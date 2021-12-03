@@ -3,6 +3,7 @@ package com.labijie.orm.generator.writer
 import com.labijie.orm.generator.*
 import com.labijie.orm.generator.writer.dsl.*
 import com.squareup.kotlinpoet.*
+import com.squareup.kotlinpoet.MemberName.Companion.member
 import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
 import com.squareup.kotlinpoet.ksp.KotlinPoetKspPreview
 import org.jetbrains.exposed.sql.*
@@ -16,6 +17,7 @@ object DSLWriter {
     private val methodBuilders: MutableList<IDSLMethodBuilder> = mutableListOf()
 
     init {
+        methodBuilders.add(ApplyExtensionMethod)
         methodBuilders.add(InsertMethod)
         methodBuilders.add(InsertAndGetIdMethod)
         methodBuilders.add(BatchInsertMethod)
@@ -36,13 +38,12 @@ object DSLWriter {
 
     fun write(context: GenerationContext) {
 
-
         val parseRow = generateParseRowMethod(context)
         val applyInsert = generateApplyInsertMethod(context)
         val applyUpdate = generateApplyUpdateMethod(context)
 
-        val rowMap = generateRowMapMethod(context)
-        val slice = generateSliceExtensionMethod(context)
+        val rowMap = generateRowMapMethod(context, parseRow)
+        val slice = generateSliceExtensionMethod(context, parseRow)
 
         val fileBuilder = FileSpec.builder(context.dslPackageName, fileName = context.dslClass.simpleName)
         val file = fileBuilder
@@ -78,25 +79,27 @@ object DSLWriter {
 
 
     private fun generateRowMapMethod(
-        context: GenerationContext
+        context: GenerationContext,
+        parseMethod: FunSpec
     ): FunSpec {
         return FunSpec.builder("to${context.pojoClass.simpleName}")
             .receiver(ResultRow::class)
             .returns(context.pojoClass)
-            .addStatement("return parseRow(this)")
+            .addStatement("return %N(this)", parseMethod)
             .build()
     }
 
 
     private fun generateSliceExtensionMethod(
-        context: GenerationContext
+        context: GenerationContext,
+        parseMethod: FunSpec
     ): FunSpec {
         val returnType = List::class.asTypeName().parameterizedBy(context.pojoClass)
 
         return FunSpec.builder("to${context.pojoClass.simpleName}List")
             .receiver(Iterable::class.asTypeName().parameterizedBy(ResultRow::class.asTypeName()))
             .returns(returnType)
-            .addStatement("return this.map(::parseRow)", context.tableClass)
+            .addStatement("return this.map(%L)", context.dslClass.member(parseMethod.name).reference())
             .build()
     }
 
@@ -107,7 +110,7 @@ object DSLWriter {
     ): FunSpec {
         val updateStatementType = UpdateStatement::class.asTypeName()
 
-        val applyUpdate = FunSpec.builder("applyUpdate")
+        val applyUpdate = FunSpec.builder("apply${context.pojoClass.simpleName}")
             .addParameter("statement", updateStatementType)
             .addParameter(OBJECT_PARAMETER_NAME, context.pojoClass)
             .returns(Unit::class.asTypeName())
@@ -127,7 +130,7 @@ object DSLWriter {
 
         insertStatementType.copy()
 
-        val applyInsert = FunSpec.builder("applyInsert")
+        val applyInsert = FunSpec.builder("apply${context.pojoClass.simpleName}")
             .addParameter("statement", insertStatementType)
             .addParameter(OBJECT_PARAMETER_NAME, context.pojoClass)
             .returns(Unit::class.asTypeName())
@@ -145,7 +148,7 @@ object DSLWriter {
     private fun generateParseRowMethod(
         context: GenerationContext
     ): FunSpec {
-        val parseRow = FunSpec.builder("parseRow")
+        val parseRow = FunSpec.builder("parse${context.pojoClass.simpleName}Row")
             .addParameter(OBJECT_PARAMETER_NAME, ResultRow::class)
             .returns(context.pojoClass)
             .addStatement("val plain = %T()", context.pojoClass)

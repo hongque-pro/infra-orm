@@ -8,6 +8,6 @@ import com.squareup.kotlinpoet.ksp.KotlinPoetKspPreview
 @KotlinPoetKspPreview
 class ExposedSymbolProcessorProvider: SymbolProcessorProvider {
     override fun create(environment: SymbolProcessorEnvironment): SymbolProcessor{
-        return ExposedSymbolProcessor(environment.logger, environment.codeGenerator, environment.options)
+        return ExposedSymbolProcessor(environment.logger, environment.options)
     }
 }

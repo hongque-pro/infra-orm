@@ -76,7 +76,6 @@ fun buildWriterOptions(env: Map<String, String>): WriterOptions {
 
     return WriterOptions().apply {
         this.packageName = env.getOrDefault(EnvVariables.PACKAGE_NAME, null)
-            ?: throw ExposedGenerationException("`${EnvVariables.PACKAGE_NAME}`environment variables missed")
         this.projectDir = env.getOrDefault(EnvVariables.PROJECT_DIR, null)
     }
 }

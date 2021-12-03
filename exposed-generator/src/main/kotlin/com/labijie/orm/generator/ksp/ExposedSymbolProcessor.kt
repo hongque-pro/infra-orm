@@ -17,7 +17,6 @@ import org.jetbrains.exposed.sql.Table
 @KotlinPoetKspPreview
 class ExposedSymbolProcessor(
     private val logger: KSPLogger,
-    private val codeGenerator: CodeGenerator,
     options: Map<String, String>
 ) : SymbolProcessor {
 
