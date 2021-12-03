@@ -1,6 +1,5 @@
 package com.labijie.infra.orm
 
-import org.jetbrains.exposed.dao.id.EntityID
 import org.jetbrains.exposed.sql.Column
 
 open class SimpleIntIdTable(name: String = "", columnName: String = "id") : SimpleIdTable<Int>(name) {
