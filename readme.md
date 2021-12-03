@@ -16,7 +16,6 @@ Exposed 提供了 Dao 和 DSL 编程模型，具体编程模型的争论可以�
 讨论原帖：   
 https://github.com/JetBrains/Exposed/issues/24
 
----
 
 ## DAO编程模型的问题：   
 
@@ -26,8 +25,8 @@ https://github.com/JetBrains/Exposed/issues/24
 2. 任何的 DAO 对象使用时都要异常小心，因为他带有状态的，漫不经心的操作很可能会造成数据库修改。
 3. 学习成本高，你需要清楚的理解并发处理机制、数据库语句发送时机、缓存，上下文如何脱离和附加，极端的例子就是 JPA 和 微软的 EntityFramework（EF有关闭更改追踪的功能），
    并没有多少人能彻底掌握。
-   
-> 由于上面的问题，JPA 也备受争议，理解不充分的情况下贸然使用会出现莫名其妙的 BUG，这是我们趟过的坑！！
+
+    由于上面的问题，JPA 也备受争议，理解不充分的情况下贸然使用会出现莫名其妙的 BUG，这是我们趟过的坑！！
 
 综上，我们更倾向于选择一种轻量化，无状态的编程方式操作数据库，JAVA 环境由于语言描述能力有限，似乎只有
 [Mybatis Dynamic](https://github.com/mybatis/mybatis-dynamic-sql) + Mybatis Generate 一个勉强凑合的选择（
@@ -202,16 +201,19 @@ public object UserDSL {
 - *User.kt* 是实体类, 帮助你用简单对象映射到 Exposed 的 ResultRow   
 - *UserDSL* 是数据操作的扩展方法，帮助你自动完成数据映射，简化 CRUD 操作
 
->看代码可以发现，我们有了直接将 User 对象作为参数的 update, insert, batchInsert， 和一些完成数据映射的帮助器方法, 但似乎还缺少一些东西, 
+> 生成代码包含了 User 对象作为参数的 update, insert, batchInsert， 和一些完成数据映射的帮助器方法, 但似乎还缺少一些东西, 
 比如 selectByPrimaryKey, deleteByPrimaryKey, updateByPrimaryKey.
 
 ## 如何获得主键方法（SelectById, UpdateById, DeleteById）
 
+
 由于 KSP 是编译时完成代码结构分析，此时还未生成字节码，所以不具备反射的能力，KSP 的定位也不会提供”赋值“层级的代码分析，
 所以我们分析不了 **UserTable** 中的代码：
+
 ```kotlin
 override val primaryKey: PrimaryKey = PrimaryKey(id, name = "user_Id")
 ```
+
 简单说，我们不知道主键是由 id 这个属性提供的，要阅读主键最直接的方式就是在 id 属性上加入注解，这样可以通过 KSP 的 API 进行分析，
 加入注解如果只是完成一个简单的 ID 分析我们认为过于大材小用了，因此我们换了一个思路，通过加入几个基类解决这个问题，
 需要引入一个包（有洁癖的请放心，这个包非常干净，只依赖 exposed-core, 这个包目前只有几个基类）:
