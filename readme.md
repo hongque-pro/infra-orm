@@ -11,7 +11,7 @@
 ## 为什么造这个轮子？
 
 Exposed 提供了 Dao 和 DSL 编程模型，具体编程模型的争论可以看下面的 issue 连接， Infra-ORM 主要解决该讨论中的问题，
-因此，你如果是 DAO 编程模型（SQL延迟发送，实体附加状态，这是另一个 JPA ？）爱好者，请使用 Exposed 官方的库。    
+因此，你如果是 DAO 编程模型（SQL延迟发送，实体附加状态，这是另一个 JPA ？）爱好者，请无视本项目，使用 Exposed 官方的 DAO 包。    
 
 DAO VS DSL 讨论原帖：   
 https://github.com/JetBrains/Exposed/issues/24
