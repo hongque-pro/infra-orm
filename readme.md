@@ -5,7 +5,7 @@
 ![license](https://img.shields.io/github/license/hongque-pro/infra-orm?style=flat-square)
 
 欢迎使用 **Infra-ORM**, 这是一个基于 [Exposed](https://github.com/JetBrains/Exposed)
-的 ORM 框架，并且和 Spring Boot 集成良好，如果你是 Kotlin 开发者，推荐你试试 Exposed, 
+的 ORM 框架，可以和 Spring Boot 集成良好，如果你是 Kotlin 开发者，推荐你试试 Exposed, 
 配合 Infra-ORM 可以给你带来最佳的开发体验。
 
 ## 为什么造这个轮子？
