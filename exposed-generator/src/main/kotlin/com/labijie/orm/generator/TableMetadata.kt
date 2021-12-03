@@ -2,12 +2,10 @@ package com.labijie.orm.generator
 
 import com.google.devtools.ksp.getAllSuperTypes
 import com.google.devtools.ksp.symbol.KSClassDeclaration
-import com.google.devtools.ksp.symbol.KSType
 import com.labijie.infra.orm.SimpleIdTable
 import org.jetbrains.exposed.dao.id.IdTable
-import java.text.Normalizer
 
-class TableMetadata(declaration: KSClassDeclaration) {
+class TableMetadata(declaration: KSClassDeclaration, val sourceFile: String) {
     val columns: MutableList<ColumnMetadata> = mutableListOf()
 
     val packageName = declaration.packageName.asString()

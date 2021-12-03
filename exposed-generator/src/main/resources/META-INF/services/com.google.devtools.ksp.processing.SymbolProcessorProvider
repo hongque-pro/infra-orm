@@ -1,1 +1,1 @@
-com.labijie.orm.generator.ExposedSymbolProcessorProvider
+com.labijie.orm.generator.ksp.ExposedSymbolProcessorProvider

@@ -1,11 +1,6 @@
 package com.labijie.orm.generator
 
-import com.fasterxml.jackson.annotation.JsonIgnore
-import com.google.devtools.ksp.symbol.ClassKind
-import com.google.devtools.ksp.symbol.KSClassDeclaration
 import com.google.devtools.ksp.symbol.KSType
-import org.jetbrains.exposed.dao.id.EntityID
-import java.util.*
 
 data class ColumnMetadata(
     val name: String,

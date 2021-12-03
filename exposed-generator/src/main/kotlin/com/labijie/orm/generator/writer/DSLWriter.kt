@@ -71,8 +71,9 @@ object DSLWriter {
                     .build()
             )
             .build()
-
-        file.writeTo(context.options.getSourceFolder())
+        val folder = context.options.getSourceFolder(context.table)
+        context.logger.println("File generate in '${folder}'")
+        file.writeTo(folder)
     }
 
 

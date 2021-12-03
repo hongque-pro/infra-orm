@@ -1,4 +1,4 @@
-package com.labijie.orm.generator
+package com.labijie.orm.generator.ksp
 
 import com.google.devtools.ksp.getDeclaredProperties
 import com.google.devtools.ksp.processing.KSPLogger

@@ -9,7 +9,5 @@ dependencies {
 }
 
 ksp {
-    arg("project", project.name)
-    arg("projectDir", project.projectDir.absolutePath)
-    arg("packageName", "com.labijie.orm.dummy.pojo")
+    arg("exg_packageName", "com.labijie.orm.dummy.pojo")
 }

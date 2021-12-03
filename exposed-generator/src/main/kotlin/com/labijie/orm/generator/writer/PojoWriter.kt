@@ -19,7 +19,7 @@ object PojoWriter {
             )
             .build()
 
-        file.writeTo(context.options.getSourceFolder())
+        file.writeTo(context.options.getSourceFolder(context.table))
     }
 
     private fun TypeSpec.Builder.addProperty(columns: Collection<ColumnMetadata>): TypeSpec.Builder {

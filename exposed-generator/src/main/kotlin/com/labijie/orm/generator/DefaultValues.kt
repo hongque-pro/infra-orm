@@ -1,10 +1,7 @@
 package com.labijie.orm.generator
 
 import com.google.devtools.ksp.symbol.KSClassDeclaration
-import com.google.devtools.ksp.symbol.KSDeclaration
 import com.google.devtools.ksp.symbol.KSType
-import com.squareup.kotlinpoet.ksp.toClassName
-import org.jetbrains.exposed.dao.id.EntityID
 import java.math.BigDecimal
 import java.util.*
 

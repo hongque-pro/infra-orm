@@ -1,19 +1,17 @@
-package com.labijie.orm.generator
+package com.labijie.orm.generator.ksp
 
-import com.google.devtools.ksp.closestClassDeclaration
 import com.google.devtools.ksp.getAllSuperTypes
 import com.google.devtools.ksp.processing.CodeGenerator
 import com.google.devtools.ksp.processing.KSPLogger
 import com.google.devtools.ksp.processing.Resolver
 import com.google.devtools.ksp.processing.SymbolProcessor
 import com.google.devtools.ksp.symbol.*
-import com.google.devtools.ksp.validate
 import com.google.devtools.ksp.visitor.KSDefaultVisitor
+import com.labijie.orm.generator.*
 import com.labijie.orm.generator.writer.DSLWriter
 import com.labijie.orm.generator.writer.PojoWriter
 import com.squareup.kotlinpoet.ksp.KotlinPoetKspPreview
 import org.jetbrains.exposed.sql.Table
-import javax.naming.Context
 
 
 @KotlinPoetKspPreview
@@ -44,7 +42,7 @@ class ExposedSymbolProcessor(
         logger.println("${tables.size} exposed table processed")
 
         tables.forEach {
-            val context = GenerationContext(it, writerOptions)
+            val context = GenerationContext(it, writerOptions, logger)
             PojoWriter.write(context)
             DSLWriter.write(context)
         }
@@ -56,8 +54,11 @@ class ExposedSymbolProcessor(
         private val logger: KSPLogger
     ) : KSDefaultVisitor<VisitContext, Unit>() {
 
+        private var currentFile: String = ""
+
         override fun visitFile(file: KSFile, data: VisitContext) {
             if(data.checkVisited(file)) return
+            currentFile = file.filePath
             logger.println("process file: ${file.filePath}")
             file.declarations.forEach {
                 it.accept(this, data)
@@ -120,7 +121,7 @@ class ExposedSymbolProcessor(
 
 
         private fun acceptTable(tableDeclaration: KSClassDeclaration, context: VisitContext) {
-            val table = TableMetadata(tableDeclaration)
+            val table = TableMetadata(tableDeclaration, this.currentFile)
             context.addTable(table)
             TablePropertiesResolver.getAllProperties(tableDeclaration).forEach {
                 it.accept(this, context)

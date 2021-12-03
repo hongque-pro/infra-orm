@@ -1,8 +1,6 @@
 package com.labijie.orm.dummy
 
 import com.labijie.infra.orm.SimpleStringIdTable
-import com.labijie.orm.dummy.pojo.TestEntity
-import com.labijie.orm.dummy.pojo.dsl.TestEntityDSL
 import org.jetbrains.exposed.dao.id.IntIdTable
 import org.jetbrains.exposed.sql.*
 
@@ -54,8 +52,8 @@ object TestSimpleTable : SimpleStringIdTable("exposed_test_entities") {
 }
 
 fun AA(){
-    val list = mutableListOf<TestEntity>()
-    val r = TestEntityTable.batchInsert(list){raw->
-        TestEntityDSL.applyInsert(this, raw)
-    }
+//    val list = mutableListOf<TestEntity>()
+//    val r = TestEntityTable.batchInsert(list){raw->
+//        TestEntityDSL.applyInsert(this, raw)
+//    }
 }
