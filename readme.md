@@ -28,7 +28,7 @@ https://github.com/JetBrains/Exposed/issues/24
 
 > 由于上面的问题，JPA 也备受争议，理解不充分的情况下贸然使用会出现莫名其妙的 BUG，这是我们趟过的坑！！
 
-综上，我们需要一种轻量化，无状态的编程方式操作数据库，JAVA 环境由于语言描述能力有限，似乎只有
+综上，我们需要一种轻量化、无状态、强类型的编程方式操作数据库，JAVA 环境由于语言描述能力有限，似乎只有
 [Mybatis Dynamic](https://github.com/mybatis/mybatis-dynamic-sql) + Mybatis Generate 一个勉强及格的答案，这也是 Mybatis 这种古老框架存活这么久的原因吧。
 
 贴一段看看 C# 方向的 EntityFramework 的语法，你就知道 JAVA 领域这些框架有多弱：
