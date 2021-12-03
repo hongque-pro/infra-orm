@@ -11,9 +11,9 @@
 ## 为什么造这个轮子？
 
 Exposed 提供了 Dao 和 DSL 编程模型，具体编程模型的争论可以看下面的 issue 连接， Infra-ORM 主要解决该讨论中的问题，
-因此，你如果是 DAO 编程模型（SQL延迟发送，实体附加状态，类似 JPA 的方式）用户，请使用 Exposed 官方的库。    
+因此，你如果是 DAO 编程模型（SQL延迟发送，实体附加状态，这是另一个 JPA ？）爱好者，请使用 Exposed 官方的库。    
 
-讨论原帖：   
+DAO VS DSL 讨论原帖：   
 https://github.com/JetBrains/Exposed/issues/24
 
 
@@ -46,7 +46,7 @@ var query = from photo in context.Set<PersonPhoto>()
 
 https://github.com/JetBrains/Exposed/wiki/DSL
 
-不幸的是官方似乎对 DAO 模型情有独钟，并不打算在 DSL + 简单对象映射的方向上给出方案，所以有了这个轮子
+不幸的是官方似乎对 DAO 模型情有独钟，并不打算在 DSL + 简单对象映射的方向上给出方案，所以有了这个轮子。
 
 ## Quick Start
 
