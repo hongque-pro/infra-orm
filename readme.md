@@ -26,11 +26,20 @@ https://github.com/JetBrains/Exposed/issues/24
 3. 学习成本高，你需要清楚的理解并发处理机制、数据库语句发送时机、缓存，上下文如何脱离和附加，极端的例子就是 JPA 和 微软的 EntityFramework（EF有关闭更改追踪的功能），
    并没有多少人能彻底掌握。
 
-    由于上面的问题，JPA 也备受争议，理解不充分的情况下贸然使用会出现莫名其妙的 BUG，这是我们趟过的坑！！
+> 由于上面的问题，JPA 也备受争议，理解不充分的情况下贸然使用会出现莫名其妙的 BUG，这是我们趟过的坑！！
 
 综上，我们需要一种轻量化，无状态的编程方式操作数据库，JAVA 环境由于语言描述能力有限，似乎只有
-[Mybatis Dynamic](https://github.com/mybatis/mybatis-dynamic-sql) + Mybatis Generate 一个勉强几个的答案（
-相较于 LINQ 表达式和 C# 语言赋予 EF 的魔力，JAVA 语言这方面真是弱爆了），这也是 Mybatis 这种古老框架存活这么久的原因吧。
+[Mybatis Dynamic](https://github.com/mybatis/mybatis-dynamic-sql) + Mybatis Generate 一个勉强及格的答案，这也是 Mybatis 这种古老框架存活这么久的原因吧。
+
+贴一段看看 C# 方向的 EntityFramework 的语法，你就知道 JAVA 领域这些框架有多弱：
+
+```C#
+var query = from photo in context.Set<PersonPhoto>()
+            join person in context.Set<Person>()
+                on new { Id = (int?)photo.PersonPhotoId, photo.Caption }
+                equals new { Id = person.PhotoId, Caption = "SN" }
+            select new { person, photo };
+```
 
 
 随着 KOTLIN 语言的出现，JAVA 领域的 ORM 有了更多风骚的操作，Exposed 更是将 kotlin 语法在 ORM 方向发挥到了极致，附上 Exposed 文档，自己感受一下：
