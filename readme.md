@@ -5,8 +5,8 @@
 ![license](https://img.shields.io/github/license/hongque-pro/infra-orm?style=flat-square)
 
 欢迎使用 **Infra-ORM**, 这是一个基于 [Exposed](https://github.com/JetBrains/Exposed)
-的 ORM 框架，并且和 Spring Boot 集成良好，如果你是 Kotlin 开发者，我们推荐你试试 Exposed, 
-配合我们的 Infra-ORM 可以给你带来最佳的开发体验。
+的 ORM 框架，并且和 Spring Boot 集成良好，如果你是 Kotlin 开发者，推荐你试试 Exposed, 
+配合 Infra-ORM 可以给你带来最佳的开发体验。
 
 ## 为什么造这个轮子？
 
@@ -28,12 +28,14 @@ https://github.com/JetBrains/Exposed/issues/24
 
     由于上面的问题，JPA 也备受争议，理解不充分的情况下贸然使用会出现莫名其妙的 BUG，这是我们趟过的坑！！
 
-综上，我们更倾向于选择一种轻量化，无状态的编程方式操作数据库，JAVA 环境由于语言描述能力有限，似乎只有
-[Mybatis Dynamic](https://github.com/mybatis/mybatis-dynamic-sql) + Mybatis Generate 一个勉强凑合的选择（
+综上，我们需要一种轻量化，无状态的编程方式操作数据库，JAVA 环境由于语言描述能力有限，似乎只有
+[Mybatis Dynamic](https://github.com/mybatis/mybatis-dynamic-sql) + Mybatis Generate 一个勉强几个的答案（
 相较于 LINQ 表达式和 C# 语言赋予 EF 的魔力，JAVA 语言这方面真是弱爆了），这也是 Mybatis 这种古老框架存活这么久的原因吧。
 
 
-随着 KOTLIN 语言的出现，JAVA 领域的 ORM 有了更多风骚的操作，Exposed 更是将 kotlin 语法在 ORM 方向发挥到了极致。
+随着 KOTLIN 语言的出现，JAVA 领域的 ORM 有了更多风骚的操作，Exposed 更是将 kotlin 语法在 ORM 方向发挥到了极致，附上 Exposed 文档，自己感受一下：
+
+https://github.com/JetBrains/Exposed/wiki/DSL
 
 不幸的是官方似乎对 DAO 模型情有独钟，并不打算在 DSL + 简单对象映射的方向上给出方案，所以有了这个轮子
 
@@ -208,15 +210,16 @@ public object UserDSL {
 
 
 由于 KSP 是编译时完成代码结构分析，此时还未生成字节码，所以不具备反射的能力，KSP 的定位也不会提供”赋值“层级的代码分析，
-所以我们分析不了 **UserTable** 中的代码：
+所以分析不了 **UserTable** 中的代码：
 
 ```kotlin
 override val primaryKey: PrimaryKey = PrimaryKey(id, name = "user_Id")
 ```
 
-简单说，我们不知道主键是由 id 这个属性提供的，要阅读主键最直接的方式就是在 id 属性上加入注解，这样可以通过 KSP 的 API 进行分析，
-加入注解如果只是完成一个简单的 ID 分析我们认为过于大材小用了，因此我们换了一个思路，通过加入几个基类解决这个问题，
-需要引入一个包（有洁癖的请放心，这个包非常干净，只依赖 exposed-core, 这个包目前只有几个基类）:
+简单说，由于无法分析出主键是由 id 这个属性提供的，要读取主键最直接的方式就是在 id 属性上加入注解，这样可以通过 KSP 的 API 进行分析。   
+但是，加入注解如果只是完成一个简单的 ID 分析似乎有点大材小用了，不妨换了一个思路，加入基类限定主键的属性名称。   
+
+这需要引入一个包（有洁癖的请放心，这个包非常干净，只依赖 exposed-core, 这个包目前只有几个基类）:
 
 1. 引入包
 
@@ -239,7 +242,7 @@ object UserTable : SimpleLongIdTable("my", "id") {
 
 让 UserTable 继承自 **SimpleLongIdTable** 即可，这样我们通过 KSP 分析代码时候只要发现这个基类，就知道你的主键是 id 属性。
 
-3. 重新编译代码，将生成新的 DSL 类：
+3. 重新编译项目，你将发现的 UserDSL 类多了三个扩展方法：
 
 ```kotlin
 public object UserDSL {
@@ -263,7 +266,7 @@ public object UserDSL {
 
 ```
 
-至此，已经有了常用的单表操作方法，同时几个用于数据映射的扩展方法也协助你更方便的使用 Exposed DSL 的强大功能。
+至此，已经有了常用的单表操作方法，同时几个用于数据映射的扩展方法也可以协助更好的使用 Exposed DSL 的强大功能。
 
 > 生成代码样例可以在本项目的的 **dummy-project** 模块中找到
 
@@ -272,7 +275,7 @@ public object UserDSL {
 这不是一个广泛需求，还会为数据库带来减益，暂不打算为了这个意义不大的需求引入一系列注解污染你的代码，你可以考虑如下方式处理这个额问题： 
 
 1. 如果可能，通过程序转换为单主键，例如 md5 hash 多个键值的方式，这样存储是单主键，但是逻辑上还是多主键。
-1. 手写帮助器方法，因为我们已经完成了映射类型的苦差事，多写几个万年不改的扩展方法并不难。
+1. 手写帮助器方法，因为生成的代码已经完成了映射类型的苦差事，多写几个万年不改的扩展方法并不难。
 
 ## 生成器配置
 
