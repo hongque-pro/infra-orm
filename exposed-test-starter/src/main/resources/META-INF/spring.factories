@@ -1,0 +1,6 @@
+com.labijie.infra.orm.test.AutoConfigureExposed=\
+org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration,\
+org.springframework.boot.autoconfigure.jdbc.DataSourceTransactionManagerAutoConfiguration,\
+org.springframework.boot.autoconfigure.jdbc.JdbcTemplateAutoConfiguration,\
+org.springframework.boot.autoconfigure.transaction.TransactionAutoConfiguration,\
+com.labijie.infra.orm.configuration.InfraExposedAutoConfiguration

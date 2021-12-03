@@ -1,0 +1,6 @@
+spring:
+  exposed:
+    show-sql: true
+infra:
+    exposed:
+      generate-tables: '*'

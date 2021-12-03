@@ -1,0 +1,23 @@
+{
+  "group":[
+    {
+      "name":"infra.exposed",
+      "type": "com.labijie.infra.exposed.configuration.InfraExposedProperties"
+    }
+  ],
+  "properties":[
+    {
+      "name":"infra.exposed.generate-tables",
+      "type": "java.lang.String",
+      "sourceType": "com.labijie.infra.exposed.configuration.InfraExposedProperties",
+      "description": "The table name in database separated by a comma ( support wildcard (*), examples: user_* )"
+    },
+    {
+      "name":"infra.exposed.show-sql",
+      "type": "java.lang.Boolean",
+      "sourceType": "com.labijie.infra.exposed.configuration.InfraExposedProperties",
+      "description": "show sql for exposed",
+      "defaultValue": false
+    }
+  ]
+}

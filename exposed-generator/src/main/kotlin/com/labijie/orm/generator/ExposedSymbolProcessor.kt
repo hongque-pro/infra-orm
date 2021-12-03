@@ -1,0 +1,135 @@
+package com.labijie.orm.generator
+
+import com.google.devtools.ksp.closestClassDeclaration
+import com.google.devtools.ksp.getAllSuperTypes
+import com.google.devtools.ksp.processing.CodeGenerator
+import com.google.devtools.ksp.processing.KSPLogger
+import com.google.devtools.ksp.processing.Resolver
+import com.google.devtools.ksp.processing.SymbolProcessor
+import com.google.devtools.ksp.symbol.*
+import com.google.devtools.ksp.validate
+import com.google.devtools.ksp.visitor.KSDefaultVisitor
+import com.labijie.orm.generator.writer.DSLWriter
+import com.labijie.orm.generator.writer.PojoWriter
+import com.squareup.kotlinpoet.ksp.KotlinPoetKspPreview
+import org.jetbrains.exposed.sql.Table
+import javax.naming.Context
+
+
+@KotlinPoetKspPreview
+class ExposedSymbolProcessor(
+    private val logger: KSPLogger,
+    private val codeGenerator: CodeGenerator,
+    options: Map<String, String>
+) : SymbolProcessor {
+
+    private var invoked = false
+
+    private val writerOptions = buildWriterOptions(options)
+
+
+    override fun process(resolver: Resolver): List<KSAnnotated> {
+        if (invoked) {
+            return emptyList()
+        }
+
+        val visitContext = VisitContext()
+
+        val symbols = resolver.getAllFiles().forEach {
+            it.accept(ExposedTableVisitor(logger), visitContext)
+        }
+
+        val tables = visitContext.getTables()
+
+        logger.println("${tables.size} exposed table processed")
+
+        tables.forEach {
+            val context = GenerationContext(it, writerOptions)
+            PojoWriter.write(context)
+            DSLWriter.write(context)
+        }
+        invoked = true
+        return emptyList()
+    }
+
+    class ExposedTableVisitor(
+        private val logger: KSPLogger
+    ) : KSDefaultVisitor<VisitContext, Unit>() {
+
+        override fun visitFile(file: KSFile, data: VisitContext) {
+            if(data.checkVisited(file)) return
+            logger.println("process file: ${file.filePath}")
+            file.declarations.forEach {
+                it.accept(this, data)
+            }
+        }
+
+
+        override fun visitPropertyDeclaration(property: KSPropertyDeclaration, data: VisitContext) {
+            if(data.checkVisited(property)) return
+            val table = data.currentTable
+            if (table != null) {
+                //it.origin == Origin.KOTLIN 用来判断是否是来自直接声明
+                val getter =  property.getter?.receiver
+                //logger.println("property receiver: ${property.parentDeclaration?.qualifiedName?.getShortName()}")
+
+                val columnType = property.getColumnType()
+                if (columnType != null) {
+                    val columnName = property.simpleName.getShortName()
+                    val isPrimary = ((table.kind == TableKind.ExposedIdTable || table.kind == TableKind.SimpleIdTable) && columnName == "id")
+
+
+                    logger.println("property: ${columnName}, table: ${table.kind}")
+
+                    val col = ColumnMetadata(
+                        name = property.simpleName.getShortName(),
+                        type = columnType.type,
+                        rawType = columnType.rawType,
+                        isNull = columnType.isNullable,
+                        isPrimary = isPrimary,
+                        isEntityId = isPrimary && table.kind == TableKind.ExposedIdTable
+                    )
+
+                    if (isPrimary) {
+                        table.primaryKeys.add(col)
+                    }
+
+                    table.columns.add(col)
+                }
+            }
+        }
+
+
+        override fun visitDeclaration(declaration: KSDeclaration, data: VisitContext) {
+            if(data.checkVisited(declaration)) return
+            if(declaration is KSClassDeclaration){
+                declaration.accept(this, data)
+            }
+        }
+
+
+        override fun visitClassDeclaration(classDeclaration: KSClassDeclaration, data: VisitContext) {
+            val isTable = classDeclaration.getAllSuperTypes()
+                .any { it.declaration.qualifiedName?.asString() == Table::class.qualifiedName }
+            if (classDeclaration.classKind == ClassKind.OBJECT && isTable) {
+                acceptTable(classDeclaration, data)
+            } else {
+                logger.println("skip symbol: ${classDeclaration.qualifiedName?.asString()}")
+            }
+        }
+
+
+        private fun acceptTable(tableDeclaration: KSClassDeclaration, context: VisitContext) {
+            val table = TableMetadata(tableDeclaration)
+            context.addTable(table)
+            TablePropertiesResolver.getAllProperties(tableDeclaration).forEach {
+                it.accept(this, context)
+            }
+            logger.println("prepare $table")
+        }
+
+        override fun defaultHandler(node: KSNode, data: VisitContext) {
+
+        }
+    }
+}
