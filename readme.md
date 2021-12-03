@@ -27,7 +27,7 @@ https://github.com/JetBrains/Exposed/issues/24
 3. 学习成本高，你需要清楚的理解并发处理机制、数据库语句发送时机、缓存，上下文如何脱离和附加，极端的例子就是 JPA 和 微软的 EntityFramework（EF有关闭更改追踪的功能），
    并没有多少人能彻底掌握。
    
->> 由于上面的问题，JPA 也备受争议，理解不充分的情况下贸然使用会出现莫名其妙的 BUG，这是我们趟过的坑！！
+> 由于上面的问题，JPA 也备受争议，理解不充分的情况下贸然使用会出现莫名其妙的 BUG，这是我们趟过的坑！！
 
 综上，我们更倾向于选择一种轻量化，无状态的编程方式操作数据库，JAVA 环境由于语言描述能力有限，似乎只有
 [Mybatis Dynamic](https://github.com/mybatis/mybatis-dynamic-sql) + Mybatis Generate 一个勉强凑合的选择（
@@ -57,7 +57,8 @@ ksp {
 }
 
 ```
->> 加入 KSP , 同时引入 Infra-ORM 的代码生成器
+
+> 加入 KSP , 同时引入 Infra-ORM 的代码生成器
 
 ```kotlin
 ksp {
@@ -127,8 +128,9 @@ object UserTable : Table("my") {
         +---kotlin
 ```
 
-可以看到生成了 *pojo* 目录, 同时生成了 *User.kt* 文件和 *UserDSL.kt* 文件:
+可以看到生成了 *pojo* 目录, 同时生成了 *User.kt* 文件和 *UserDSL.kt* 文件:   
 
+User.kt
 ```kotlin
 public open class User {
    public var id: Long = 0L
@@ -141,7 +143,7 @@ public open class User {
 }
 
 ```
-
+UserDSL.kt   
 ```kotlin
 public object UserDSL {
    public fun parseUserRow(raw: ResultRow): User {
@@ -200,7 +202,7 @@ public object UserDSL {
 - *User.kt* 是实体类, 帮助你用简单对象映射到 Exposed 的 ResultRow   
 - *UserDSL* 是数据操作的扩展方法，帮助你自动完成数据映射，简化 CRUD 操作
 
-看代码可以发现，我们有了直接将 User 对象作为参数的 update, insert, batchInsert， 和一些完成数据映射的帮助器方法, 但似乎还缺少一些东西, 
+>看代码可以发现，我们有了直接将 User 对象作为参数的 update, insert, batchInsert， 和一些完成数据映射的帮助器方法, 但似乎还缺少一些东西, 
 比如 selectByPrimaryKey, deleteByPrimaryKey, updateByPrimaryKey.
 
 ## 如何获得主键方法（SelectById, UpdateById, DeleteById）
