@@ -11,8 +11,8 @@ plugins {
 val pom = PomInfo(
     description = "Orm and tooling for kotlin based exposed",
     projectUrl = "https://github.com/hongque-pro/infra-orm",
-    gitUrl = "https://github.com/hongque-pro/infra-bom.git",
-    githubScmUrl = "git@github.com:hongque-pro/infra-bom.git",
+    gitUrl = "https://github.com/hongque-pro/infra-orm.git",
+    githubScmUrl = "git@github.com:hongque-pro/infra-orm.git",
 )
 
 allprojects {
