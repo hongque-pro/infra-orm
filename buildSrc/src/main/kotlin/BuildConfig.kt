@@ -58,17 +58,18 @@ private fun Project.mustBeRoot(methodName: String) {
     }
 }
 
-fun Project.applyDefaultForAll(
-    includeSource: Boolean,
-    useMavenProxy: Boolean = true,
+fun Project.useDefaults(
     jvmVersion: String = "1.8",
-    isBomProject: Boolean = false
+    includeSource: Boolean = true,
+    useMavenProxy: Boolean = true,
+    isBomProject: Boolean = false,
+    dependencyAction: (DependencyHandlerScope.() -> Unit)? = null
 ) {
-    this.mustBeRoot("applyDefaultForAll")
-
-    buildscript {
-        repositories {
-            this.useDefaults()
+    if(this.parent == null){
+        buildscript {
+            repositories {
+                this.useDefaults()
+            }
         }
     }
 
@@ -79,19 +80,15 @@ fun Project.applyDefaultForAll(
         return
     }
 
-
-    this.allprojects {
-
-        apply(plugin = "kotlin")
-        apply(plugin = "kotlin-spring")
-        apply(plugin = "java-library")
+    apply(plugin = "kotlin")
+    apply(plugin = "kotlin-spring")
+    apply(plugin = "java-library")
 
 
-
-        this.tasks.withType(JavaCompile::class.java) {
-            sourceCompatibility = jvmVersion
-            targetCompatibility = jvmVersion
-        }
+    this.tasks.withType(JavaCompile::class.java) {
+        sourceCompatibility = jvmVersion
+        targetCompatibility = jvmVersion
+    }
 
 
 //        this.tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile::class.java) {
@@ -101,110 +98,97 @@ fun Project.applyDefaultForAll(
 //        }
 
 
-        this.configure<JavaPluginExtension> {
-            withJavadocJar()
-            if (includeSource) {
-                withSourcesJar()
-            }
+    this.configure<JavaPluginExtension> {
+        withJavadocJar()
+        if (includeSource) {
+            withSourcesJar()
         }
+    }
 
-        this.tasks.withType(Javadoc::class.java) {
-            this.isFailOnError = false
+    this.tasks.withType(Javadoc::class.java) {
+        this.isFailOnError = false
+    }
+
+    repositories {
+        useDefaults(useMavenProxy)
+    }
+
+    if (this.tasks.findByName("test") != null) {
+        this.tasks.withType(Test::class.java) {
+            useJUnitPlatform()
         }
+    }
 
-        repositories {
-            useDefaults(useMavenProxy)
-        }
+    this.dependencies {
+        this.add("implementation", platform("com.labijie.bom:lib-dependencies:${Versions.infraBomVersion}"))
+        this.add("api", "org.jetbrains.kotlin:kotlin-stdlib-jdk8:${Versions.kotlinVersion}")
+        this.add("api", "org.jetbrains.kotlin:kotlin-reflect:${Versions.kotlinVersion}")
+        /**
 
-        if(this.tasks.findByName("test") != null){
-            this.tasks.withType(Test::class.java){
-                useJUnitPlatform()
-            }
-        }
+        testImplementation "org.jetbrains.kotlin:kotlin-test-junit5:$kotlin_version"
+        testImplementation "org.junit.jupiter:junit-jupiter-api"
+        testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine"
+        testImplementation "org.mockito:mockito-all"
+         */
+        this.add("testImplementation", "org.jetbrains.kotlin:kotlin-test-junit5")
+        this.add("testImplementation", "org.junit.jupiter:junit-jupiter-api")
+        this.add("testImplementation", "org.junit.jupiter:junit-jupiter-engine")
+        this.add("testImplementation", "org.mockito:mockito-all")
 
-        this.dependencies {
-            this.add("implementation", platform("com.labijie.bom:lib-dependencies:${Versions.infraBomVersion}"))
-            this.add("api", "org.jetbrains.kotlin:kotlin-stdlib-jdk8:${Versions.kotlinVersion}")
-            this.add("api", "org.jetbrains.kotlin:kotlin-reflect:${Versions.kotlinVersion}")
-            /**
-
-            testImplementation "org.jetbrains.kotlin:kotlin-test-junit5:$kotlin_version"
-            testImplementation "org.junit.jupiter:junit-jupiter-api"
-            testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine"
-            testImplementation "org.mockito:mockito-all"
-             */
-            this.add("testImplementation", "org.jetbrains.kotlin:kotlin-test-junit5")
-            this.add("testImplementation", "org.junit.jupiter:junit-jupiter-api")
-            this.add("testImplementation", "org.junit.jupiter:junit-jupiter-engine")
-            this.add("testImplementation", "org.mockito:mockito-all")
-        }
+        dependencyAction?.invoke(this)
     }
 }
 
 
-fun Project.filterSubProjects(filter: (project: Project) -> Boolean, action: Action<Project>) {
-    this.mustBeRoot(this::filterSubProjects.name)
+fun Project.usePublishing(info: PomInfo, artifactName: ((p: Project) -> String)? = null) {
 
-    this.subprojects {
-        if (filter(this)) {
-            action.invoke(this)
-        }
-    }
-}
+    this.apply(plugin = "maven-publish")
+    this.apply(plugin = "signing")
+    this.apply(plugin = "signing")
 
+    val project = this
+    val artifact = artifactName?.invoke(project) ?: project.name
 
-fun Project.applyPublishingForAll(info: PomInfo, excludeProjectPrefix: String = "dummy", artifactName: ((p: Project) -> String)? = null) {
-    this.mustBeRoot(this::applyPublishingForAll.name)
-
-    this.filterSubProjects({ !it.name.startsWith(excludeProjectPrefix) }){
-
-        this.apply(plugin = "maven-publish")
-        this.apply(plugin = "signing")
-        this.apply(plugin = "signing")
-
-        val project = this
-        val artifact = artifactName?.invoke(project) ?: project.name
-
-        this.configure<PublishingExtension> {
-            publications {
-                create("maven", MavenPublication::class.java) {
-                    artifactId = artifact
-                    from((components.findByName("javaPlatform") ?: components.findByName("java")))
-                    pom {
-                        description.set(info.description)
-                        url.set(info.projectUrl)
-                        licenses {
-                            license {
-                                name.set(info.licenseName)
-                                url.set(info.licenseUrl)
-                            }
-                        }
-                        developers {
-                            developer {
-                                id.set(info.developerName)
-                                name.set(info.developerName)
-                                email.set(info.developerMail)
-                            }
-                        }
-                        scm {
-                            url.set(info.projectUrl)
-                            connection.set(info.githubScmUrl)
-                            developerConnection.set(info.gitUrl)
+    this.configure<PublishingExtension> {
+        publications {
+            create("maven", MavenPublication::class.java) {
+                artifactId = artifact
+                from((components.findByName("javaPlatform") ?: components.findByName("java")))
+                pom {
+                    description.set(info.description)
+                    url.set(info.projectUrl)
+                    licenses {
+                        license {
+                            name.set(info.licenseName)
+                            url.set(info.licenseUrl)
                         }
                     }
-
+                    developers {
+                        developer {
+                            id.set(info.developerName)
+                            name.set(info.developerName)
+                            email.set(info.developerMail)
+                        }
+                    }
+                    scm {
+                        url.set(info.projectUrl)
+                        connection.set(info.githubScmUrl)
+                        developerConnection.set(info.gitUrl)
+                    }
                 }
-            }
-        }
 
-        this.configure<SigningExtension> {
-            val publishing = project.the(PublishingExtension::class)
-
-            if (project.canBeSign()) {
-                this.sign(publishing.publications.findByName("maven"))
-            } else {
-                println("Signing information missing/incomplete for ${project.name}")
             }
         }
     }
+
+    this.configure<SigningExtension> {
+        val publishing = project.the(PublishingExtension::class)
+
+        if (project.canBeSign()) {
+            this.sign(publishing.publications.findByName("maven"))
+        } else {
+            println("Signing information missing/incomplete for ${project.name}")
+        }
+    }
+
 }

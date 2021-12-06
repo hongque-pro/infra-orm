@@ -29,10 +29,6 @@ class TableDefinitionPostProcessor : BeanDefinitionRegistryPostProcessor, Applic
     var excludeClasses: String = ""
 
     override fun postProcessBeanDefinitionRegistry(registry: BeanDefinitionRegistry) {
-        val properties = context.getBean(InfraExposedProperties::class.java)
-        if(!properties.generateSchema){
-            return
-        }
 
         if (this.processPropertyPlaceHolders) {
             processPropertyPlaceHolders()

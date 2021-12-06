@@ -38,7 +38,10 @@ class TabScannerRegistrar : ImportBeanDefinitionRegistrar {
         basePackages.addAll(annoAttrs.getStringArray(TableScan::basePackages.name).filter { !it.isNullOrBlank() })
         basePackages.addAll(
             annoAttrs.getClassArray(TableScan::basePackageClasses.name).map { ClassUtils.getPackageName(it) })
-        basePackages.add(getDefaultBasePackage(annoMeta))
+
+        if(basePackages.isEmpty()) {
+            basePackages.add(getDefaultBasePackage(annoMeta))
+        }
 
 
         builder.addPropertyValue(

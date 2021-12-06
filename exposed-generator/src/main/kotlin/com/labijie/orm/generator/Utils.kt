@@ -45,7 +45,7 @@ fun KSPropertyDeclaration.getColumnType(): ColumnType? {
 
         val columnType = propertyType.arguments.firstOrNull()?.type?.resolve()
         if (columnType != null) {
-            val idType = columnType?.getIDTypeFromEntityID()
+            val idType = columnType.getIDTypeFromEntityID()
             if (idType != null) {
                 return ColumnType(columnType, idType, columnType.isMarkedNullable)
             }

@@ -15,14 +15,19 @@ val pom = PomInfo(
     githubScmUrl = "git@github.com:hongque-pro/infra-bom.git",
 )
 
-applyDefaultForAll(includeSource = true)
-applyPublishingForAll(pom)
-
-subprojects {
+allprojects {
     group = "com.labijie.orm"
     version = "1.0.0"
 
+    useDefaults()
     dependencies {
         implementation(platform("org.jetbrains.exposed:exposed-bom:${Versions.exposedVersion}"))
     }
 }
+
+subprojects {
+    if(!this.name.startsWith("dummy")){
+        this.usePublishing(pom)
+    }
+}
+

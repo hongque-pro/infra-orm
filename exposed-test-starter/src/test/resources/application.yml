@@ -1,8 +1,3 @@
-spring:
-  exposed:
-    show-sql: true
 infra:
-    exposed:
-      show-sql: true
-      generate-includes: '*'
-      generate-excludes:
+  exposed:
+    generate-schema: true

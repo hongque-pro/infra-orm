@@ -1,19 +1,15 @@
 package com.labijie.infra.orm.test
 
-import com.labijie.infra.orm.annotation.TableScan
-import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration
 import org.springframework.boot.autoconfigure.ImportAutoConfiguration
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.test.autoconfigure.OverrideAutoConfiguration
-import org.springframework.boot.test.autoconfigure.core.AutoConfigureCache
 import org.springframework.boot.test.autoconfigure.filter.TypeExcludeFilters
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase
-import java.lang.annotation.Inherited
 import org.springframework.context.annotation.ComponentScan.Filter
 import org.springframework.test.context.BootstrapWith
-import org.springframework.test.context.junit.jupiter.SpringExtension
 import org.springframework.transaction.annotation.EnableTransactionManagement
+import java.lang.annotation.Inherited
 
 
 @Target(AnnotationTarget.CLASS)
@@ -21,7 +17,6 @@ import org.springframework.transaction.annotation.EnableTransactionManagement
 @MustBeDocumented
 @Inherited
 @BootstrapWith(ExposedTestContextBootstrapper::class)
-@ExtendWith(SpringExtension::class)
 @OverrideAutoConfiguration(enabled = false)
 @TypeExcludeFilters(ExposedTypeExcludeFilter::class)
 @EnableTransactionManagement

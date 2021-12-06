@@ -26,19 +26,19 @@ class SchemaCreationProcessor(
     override fun onApplicationEvent(event: ApplicationStartedEvent) {
         val exposedTables = context.getBeanProvider(Table::class.java).orderedStream().collect(Collectors.toList()).toTypedArray()
 
-        transactionTemplate.execute {
-            if (!properties.showSql && logger.isInfoEnabled) {
-                val msg = StringBuilder()
-                    .appendLine("Schema generation for tables: ${exposedTables.count()} tables: ")
-                    .apply {
-                        exposedTables.forEach {
-                            this.appendLine(it.ddl.joinToString(System.lineSeparator()))
-                        }
-                    }.toString()
-
-                logger.info(msg)
+        if(exposedTables.isNotEmpty()) {
+            transactionTemplate.execute {
+                SchemaUtils.create(*exposedTables)
             }
-            SchemaUtils.create(*exposedTables)
+        }
+        if (!properties.showSql && logger.isInfoEnabled) {
+            val msg = StringBuilder()
+                .appendLine("Schema generation for tables: ${exposedTables.count()} tables: ")
+                .apply {
+                    this.appendLine(exposedTables.joinToString(System.lineSeparator()) { it.tableName })
+                }.toString()
+
+            logger.info(msg)
         }
     }
 
