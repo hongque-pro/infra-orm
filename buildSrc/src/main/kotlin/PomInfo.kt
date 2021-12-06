@@ -7,7 +7,7 @@ class PomInfo(val description: String, var projectUrl: String, var gitUrl: Strin
     var developerMail: String = "tech@labijie.com"
 
     fun license(name: String, url: String){
-        this.licenseName = licenseName
-        this.licenseUrl = licenseUrl
+        this.licenseName = name
+        this.licenseUrl = url
     }
 }

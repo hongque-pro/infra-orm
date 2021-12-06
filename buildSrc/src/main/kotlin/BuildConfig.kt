@@ -186,6 +186,7 @@ fun Project.usePublishing(info: PomInfo, artifactName: ((p: Project) -> String)?
                 artifactId = artifact
                 from((components.findByName("javaPlatform") ?: components.findByName("java")))
                 pom {
+                    name.set(project.name)
                     description.set(info.description)
                     url.set(info.projectUrl)
                     licenses {
