@@ -139,6 +139,36 @@ fun Project.useDefault(
     }
 }
 
+private fun Project.configureNexusPublishPlugin(){
+    this.apply(plugin = "io.github.gradle-nexus.publish-plugin")
+    if (this.extensions.findByName("nexusPublishing") != null) {
+        this.extensions.configure<io.github.gradlenexus.publishplugin.NexusPublishExtension> {
+            val u = project.getPropertyOrCmdArgs("PUB_USER", "u")
+            val p = project.getPropertyOrCmdArgs("PUB_PWD", "p")
+            val s = project.getPropertyOrCmdArgs("PUB_URL", "s") ?: "https://your-nexus-server.com/publish"
+            repositories {
+                sonatype {
+                    if (u != null) {
+                        username.set(u)
+                        if (p != null) {
+                            password.set(p)
+                        }
+                    }
+                }
+                create("nexus") {
+                    nexusUrl.set(uri(s))
+                    //snapshotRepositoryUrl.set(uri("https://your-server.com/snapshots"))
+                    if(u != null) {
+                        username.set(u) // defaults to project.properties["nexusUsername"]
+                        if (p != null) {
+                            password.set(p) // defaults to project.properties["nexusPassword"]
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
 
 fun Project.usePublishing(info: PomInfo, artifactName: ((p: Project) -> String)? = null) {
 
@@ -147,7 +177,7 @@ fun Project.usePublishing(info: PomInfo, artifactName: ((p: Project) -> String)?
 
     if(this.parent == null)
     {
-        this.apply(plugin = "io.github.gradle-nexus.publish-plugin")
+        this.configureNexusPublishPlugin()
     }
 
 
@@ -192,34 +222,6 @@ fun Project.usePublishing(info: PomInfo, artifactName: ((p: Project) -> String)?
             this.sign(publishing.publications.findByName("maven"))
         } else {
             println("Signing information missing/incomplete for ${project.name}")
-        }
-    }
-
-    if (this.extensions.findByName("nexusPublishing") != null) {
-        this.extensions.configure<io.github.gradlenexus.publishplugin.NexusPublishExtension> {
-            val u = project.getPropertyOrCmdArgs("PUB_USER", "u")
-            val p = project.getPropertyOrCmdArgs("PUB_PWD", "p")
-            val s = project.getPropertyOrCmdArgs("PUB_URL", "s") ?: "https://your-nexus-server.com/publish"
-            repositories {
-                sonatype {
-                    if (u != null) {
-                        username.set(u)
-                        if (p != null) {
-                            password.set(p)
-                        }
-                    }
-                }
-                create("nexus") {
-                    nexusUrl.set(uri(s))
-                    //snapshotRepositoryUrl.set(uri("https://your-server.com/snapshots"))
-                    if(u != null) {
-                        username.set(u) // defaults to project.properties["nexusUsername"]
-                        if (p != null) {
-                            password.set(p) // defaults to project.properties["nexusPassword"]
-                        }
-                    }
-                }
-            }
         }
     }
 }
