@@ -26,7 +26,7 @@ dependencies {
 infra:
     exposed:
       show-sql: true
-      generate-includes: true
+      generate-schema: true
 ```
 
 exposed 配置属性说明:
