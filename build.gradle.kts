@@ -22,8 +22,10 @@ allprojects {
     dependencies {
         implementation(platform("org.jetbrains.exposed:exposed-bom:${Versions.exposedVersion}"))
     }
+}
+
+subprojects {
     if(!this.name.startsWith("dummy")){
         this.usePublishing(pom)
     }
 }
-
