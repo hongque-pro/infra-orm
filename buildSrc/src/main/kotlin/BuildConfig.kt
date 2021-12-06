@@ -139,7 +139,9 @@ fun Project.useDefault(
     }
 }
 
-private fun Project.configureNexusPublishPlugin(){
+fun Project.useNexusPublishPlugin(){
+    this.mustBeRoot("useNexusPublishPlugin")
+
     this.apply(plugin = "io.github.gradle-nexus.publish-plugin")
     if (this.extensions.findByName("nexusPublishing") != null) {
         this.extensions.configure<io.github.gradlenexus.publishplugin.NexusPublishExtension> {
@@ -174,12 +176,6 @@ fun Project.usePublishing(info: PomInfo, artifactName: ((p: Project) -> String)?
 
     this.apply(plugin = "maven-publish")
     this.apply(plugin = "signing")
-
-    if(this.parent == null)
-    {
-        this.configureNexusPublishPlugin()
-    }
-
 
     val project = this
     val artifact = artifactName?.invoke(project) ?: project.name

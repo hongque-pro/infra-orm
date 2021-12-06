@@ -13,6 +13,7 @@ val pom = PomInfo(
     githubScmUrl = "git@github.com:hongque-pro/infra-orm.git",
 )
 
+useNexusPublishPlugin()
 
 allprojects {
     group = "com.labijie.orm"
