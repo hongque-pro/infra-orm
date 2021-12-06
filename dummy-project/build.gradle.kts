@@ -7,7 +7,3 @@ dependencies {
     implementation(project(":exposed-generator"))
     ksp(project(":exposed-generator"))
 }
-
-ksp {
-    arg("exg_packageName", project.rootProject.childProjects["other"]!!.projectDir.absolutePath)
-}

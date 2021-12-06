@@ -6,3 +6,4 @@ dependencies {
     api("com.h2database:h2")
     api(project(":exposed-starter"))
 }
+

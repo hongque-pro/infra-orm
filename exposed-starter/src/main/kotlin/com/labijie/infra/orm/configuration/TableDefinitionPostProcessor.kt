@@ -12,6 +12,7 @@ import org.springframework.context.ApplicationContext
 import org.springframework.context.ApplicationContextAware
 import org.springframework.context.ConfigurableApplicationContext
 import org.springframework.util.StringUtils
+import kotlin.reflect.KClass
 
 
 class TableDefinitionPostProcessor : BeanDefinitionRegistryPostProcessor, ApplicationContextAware, BeanNameAware {
@@ -25,14 +26,19 @@ class TableDefinitionPostProcessor : BeanDefinitionRegistryPostProcessor, Applic
 
     var packages: String = ""
     var processPropertyPlaceHolders = false
+    var excludeClasses: String = ""
 
     override fun postProcessBeanDefinitionRegistry(registry: BeanDefinitionRegistry) {
-
-        if (this.processPropertyPlaceHolders) {
-            processPropertyPlaceHolders();
+        val properties = context.getBean(InfraExposedProperties::class.java)
+        if(!properties.generateSchema){
+            return
         }
 
-        val scaner = TableScanner(registry)
+        if (this.processPropertyPlaceHolders) {
+            processPropertyPlaceHolders()
+        }
+
+        val scaner = TableScanner(registry, excludeClasses)
         scaner.resourceLoader = context
 
         if(packages.isNotBlank()) {
@@ -71,6 +77,7 @@ class TableDefinitionPostProcessor : BeanDefinitionRegistryPostProcessor, Applic
             }
             val values: PropertyValues = mapperScannerBean.propertyValues
             this.packages = getPropertyValue(this::packages.name, values) ?: ""
+            this.excludeClasses = getPropertyValue(this::excludeClasses.name, values) ?: ""
         }
     }
 

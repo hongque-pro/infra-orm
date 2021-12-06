@@ -7,4 +7,7 @@ import kotlin.reflect.KClass
 @Target(AnnotationTarget.CLASS)
 @Retention(AnnotationRetention.RUNTIME)
 @Import(TabScannerRegistrar::class)
-annotation class TableScan(val basePackages:Array<String> = [], vararg val basePackageClasses: KClass<*> = [])
+annotation class TableScan(
+    val basePackages:Array<String> = [],
+    val basePackageClasses: Array<KClass<*>> = [],
+    val excludeClasses: Array<KClass<*>> = [])

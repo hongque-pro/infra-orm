@@ -7,52 +7,39 @@ import org.springframework.boot.context.event.ApplicationStartedEvent
 import org.springframework.context.ApplicationContext
 import org.springframework.context.ApplicationContextAware
 import org.springframework.context.ApplicationListener
-import org.springframework.transaction.annotation.Transactional
+import org.springframework.transaction.support.TransactionTemplate
+import java.util.stream.Collectors
 
-class SchemaCreationProcessor(private val properties: InfraExposedProperties) : ApplicationListener<ApplicationStartedEvent>, ApplicationContextAware {
+class SchemaCreationProcessor(
+    private val transactionTemplate: TransactionTemplate,
+    private val properties: InfraExposedProperties
+) : ApplicationListener<ApplicationStartedEvent>, ApplicationContextAware {
     companion object {
         private val logger by lazy {
             LoggerFactory.getLogger(InfraExposedAutoConfiguration::class.java)
         }
     }
 
-    private lateinit var context:ApplicationContext
+    private lateinit var context: ApplicationContext
 
-    private val tablesRegex = properties.generateTables.split(",").filter {
-        it.isNotBlank()
-    }.map {
-       val exp = it.trim()
-        Regex("^${exp.replace("*", "\\S*")}$")
-    }
 
-    private fun matchTable(table:String): Boolean {
-        return tablesRegex.any {
-            it.matches(table)
-        }
-    }
-
-    @Transactional
     override fun onApplicationEvent(event: ApplicationStartedEvent) {
-        val foundTables = context.getBeanProvider(Table::class.java)
-        val exposedTables = if(properties.generateTables.trim() == "*"){
-            foundTables.toList().toTypedArray()
-        }else{
-            foundTables.filter { matchTable(it.tableName) }.toTypedArray()
+        val exposedTables = context.getBeanProvider(Table::class.java).orderedStream().collect(Collectors.toList()).toTypedArray()
+
+        transactionTemplate.execute {
+            if (!properties.showSql && logger.isInfoEnabled) {
+                val msg = StringBuilder()
+                    .appendLine("Schema generation for tables: ${exposedTables.count()} tables: ")
+                    .apply {
+                        exposedTables.forEach {
+                            this.appendLine(it.ddl.joinToString(System.lineSeparator()))
+                        }
+                    }.toString()
+
+                logger.info(msg)
+            }
+            SchemaUtils.create(*exposedTables)
         }
-
-        if(logger.isInfoEnabled){
-            val msg = StringBuilder()
-                .appendLine("Schema generation for tables: ${exposedTables.count()} tables: ")
-                .apply {
-                    exposedTables.forEach {
-                        this.appendLine(it.ddl.joinToString(System.lineSeparator()))
-                    }
-                }.toString()
-
-            logger.info(msg)
-        }
-
-        SchemaUtils.create(*exposedTables)
     }
 
     override fun setApplicationContext(applicationContext: ApplicationContext) {

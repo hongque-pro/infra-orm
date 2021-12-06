@@ -7,10 +7,11 @@
   ],
   "properties":[
     {
-      "name":"infra.exposed.generate-tables",
-      "type": "java.lang.String",
+      "name":"infra.exposed.generate-schema",
+      "type": "java.lang.Boolean",
       "sourceType": "com.labijie.infra.exposed.configuration.InfraExposedProperties",
-      "description": "The table name in database separated by a comma ( support wildcard (*), examples: user_* )"
+      "description": "Whether auto create schema when application started",
+      "defaultValue": false
     },
     {
       "name":"infra.exposed.show-sql",

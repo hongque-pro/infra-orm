@@ -31,16 +31,21 @@ class TabScannerRegistrar : ImportBeanDefinitionRegistrar {
 
         builder.addPropertyValue(TableDefinitionPostProcessor::processPropertyPlaceHolders.name, true);
 
-        val basePackages: MutableList<String> = ArrayList()
+        val basePackages: MutableSet<String> = mutableSetOf()
+
+        val excludeClasses = annoAttrs.getClassArray(TableScan::excludeClasses.name).map { it.name }
 
         basePackages.addAll(annoAttrs.getStringArray(TableScan::basePackages.name).filter { !it.isNullOrBlank() })
-        basePackages.addAll(annoAttrs.getClassArray("basePackageClasses").map { ClassUtils.getPackageName(it) }
-        )
-        if (basePackages.isEmpty()) {
-            basePackages.add(getDefaultBasePackage(annoMeta))
-        }
+        basePackages.addAll(
+            annoAttrs.getClassArray(TableScan::basePackageClasses.name).map { ClassUtils.getPackageName(it) })
+        basePackages.add(getDefaultBasePackage(annoMeta))
 
-        builder.addPropertyValue(TableDefinitionPostProcessor::packages.name, StringUtils.collectionToCommaDelimitedString(basePackages))
+
+        builder.addPropertyValue(
+            TableDefinitionPostProcessor::packages.name,
+            StringUtils.collectionToCommaDelimitedString(basePackages)
+        )
+        builder.addPropertyValue(TableDefinitionPostProcessor::excludeClasses.name, StringUtils.collectionToCommaDelimitedString(excludeClasses))
         registry.registerBeanDefinition(beanName!!, builder.beanDefinition)
     }
 

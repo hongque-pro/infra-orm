@@ -1,5 +1,6 @@
 package com.labijie.infra.orm.testing
 
+import com.labijie.infra.orm.annotation.TableScan
 import com.labijie.infra.orm.test.ExposedTest
 import org.jetbrains.exposed.sql.Table
 import org.jetbrains.exposed.sql.insert
@@ -17,6 +18,8 @@ import kotlin.test.assertNotNull
 @ExposedTest
 @ExtendWith(SpringExtension::class)
 @ContextConfiguration(classes = [TestingContext::class])
+@Transactional
+@TableScan
 class Tester {
 
     @Autowired
@@ -28,7 +31,6 @@ class Tester {
     }
 
     @Test
-    @Transactional
     fun testCRUD(){
 
         TestEntityTable.insert {

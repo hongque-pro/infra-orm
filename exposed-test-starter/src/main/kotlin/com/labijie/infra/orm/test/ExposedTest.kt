@@ -1,5 +1,6 @@
 package com.labijie.infra.orm.test
 
+import com.labijie.infra.orm.annotation.TableScan
 import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration
 import org.springframework.boot.autoconfigure.ImportAutoConfiguration
@@ -12,7 +13,7 @@ import java.lang.annotation.Inherited
 import org.springframework.context.annotation.ComponentScan.Filter
 import org.springframework.test.context.BootstrapWith
 import org.springframework.test.context.junit.jupiter.SpringExtension
-import org.springframework.transaction.annotation.Transactional
+import org.springframework.transaction.annotation.EnableTransactionManagement
 
 
 @Target(AnnotationTarget.CLASS)
@@ -23,12 +24,11 @@ import org.springframework.transaction.annotation.Transactional
 @ExtendWith(SpringExtension::class)
 @OverrideAutoConfiguration(enabled = false)
 @TypeExcludeFilters(ExposedTypeExcludeFilter::class)
-@Transactional
-@AutoConfigureCache
-@AutoConfigureExposed
+@EnableTransactionManagement
 @AutoConfigureTestDatabase
 @ImportAutoConfiguration
 @EnableAutoConfiguration
+@AutoConfigureExposed
 annotation class ExposedTest(
     /**
      * Properties in form key=value that should be added to the Spring [Environment] before the test

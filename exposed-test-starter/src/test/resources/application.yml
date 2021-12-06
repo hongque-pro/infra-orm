@@ -3,4 +3,6 @@ spring:
     show-sql: true
 infra:
     exposed:
-      generate-tables: '*'
+      show-sql: true
+      generate-includes: '*'
+      generate-excludes:

@@ -10,14 +10,19 @@ import org.springframework.beans.factory.support.BeanDefinitionBuilder
 import org.springframework.beans.factory.support.BeanDefinitionRegistry
 import org.springframework.boot.autoconfigure.AutoConfigurationPackages
 import org.springframework.boot.autoconfigure.AutoConfigureAfter
+import org.springframework.boot.autoconfigure.AutoConfigureBefore
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration
+import org.springframework.boot.autoconfigure.transaction.TransactionAutoConfiguration
 import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Import
 import org.springframework.context.annotation.ImportBeanDefinitionRegistrar
 import org.springframework.core.type.AnnotationMetadata
+import org.springframework.transaction.annotation.EnableTransactionManagement
+import org.springframework.transaction.config.TransactionManagementConfigUtils
+import org.springframework.transaction.support.TransactionTemplate
 import org.springframework.util.StringUtils
 import java.util.function.Consumer
 import javax.sql.DataSource
@@ -26,6 +31,7 @@ import javax.sql.DataSource
 @Configuration(proxyBeanMethods = false)
 @AutoConfigureAfter(DataSourceAutoConfiguration::class)
 @EnableConfigurationProperties(InfraExposedProperties::class)
+@AutoConfigureBefore(TransactionAutoConfiguration::class)
 class InfraExposedAutoConfiguration  {
 
     companion object {
@@ -85,7 +91,7 @@ class InfraExposedAutoConfiguration  {
     @ConditionalOnMissingBean(TableDefinitionPostProcessor::class)
     class TableScannerRegistrarNotFoundConfiguration : InitializingBean {
         override fun afterPropertiesSet() {
-            logger.warn(
+            logger.info(
                 "Not found configuration for registering kotlin expose table bean using @TableScan or TableDefinitionPostProcessor."
             )
         }
@@ -95,5 +101,5 @@ class InfraExposedAutoConfiguration  {
     fun exposedConfigurationOverride() = ExposedConfigurationOverride()
 
     @Bean
-    fun schemaCreationProcessor(properties: InfraExposedProperties) = SchemaCreationProcessor(properties)
+    fun schemaCreationProcessor(transactionTemplate: TransactionTemplate, properties: InfraExposedProperties) = SchemaCreationProcessor(transactionTemplate, properties)
 }
