@@ -17,7 +17,7 @@ import kotlin.io.path.createDirectories
 import kotlin.io.path.isDirectory
 
 fun KSPLogger.println(message: String, symbol: KSNode? = null) {
-    this.warn("[expose gen] $message", symbol)
+    this.info("[expose gen] $message", symbol)
 }
 
 
