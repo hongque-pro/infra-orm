@@ -63,7 +63,7 @@ TableScan 提供以下属性来定义扫包逻辑：
 
 |   属性     |       类型       |    说明    |
 |-----------|------------|----------------|
-| basePackages| Array&lt;String> |  包名，如果不指定 basePackages 和 basePackageClasses 或者他们都是为数组，表示仅扫描当前被注解的类所在的包 |
+| basePackages| Array&lt;String> |  包名，如果不指定 basePackages 和 basePackageClasses，表示仅扫描当前被注解的类所在的包 |
 | basePackageClasses| Array&lt;KClass&lt;*>> |  通过类型来指定包，即类型所在的包 |
 | excludeClasses| Array&lt;KClass&lt;*>> |  要排除的类，通过排除类来避免自动生成 Schema |
 
