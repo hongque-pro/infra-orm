@@ -145,6 +145,11 @@ fun Project.usePublishing(info: PomInfo, artifactName: ((p: Project) -> String)?
     this.apply(plugin = "maven-publish")
     this.apply(plugin = "signing")
 
+    if(this.parent == null)
+    {
+        this.apply(plugin = "io.github.gradle-nexus.publish-plugin")
+    }
+
 
     val project = this
     val artifact = artifactName?.invoke(project) ?: project.name
