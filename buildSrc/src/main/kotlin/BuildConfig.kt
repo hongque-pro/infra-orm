@@ -178,21 +178,6 @@ fun Project.usePublishing(info: PomInfo, artifactName: ((p: Project) -> String)?
                 }
             }
         }
-        val u = project.getPropertyOrCmdArgs("PUB_USER", "u")
-        val p = project.getPropertyOrCmdArgs("PUB_PWD", "p")
-        val s = project.getPropertyOrCmdArgs("PUB_URL", "s")
-        if (u.isNullOrBlank() && p.isNotNullOrBlank() && s.isNullOrBlank()) {
-            repositories {
-                maven {
-                    name = "nexus"
-                    setUrl(s!!)
-                    credentials {
-                        username = u
-                        password = p
-                    }
-                }
-            }
-        }
     }
 
     this.configure<SigningExtension> {

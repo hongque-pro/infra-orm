@@ -30,14 +30,25 @@ allprojects {
 
 
 nexusPublishing {
+    val u = project.getPropertyOrCmdArgs("PUB_USER", "u")
+    val p = project.getPropertyOrCmdArgs("PUB_PWD", "p")
+    val s = project.getPropertyOrCmdArgs("PUB_URL", "s") ?: "https://your-nexus-server.com/publish"
     repositories {
         sonatype {
-            val u = project.getPropertyOrCmdArgs("PUB_USER", "u")
-            val p = project.getPropertyOrCmdArgs("PUB_PWD", "p")
             if (u != null) {
                 username.set(u)
                 if (p != null) {
                     password.set(p)
+                }
+            }
+        }
+        create("nexus") {
+            nexusUrl.set(uri(s))
+            //snapshotRepositoryUrl.set(uri("https://your-server.com/snapshots"))
+            if(u != null) {
+                username.set(u) // defaults to project.properties["nexusUsername"]
+                if (p != null) {
+                    password.set(p) // defaults to project.properties["nexusPassword"]
                 }
             }
         }
