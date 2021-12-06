@@ -1,6 +1,5 @@
-import org.gradle.api.Action
+import com.sun.org.apache.bcel.internal.util.ClassPath
 import org.gradle.api.Project
-import org.gradle.api.Task
 import org.gradle.api.artifacts.dsl.RepositoryHandler
 import org.gradle.api.plugins.JavaPluginExtension
 import org.gradle.api.publish.PublishingExtension
@@ -11,6 +10,7 @@ import org.gradle.api.tasks.testing.Test
 import org.gradle.kotlin.dsl.*
 import org.gradle.plugins.signing.SigningExtension
 import java.lang.IllegalArgumentException
+import java.net.URL
 
 fun Any?.isNotNullOrBlank(): Boolean {
     return !(this == null || this.toString().isBlank())
@@ -39,7 +39,7 @@ fun Project.getPropertyOrCmdArgs(propertyName: String, cmdArgName: String): Stri
     return (System.getProperty(cmdArgName) ?: propertyValue) ?: System.getenv(propertyName)?.ifEmpty { null }
 }
 
-fun RepositoryHandler.useDefaults(useMavenProxy: Boolean = true) {
+fun RepositoryHandler.useDefaultRepositories(useMavenProxy: Boolean = true) {
     mavenLocal()
     if (useMavenProxy) {
         maven {
@@ -58,17 +58,17 @@ private fun Project.mustBeRoot(methodName: String) {
     }
 }
 
-fun Project.useDefaults(
+fun Project.useDefault(
     jvmVersion: String = "1.8",
     includeSource: Boolean = true,
     useMavenProxy: Boolean = true,
     isBomProject: Boolean = false,
     dependencyAction: (DependencyHandlerScope.() -> Unit)? = null
 ) {
-    if(this.parent == null){
+    if (this.parent == null) {
         buildscript {
             repositories {
-                this.useDefaults()
+                this.useDefaultRepositories()
             }
         }
     }
@@ -110,7 +110,7 @@ fun Project.useDefaults(
     }
 
     repositories {
-        useDefaults(useMavenProxy)
+        useDefaultRepositories(useMavenProxy)
     }
 
     if (this.tasks.findByName("test") != null) {
@@ -144,7 +144,7 @@ fun Project.usePublishing(info: PomInfo, artifactName: ((p: Project) -> String)?
 
     this.apply(plugin = "maven-publish")
     this.apply(plugin = "signing")
-    this.apply(plugin = "signing")
+
 
     val project = this
     val artifact = artifactName?.invoke(project) ?: project.name
@@ -176,7 +176,21 @@ fun Project.usePublishing(info: PomInfo, artifactName: ((p: Project) -> String)?
                         developerConnection.set(info.gitUrl)
                     }
                 }
-
+            }
+        }
+        val u = project.getPropertyOrCmdArgs("PUB_USER", "u")
+        val p = project.getPropertyOrCmdArgs("PUB_PWD", "p")
+        val s = project.getPropertyOrCmdArgs("PUB_URL", "s")
+        if (u.isNullOrBlank() && p.isNotNullOrBlank() && s.isNullOrBlank()) {
+            repositories {
+                maven {
+                    name = "nexus"
+                    setUrl(s!!)
+                    credentials {
+                        username = u
+                        password = p
+                    }
+                }
             }
         }
     }

@@ -15,19 +15,31 @@ val pom = PomInfo(
     githubScmUrl = "git@github.com:hongque-pro/infra-orm.git",
 )
 
+
 allprojects {
     group = "com.labijie.orm"
     version = "1.0.0"
-
-    useDefaults()
+    useDefault()
     dependencies {
         implementation(platform("org.jetbrains.exposed:exposed-bom:${Versions.exposedVersion}"))
     }
-}
-
-subprojects {
     if(!this.name.startsWith("dummy")){
         this.usePublishing(pom)
     }
 }
 
+
+nexusPublishing {
+    repositories {
+        sonatype {
+            val u = project.getPropertyOrCmdArgs("PUB_USER", "u")
+            val p = project.getPropertyOrCmdArgs("PUB_PWD", "p")
+            if (u != null) {
+                username.set(u)
+                if (p != null) {
+                    password.set(p)
+                }
+            }
+        }
+    }
+}

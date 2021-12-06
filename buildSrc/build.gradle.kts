@@ -11,9 +11,14 @@ fun getProxyMavenRepository(): String {
 
 repositories {
     mavenLocal()
+    gradlePluginPortal()
     maven {
         this.setUrl(getProxyMavenRepository())
         this.isAllowInsecureProtocol = true
     }
     mavenCentral()
+}
+
+dependencies {
+    compileOnly("io.github.gradle-nexus:publish-plugin:1.1.0")
 }
