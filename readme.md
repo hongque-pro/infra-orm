@@ -51,7 +51,7 @@ https://github.com/JetBrains/Exposed/wiki/DSL
 ## 文档
 
 [Quick Start](docs/quick_start.md)   
-[Integrate with SrpingBoot](docs/quick_start.md)
+[Integrate with SpringBoot project](docs/quick_start.md)
 
 
 ## 数据库支持
