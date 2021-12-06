@@ -1,4 +1,4 @@
-#QuickStart
+# QuickStart
 
 通过本向导指导你如何通过 Infra-ORM 提供的工具链更好的使用 Exposed DSL 。
 
