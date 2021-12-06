@@ -32,6 +32,14 @@ import org.jetbrains.exposed.sql.statements.UpdateBuilder
 import org.jetbrains.exposed.sql.statements.UpdateStatement
 import org.jetbrains.exposed.sql.update
 
+/**
+ * DSL support for TestSimpleTable
+ *
+ * This class made by a code generator (https://github.com/hongque-pro/infra-orm).
+ *
+ * Origin Exposed Table:
+ * @see com.labijie.orm.dummy.TestSimpleTable
+ */
 public object TestSimpleDSL {
   public fun parseTestSimpleRow(raw: ResultRow): TestSimple {
     val plain = TestSimple()

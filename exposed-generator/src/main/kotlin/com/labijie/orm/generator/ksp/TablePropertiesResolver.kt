@@ -30,7 +30,7 @@ object TablePropertiesResolver {
         }
     }
 
-    fun getAllProperties(dc: KSClassDeclaration, logger: KSPLogger? = null): Collection<KSPropertyDeclaration> {
+    fun getAllProperties(dc: KSClassDeclaration): Collection<KSPropertyDeclaration> {
         val agg = mutableMapOf<String, KSPropertyDeclaration>()
         resolveProperties(true, dc, agg) {
 

@@ -2,11 +2,8 @@ package com.labijie.orm.generator
 
 import com.google.devtools.ksp.processing.KSPLogger
 import com.google.devtools.ksp.symbol.*
-import com.squareup.kotlinpoet.ClassName
-import com.squareup.kotlinpoet.ParameterizedTypeName
+import com.squareup.kotlinpoet.*
 import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
-import com.squareup.kotlinpoet.WildcardTypeName
-import com.squareup.kotlinpoet.asTypeName
 import org.jetbrains.exposed.dao.id.EntityID
 import org.jetbrains.exposed.sql.Column
 import java.io.File
@@ -15,11 +12,31 @@ import java.nio.file.Path
 import kotlin.io.path.Path
 import kotlin.io.path.createDirectories
 import kotlin.io.path.isDirectory
+import kotlin.text.StringBuilder
 
 fun KSPLogger.println(message: String, symbol: KSNode? = null) {
     this.info("[expose gen] $message", symbol)
 }
 
+private val DEFAULT_CLASS_COMMENTS = "This class made by a code generator (https://github.com/hongque-pro/infra-orm)."
+
+fun TypeSpec.Builder.addComments(classComment: String, context:GenerationContext): TypeSpec.Builder {
+
+    val comment = CodeBlock.builder()
+        .add(classComment)
+        .add("\n")
+        .add("\n")
+        .add(DEFAULT_CLASS_COMMENTS)
+        .add("\n")
+        .add("\n")
+        .add("Origin Exposed Table:")
+        .add("\n")
+        .add("@see ${context.tableClass.canonicalName}")
+        .build()
+
+    return this.addKdoc(comment)
+
+}
 
 private fun KSType.isExposedColumn(): Boolean {
     val isColumnType = this.declaration.qualifiedName?.asString() == Column::class.qualifiedName

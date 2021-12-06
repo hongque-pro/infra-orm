@@ -25,6 +25,14 @@ import org.jetbrains.exposed.sql.statements.UpdateBuilder
 import org.jetbrains.exposed.sql.statements.UpdateStatement
 import org.jetbrains.exposed.sql.update
 
+/**
+ * DSL support for UserTable
+ *
+ * This class made by a code generator (https://github.com/hongque-pro/infra-orm).
+ *
+ * Origin Exposed Table:
+ * @see com.labijie.orm.dummy.UserTable
+ */
 public object UserDSL {
   public fun parseUserRow(raw: ResultRow): User {
     val plain = User()

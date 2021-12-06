@@ -32,7 +32,7 @@ class ExposedSymbolProcessor(
 
         val visitContext = VisitContext()
 
-        val symbols = resolver.getAllFiles().forEach {
+        resolver.getAllFiles().forEach {
             it.accept(ExposedTableVisitor(logger), visitContext)
         }
 
@@ -70,7 +70,6 @@ class ExposedSymbolProcessor(
             val table = data.currentTable
             if (table != null) {
                 //it.origin == Origin.KOTLIN 用来判断是否是来自直接声明
-                val getter =  property.getter?.receiver
                 //logger.println("property receiver: ${property.parentDeclaration?.qualifiedName?.getShortName()}")
 
                 val columnType = property.getColumnType()

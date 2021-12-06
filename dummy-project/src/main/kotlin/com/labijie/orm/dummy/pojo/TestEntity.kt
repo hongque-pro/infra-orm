@@ -10,6 +10,14 @@ import kotlin.Int
 import kotlin.Short
 import kotlin.String
 
+/**
+ * POJO for TestEntityTable
+ *
+ * This class made by a code generator (https://github.com/hongque-pro/infra-orm).
+ *
+ * Origin Exposed Table:
+ * @see com.labijie.orm.dummy.TestEntityTable
+ */
 public open class TestEntity {
   public var name: String = ""
 

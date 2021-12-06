@@ -9,6 +9,14 @@ import kotlin.Char
 import kotlin.Short
 import kotlin.String
 
+/**
+ * POJO for TestSimpleTable
+ *
+ * This class made by a code generator (https://github.com/hongque-pro/infra-orm).
+ *
+ * Origin Exposed Table:
+ * @see com.labijie.orm.dummy.TestSimpleTable
+ */
 public open class TestSimple {
   public var name: String = ""
 

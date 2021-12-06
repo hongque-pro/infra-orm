@@ -5,6 +5,14 @@ import kotlin.Int
 import kotlin.Long
 import kotlin.String
 
+/**
+ * POJO for UserTable
+ *
+ * This class made by a code generator (https://github.com/hongque-pro/infra-orm).
+ *
+ * Origin Exposed Table:
+ * @see com.labijie.orm.dummy.UserTable
+ */
 public open class User {
   public var name: String = ""
 

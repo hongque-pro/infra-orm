@@ -13,6 +13,7 @@ object PojoWriter {
         val file = FileSpec.builder(context.pojoPackageName, fileName = context.pojoClass.simpleName)
             .addType(
                 TypeSpec.classBuilder(context.pojoClass)
+                    .addComments("POJO for ${context.tableClass.simpleName}", context)
                     .addModifiers(KModifier.OPEN)
                     .addProperty(context.table.columns)
                     .build()

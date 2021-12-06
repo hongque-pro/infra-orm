@@ -50,6 +50,7 @@ object DSLWriter {
             .addImport(context.tableClass, context.table.columns.map { it.name })
             .addType(
                 TypeSpec.objectBuilder(context.dslClass)
+                    .addComments("DSL support for ${context.tableClass.simpleName}", context)
                     .addFunction(parseRow)
                     .addFunction(applyInsert)
                     .addFunction(applyUpdate)
@@ -57,7 +58,7 @@ object DSLWriter {
                     .addFunction(rowMap)
                     .addFunction(slice)
                     .apply {
-                        val context = DSLCodeContext(
+                        val dslCtx = DSLCodeContext(
                             context,
                             fileBuilder,
                             parseRow,
@@ -67,7 +68,7 @@ object DSLWriter {
                             slice,
                             OBJECT_PARAMETER_NAME
                         )
-                        this.buildMethods(context)
+                        this.buildMethods(dslCtx)
                     }
                     .build()
             )
