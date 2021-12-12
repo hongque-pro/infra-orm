@@ -1,3 +1,0 @@
-fun addExposedGenerator(version: String) {
-
-}

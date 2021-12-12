@@ -4,3 +4,12 @@ include("exposed-starter")
 include("exposed-test-starter")
 include("exposed-generator")
 include("dummy-project")
+
+pluginManagement {
+
+    repositories {
+        mavenLocal()
+
+        gradlePluginPortal()
+    }
+}

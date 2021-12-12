@@ -7,3 +7,7 @@ dependencies {
     implementation(project(":exposed-generator"))
     ksp(project(":exposed-generator"))
 }
+
+ksp {
+
+}

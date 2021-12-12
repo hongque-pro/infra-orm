@@ -1,31 +1,60 @@
-
-
 plugins {
-    kotlin("jvm") version Versions.kotlinVersion
+    id("com.labijie.infra") version (Versions.infraPluginVersion) apply false
 }
-
-
-
-val pom = PomInfo(
-    description = "Orm and tooling for kotlin based exposed",
-    projectUrl = "https://github.com/hongque-pro/infra-orm",
-    gitUrl = "https://github.com/hongque-pro/infra-orm.git",
-    githubScmUrl = "git@github.com:hongque-pro/infra-orm.git",
-)
-
-useNexusPublishPlugin()
 
 allprojects {
     group = "com.labijie.orm"
-    version = "1.0.0"
-    useDefault()
-    dependencies {
-        implementation(platform("org.jetbrains.exposed:exposed-bom:${Versions.exposedVersion}"))
+    version = "1.0.1"
+
+    infra {
+        useDefault {
+            includeSource = true
+            infraBomVersion = Versions.infraBomVersion
+            kotlinVersion = Versions.kotlinVersion
+            useMavenProxy = true
+        }
+
+        useNexusPublish()
     }
 }
 
 subprojects {
-    if(!this.name.startsWith("dummy")){
-        this.usePublishing(pom)
+    infra {
+        if (!project.name.startsWith("dummy")) {
+            usePublish {
+                description = "Orm and tooling for kotlin based exposed"
+                githubUrl("hongque-pro", "infra-orm")
+            }
+
+        }
+    }
+
+    dependencies {
+        add("api", platform("org.jetbrains.exposed:exposed-bom:${Versions.exposedVersion}"))
     }
 }
+
+
+//val pom = PomInfo(
+//    description = "Orm and tooling for kotlin based exposed",
+//    projectUrl = "https://github.com/hongque-pro/infra-orm",
+//    gitUrl = "https://github.com/hongque-pro/infra-orm.git",
+//    githubScmUrl = "git@github.com:hongque-pro/infra-orm.git",
+//)
+//
+//useNexusPublishPlugin()
+//
+//allprojects {
+//    group = "com.labijie.orm"
+//    version = "1.0.0"
+//    useDefault()
+//    dependencies {
+//        implementation(platform("org.jetbrains.exposed:exposed-bom:${Versions.exposedVersion}"))
+//    }
+//}
+//
+//subprojects {
+//    if(!this.name.startsWith("dummy")){
+//        this.usePublishing(pom)
+//    }
+//}
