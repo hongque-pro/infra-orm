@@ -11,7 +11,7 @@ allprojects {
             includeSource = true
             infraBomVersion = Versions.infraBomVersion
             kotlinVersion = Versions.kotlinVersion
-            useMavenProxy = true
+            useMavenProxy = false
         }
 
         useNexusPublish()
