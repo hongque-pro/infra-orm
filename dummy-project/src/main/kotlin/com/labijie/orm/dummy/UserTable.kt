@@ -15,7 +15,13 @@ object UserTable : SimpleLongIdTable("my", "id") {
     var count = integer("count")
 }
 
-object TestEntityTable : IntIdTable("exposed_test_entities") {
+object ShopTable : SimpleLongIdTable("my", "id") {
+    var name: Column<String> = varchar("name", 50)
+    var status = enumeration("status", TestEnum::class)
+    var count = integer("count")
+}
+
+object IntIdTable : IntIdTable("exposed_test_entities") {
     var name: Column<String> = varchar("name", 50)
     var memo = varchar("name", 50).nullable()
     var charCol = char("cc")

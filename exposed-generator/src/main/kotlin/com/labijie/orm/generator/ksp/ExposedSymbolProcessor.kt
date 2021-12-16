@@ -66,7 +66,6 @@ class ExposedSymbolProcessor(
 
 
         override fun visitPropertyDeclaration(property: KSPropertyDeclaration, data: VisitContext) {
-            if(data.checkVisited(property)) return
             val table = data.currentTable
             if (table != null) {
                 //it.origin == Origin.KOTLIN 用来判断是否是来自直接声明

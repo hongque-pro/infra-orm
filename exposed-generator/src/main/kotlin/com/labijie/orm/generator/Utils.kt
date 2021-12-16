@@ -15,7 +15,7 @@ import kotlin.io.path.isDirectory
 import kotlin.text.StringBuilder
 
 fun KSPLogger.println(message: String, symbol: KSNode? = null) {
-    this.info("[expose gen] $message", symbol)
+    this.warn("[expose gen] $message", symbol)
 }
 
 private val DEFAULT_CLASS_COMMENTS = "This class made by a code generator (https://github.com/hongque-pro/infra-orm)."

@@ -16,7 +16,9 @@ class TableMetadata(declaration: KSClassDeclaration, val sourceFile: String) {
         private set
 
     init {
-        loop@ for (superType in declaration.getAllSuperTypes()) {
+
+
+        loop@ for (superType in declaration .getAllSuperTypes()) {
             val typeName = superType.declaration.qualifiedName?.asString()
             if (typeName == IdTable::class.qualifiedName) {
                 kind = TableKind.ExposedIdTable
