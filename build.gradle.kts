@@ -12,6 +12,8 @@ allprojects {
             infraBomVersion = Versions.infraBomVersion
             kotlinVersion = Versions.kotlinVersion
             useMavenProxy = false
+
+            addHongQueGitHubPackages()
         }
 
         useNexusPublish()
@@ -26,6 +28,7 @@ subprojects {
                 githubUrl("hongque-pro", "infra-orm")
             }
 
+            useGitHubPackages("hongque-pro", "infra-orm")
         }
     }
 
@@ -33,28 +36,3 @@ subprojects {
         add("api", platform("org.jetbrains.exposed:exposed-bom:${Versions.exposedVersion}"))
     }
 }
-
-
-//val pom = PomInfo(
-//    description = "Orm and tooling for kotlin based exposed",
-//    projectUrl = "https://github.com/hongque-pro/infra-orm",
-//    gitUrl = "https://github.com/hongque-pro/infra-orm.git",
-//    githubScmUrl = "git@github.com:hongque-pro/infra-orm.git",
-//)
-//
-//useNexusPublishPlugin()
-//
-//allprojects {
-//    group = "com.labijie.orm"
-//    version = "1.0.0"
-//    useDefault()
-//    dependencies {
-//        implementation(platform("org.jetbrains.exposed:exposed-bom:${Versions.exposedVersion}"))
-//    }
-//}
-//
-//subprojects {
-//    if(!this.name.startsWith("dummy")){
-//        this.usePublishing(pom)
-//    }
-//}

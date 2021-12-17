@@ -1,7 +1,6 @@
 
 plugins {
-    id("org.gradle.kotlin.kotlin-dsl") version "2.1.7"
-    id("org.gradle.kotlin.embedded-kotlin") version "2.1.7"
+    `kotlin-dsl`
 }
 
 fun getProxyMavenRepository(): String {

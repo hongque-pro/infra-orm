@@ -8,6 +8,7 @@ env:
   GPG_PWD: ${{ secrets.MAVEN_SIGN_KEY_PWD }}
   PUB_USER: ${{ secrets.MAVEN_USER_NAME }}
   PUB_PWD: ${{ secrets.MAVEN_USER_PWD }}
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 on:
   workflow_dispatch:
   release:
@@ -37,5 +38,7 @@ jobs:
           cat gradle.properties
       - name: Build with Gradle
         run: gradle build -x test -x kspKotlin -x compileJava
+      - name: Publish to GitHub Packages
+        run: gradle publishToGitHubPackages
       - name: Publish to Maven Central
         run: gradle publishToSonatype closeAndReleaseSonatypeStagingRepository
