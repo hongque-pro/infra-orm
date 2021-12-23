@@ -26,17 +26,19 @@ class SchemaCreationProcessor(
 
 
     override fun onApplicationEvent(event: ApplicationStartedEvent) {
-        val exposedTables = context.getBeanProvider(Table::class.java).orderedStream().collect(Collectors.toList()).toTypedArray()
+        val exposedTables =
+            context.getBeanProvider(Table::class.java).orderedStream().collect(Collectors.toList()).toTypedArray()
 
-        if(exposedTables.isNotEmpty()) {
-            val sql = SchemaUtils.statementsRequiredToActualizeScheme(*exposedTables)
-            if(sql.isNotEmpty()) {
-                transactionTemplate.execute {
+        if (exposedTables.isNotEmpty()) {
+            transactionTemplate.execute {
+                val sql = SchemaUtils.statementsRequiredToActualizeScheme(*exposedTables)
+                if (sql.isNotEmpty()) {
                     with(TransactionManager.current()) {
                         this.execInBatch(sql)
                         commit()
                         currentDialect.resetCaches()
                     }
+
                 }
             }
         }
