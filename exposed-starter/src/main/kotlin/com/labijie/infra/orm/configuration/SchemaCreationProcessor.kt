@@ -28,15 +28,17 @@ class SchemaCreationProcessor(
 
         if(exposedTables.isNotEmpty()) {
             val sql = SchemaUtils.statementsRequiredToActualizeScheme(*exposedTables)
-            with(TransactionManager.current()) {
-                this.execInBatch(sql)
-                commit()
-                currentDialect.resetCaches()
+            if(sql.isNotEmpty()) {
+                with(TransactionManager.current()) {
+                    this.execInBatch(sql)
+                    commit()
+                    currentDialect.resetCaches()
+                }
             }
         }
         if (!properties.showSql && logger.isInfoEnabled) {
             val msg = StringBuilder()
-                .appendLine("Schema generation for tables: ${exposedTables.count()} tables: ")
+                .appendLine("Schema of tables modified: ${exposedTables.count()} tables: ")
                 .apply {
                     this.appendLine(exposedTables.joinToString(System.lineSeparator()) { it.tableName })
                 }.toString()
