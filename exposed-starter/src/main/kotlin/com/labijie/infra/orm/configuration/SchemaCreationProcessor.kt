@@ -2,16 +2,16 @@ package com.labijie.infra.orm.configuration
 
 import org.jetbrains.exposed.sql.SchemaUtils
 import org.jetbrains.exposed.sql.Table
+import org.jetbrains.exposed.sql.transactions.TransactionManager
+import org.jetbrains.exposed.sql.vendors.currentDialect
 import org.slf4j.LoggerFactory
 import org.springframework.boot.context.event.ApplicationStartedEvent
 import org.springframework.context.ApplicationContext
 import org.springframework.context.ApplicationContextAware
 import org.springframework.context.ApplicationListener
-import org.springframework.transaction.support.TransactionTemplate
 import java.util.stream.Collectors
 
 class SchemaCreationProcessor(
-    private val transactionTemplate: TransactionTemplate,
     private val properties: InfraExposedProperties
 ) : ApplicationListener<ApplicationStartedEvent>, ApplicationContextAware {
     companion object {
@@ -27,8 +27,11 @@ class SchemaCreationProcessor(
         val exposedTables = context.getBeanProvider(Table::class.java).orderedStream().collect(Collectors.toList()).toTypedArray()
 
         if(exposedTables.isNotEmpty()) {
-            transactionTemplate.execute {
-                SchemaUtils.create(*exposedTables)
+            val sql = SchemaUtils.statementsRequiredToActualizeScheme(*exposedTables)
+            with(TransactionManager.current()) {
+                this.execInBatch(sql)
+                commit()
+                currentDialect.resetCaches()
             }
         }
         if (!properties.showSql && logger.isInfoEnabled) {
