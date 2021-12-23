@@ -21,6 +21,7 @@ import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Import
 import org.springframework.context.annotation.ImportBeanDefinitionRegistrar
 import org.springframework.core.type.AnnotationMetadata
+import org.springframework.transaction.support.TransactionTemplate
 import org.springframework.util.StringUtils
 import java.util.function.Consumer
 import javax.sql.DataSource
@@ -100,5 +101,5 @@ class InfraExposedAutoConfiguration  {
 
     @Bean
     @ConditionalOnProperty(prefix = "infra.exposed", name = ["generate-schema"], havingValue = "true", matchIfMissing = false)
-    fun schemaCreationProcessor(properties: InfraExposedProperties) = SchemaCreationProcessor(properties)
+    fun schemaCreationProcessor(transactionTemplate: TransactionTemplate, properties: InfraExposedProperties) = SchemaCreationProcessor(transactionTemplate, properties)
 }

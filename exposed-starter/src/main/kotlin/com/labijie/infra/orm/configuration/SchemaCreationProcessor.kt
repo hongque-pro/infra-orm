@@ -9,9 +9,11 @@ import org.springframework.boot.context.event.ApplicationStartedEvent
 import org.springframework.context.ApplicationContext
 import org.springframework.context.ApplicationContextAware
 import org.springframework.context.ApplicationListener
+import org.springframework.transaction.support.TransactionTemplate
 import java.util.stream.Collectors
 
 class SchemaCreationProcessor(
+    private val transactionTemplate: TransactionTemplate,
     private val properties: InfraExposedProperties
 ) : ApplicationListener<ApplicationStartedEvent>, ApplicationContextAware {
     companion object {
@@ -29,10 +31,12 @@ class SchemaCreationProcessor(
         if(exposedTables.isNotEmpty()) {
             val sql = SchemaUtils.statementsRequiredToActualizeScheme(*exposedTables)
             if(sql.isNotEmpty()) {
-                with(TransactionManager.current()) {
-                    this.execInBatch(sql)
-                    commit()
-                    currentDialect.resetCaches()
+                transactionTemplate.execute {
+                    with(TransactionManager.current()) {
+                        this.execInBatch(sql)
+                        commit()
+                        currentDialect.resetCaches()
+                    }
                 }
             }
         }
