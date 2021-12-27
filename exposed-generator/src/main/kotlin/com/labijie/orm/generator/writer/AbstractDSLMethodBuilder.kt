@@ -33,6 +33,14 @@ abstract class AbstractDSLMethodBuilder: IDSLMethodBuilder {
         MemberName("kotlin", "let", true)
     }
 
+    protected fun kotlinCollectionExtensionMethod(methodName: String): MemberName {
+        return MemberName("kotlin.collections", methodName, isExtension = true)
+    }
+
+    protected fun kotlinTextExtensionMethod(methodName: String): MemberName {
+        return MemberName("kotlin.text", methodName, isExtension = true)
+    }
+
     protected fun buildPrimaryKeyWhere(context: DSLCodeContext): CodeBlock {
         val primaryKeyCount = context.base.table.primaryKeys.size
 

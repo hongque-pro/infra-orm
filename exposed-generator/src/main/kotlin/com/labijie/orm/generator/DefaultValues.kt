@@ -2,6 +2,7 @@ package com.labijie.orm.generator
 
 import com.google.devtools.ksp.symbol.KSClassDeclaration
 import com.google.devtools.ksp.symbol.KSType
+import com.squareup.kotlinpoet.MemberName
 import java.math.BigDecimal
 import java.util.*
 
@@ -22,6 +23,30 @@ object DefaultValues {
         Boolean::class.qualifiedName to "false",
         Byte::class.qualifiedName to "0",
     )
+
+    private fun kotlinTextExtensionMethod(methodName: String): MemberName {
+        return MemberName("kotlin.text", methodName, isExtension = true)
+    }
+
+    private val parseMethods = mutableMapOf(
+        String::class.qualifiedName to null,
+        Int::class.qualifiedName to kotlinTextExtensionMethod("toInt"),
+        Short::class.qualifiedName to kotlinTextExtensionMethod("toShort"),
+        Long::class.qualifiedName to kotlinTextExtensionMethod("toLong"),
+        Float::class.qualifiedName to kotlinTextExtensionMethod("toFloat"),
+        Double::class.qualifiedName to kotlinTextExtensionMethod("toDouble"),
+        BigDecimal::class.qualifiedName to kotlinTextExtensionMethod("toDouble"),
+        Char::class.qualifiedName to kotlinTextExtensionMethod("first"),
+        ByteArray::class.qualifiedName to kotlinTextExtensionMethod("toByteArray"),
+        UUID::class.qualifiedName to MemberName("com.labijie.infra.orm", "toUUID", isExtension = true),
+        Boolean::class.qualifiedName to kotlinTextExtensionMethod("toBoolean"),
+        Byte::class.qualifiedName to kotlinTextExtensionMethod("toByte"),
+    )
+
+    fun getParseMethod(type: KSType): MemberName? {
+        val typeName = type.declaration.qualifiedName!!.asString()
+        return parseMethods[typeName]
+    }
 
     fun getValue(type: KSType): String {
         if(type.isEnum()){

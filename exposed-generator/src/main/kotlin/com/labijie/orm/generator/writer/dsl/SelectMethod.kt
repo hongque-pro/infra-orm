@@ -1,6 +1,8 @@
 package com.labijie.orm.generator.writer.dsl
 
 import com.labijie.infra.orm.OffsetList
+import com.labijie.orm.generator.ColumnMetadata
+import com.labijie.orm.generator.DefaultValues
 import com.labijie.orm.generator.writer.AbstractDSLMethodBuilder
 import com.labijie.orm.generator.writer.DSLCodeContext
 import com.squareup.kotlinpoet.*
@@ -65,30 +67,8 @@ object SelectMethod : AbstractDSLMethodBuilder() {
             .build()
     }
 
-    private fun stringToNumberMethod(context: DSLCodeContext): Pair<Boolean, MemberName?> {
-        if (context.base.table.primaryKeys.size != 1) {
-            return Pair(false, null)
-        }
 
-        val primary = context.base.table.primaryKeys.first()
-
-        val member = when (primary.rawType.declaration.qualifiedName?.asString()) {
-            String::class.qualifiedName -> null
-            Int::class.qualifiedName -> MemberName("kotlin.text", "toInt", isExtension = true)
-            Long::class.qualifiedName -> MemberName("kotlin.text", "toLong", isExtension = true)
-            Float::class.qualifiedName -> MemberName("kotlin.text", "toFloat", isExtension = true)
-            Double::class.qualifiedName -> MemberName("kotlin.text", "toDouble", isExtension = true)
-            UUID::class.qualifiedName -> MemberName("com.labijie.infra.orm", "ToUUID", isExtension = true)
-            else -> return Pair(false, null)
-        }
-        return Pair(true, member)
-    }
-
-    private fun buildSelectForward(context: DSLCodeContext): FunSpec? {
-        val (valid, convertStringMethod) = stringToNumberMethod(context)
-        if (!valid) {
-            return null
-        }
+    private fun buildSelectForward(context: DSLCodeContext, selectForwardByPrimary: FunSpec): FunSpec {
 
         val offsetListType = OffsetList::class.companionObject!!.asTypeName()
         val encodeTokenMethod = MemberName(offsetListType, "encodeToken")
@@ -114,8 +94,10 @@ object SelectMethod : AbstractDSLMethodBuilder() {
         val order = ParameterSpec.builder("order", SortOrder::class)
             .defaultValue("%T.${SortOrder.DESC.name}", SortOrder::class.asTypeName()).build()
 
-        val primaryKeyPropertyName = context.base.table.primaryKeys.first().name
-        val primaryKey = MemberName(context.base.tableClass, primaryKeyPropertyName)
+        val primary = context.base.table.primaryKeys.first()
+        val primaryKey = MemberName(context.base.tableClass, primary.name)
+
+        val parseMethod = DefaultValues.getParseMethod(primary.rawType)
 
         return FunSpec.builder("selectForward")
             .receiver(context.base.tableClass)
@@ -126,20 +108,36 @@ object SelectMethod : AbstractDSLMethodBuilder() {
             .addParameter(pageSize)
             .addParameter(whereParam)
             .returns(OffsetList::class.asTypeName().parameterizedBy(context.base.pojoClass))
+
             .beginControlFlow("if(pageSize < 1)")
-            .addStatement("return %T()", OffsetList::class)
+            .addStatement("return %T.empty()", OffsetList::class)
             .endControlFlow()
+
+            .beginControlFlow("if(%N == %M)", sortColumn, primaryKey)
+            .addStatement(
+                "return this.%N(%N, %N, %N, %N)",
+                selectForwardByPrimary,
+                forwardToken,
+                order,
+                pageSize,
+                whereParam
+            )
+            .endControlFlow()
+
             .addStatement(
                 "val kp = %N?.let { %M(it) }",
                 forwardToken,
                 decodeTokenMethod
             )
+            .addStatement("val offsetKey = kp?.first")
             .apply {
-                if (convertStringMethod != null) {
-                    addStatement("val offsetKey = kp?.first?.%M()", convertStringMethod)
-                    addStatement("val excludeKeys = kp?.second?.map { it.%M() }", convertStringMethod)
+                if (parseMethod != null) {
+                    addStatement(
+                        "val excludeKeys = kp?.second?.%M { it.%M() }",
+                        kotlinCollectionExtensionMethod("map"),
+                        parseMethod
+                    )
                 } else {
-                    addStatement("val offsetKey = kp?.first")
                     addStatement("val excludeKeys = kp?.second")
                 }
             }
@@ -171,7 +169,7 @@ object SelectMethod : AbstractDSLMethodBuilder() {
             //if
             .beginControlFlow(
                 "if(it.%M())",
-                MemberName("kotlin.collections", "isNotEmpty", isExtension = true)
+                kotlinCollectionExtensionMethod("isNotEmpty")
             )
             .addStatement(
                 "query.%M { %M notInList it }",
@@ -205,7 +203,7 @@ object SelectMethod : AbstractDSLMethodBuilder() {
             .build()
     }
 
-    private fun buildSelectForwardByPrimaryKey(context: DSLCodeContext, forwardFun: FunSpec): FunSpec {
+    private fun buildSelectForwardByPrimaryKey(context: DSLCodeContext): FunSpec {
         val forwardToken = ParameterSpec.builder("forwardToken", String::class.asTypeName().copy(nullable = true))
             .defaultValue("null")
             .build()
@@ -220,7 +218,8 @@ object SelectMethod : AbstractDSLMethodBuilder() {
 
         val whereParam = createQueryExpressionParameter(nullable = true, defaultValue = "null")
 
-        val primaryKey = context.base.table.primaryKeys.first()
+        val primaryKeyPropertyName = context.base.table.primaryKeys.first().name
+        val primaryKey = MemberName(context.base.tableClass, primaryKeyPropertyName)
 
         return FunSpec.builder("selectForwardByPrimaryKey")
             .receiver(context.base.tableClass)
@@ -228,26 +227,78 @@ object SelectMethod : AbstractDSLMethodBuilder() {
             .addParameter(order)
             .addParameter(pageSize)
             .addParameter(whereParam)
+            .returns(OffsetList::class.asTypeName().parameterizedBy(context.base.pojoClass))
+
+            .beginControlFlow("if(pageSize < 1)")
+            .addStatement("return %T.empty()", OffsetList::class)
+            .endControlFlow()
+
             .addStatement(
-                "return this.%N(${context.base.table.className}.${primaryKey.name}, %N, %N, %N, %N)",
-                forwardFun,
-                forwardToken,
-                order,
-                pageSize,
-                whereParam
+                "val offsetKey = forwardToken?.%N { %T.getUrlDecoder().decode(it).toString(%T.UTF_8) }",
+                kotlinLetMethod,
+                Base64::class.java.asTypeName(),
+                Charsets::class.asTypeName()
             )
+            .addStatement("val query = %T.%M()", context.base.tableClass, getExposedSqlMember("selectAll"))
+
+            .beginControlFlow("offsetKey?.%N", kotlinLetMethod)
+            //when
+            .beginControlFlow("when(order)")
+            .addStatement(
+                "%T.DESC, %T.DESC_NULLS_FIRST, %T.DESC_NULLS_LAST->",
+                SortOrder::class,
+                SortOrder::class,
+                SortOrder::class
+            )
+            .addStatement(
+                "query.%N { %M less it }",
+                getExposedSqlMember("andWhere"),
+                primaryKey
+            )
+            .addStatement(
+                "else-> query.%M { %N greater it }",
+                getExposedSqlMember("andWhere"),
+                primaryKey
+            )
+
+            .endControlFlow()
+            //end when
+            .endControlFlow()
+
+            .addStatement("%N?.invoke(query)", whereParam)
+
+            .addStatement("val sorted = query.orderBy(%M, order)", primaryKey)
+            .addStatement("val list = sorted.limit(pageSize).%N()", context.rowListMapFunc)
+
+
+            .beginControlFlow("val token = if(list.size >= pageSize)")
+            .addStatement(
+                "val lastId = list.%M().${primaryKeyPropertyName}.toString().%M(%T.UTF_8)",
+                kotlinCollectionExtensionMethod("last"),
+                kotlinTextExtensionMethod("toByteArray"),
+                Charsets::class.asTypeName()
+            )
+            .addStatement("%T.getUrlEncoder().encodeToString(lastId)", Base64::class.java.asTypeName())
+            .endControlFlow()
+            .beginControlFlow("else")
+            .addStatement("null")
+            .endControlFlow()
+
+            .addStatement("return %T(list, token)", OffsetList::class.asTypeName())
+
             .build()
     }
 
     override fun buildMethods(context: DSLCodeContext): List<FunSpec> {
-        return buildSelectForward(context)?.let {
+        return if (context.base.table.primaryKeys.size == 1) {
+            val selectForwardByPrimary = buildSelectForwardByPrimaryKey(context)
             listOf(
                 buildSelectMany(context),
                 buildSelectOne(context),
-                it,
-                buildSelectForwardByPrimaryKey(context, it)
+                selectForwardByPrimary,
+                buildSelectForward(context, selectForwardByPrimary)
             )
-        } ?: listOf(
+        } else listOf(
             buildSelectMany(context),
             buildSelectOne(context),
         )

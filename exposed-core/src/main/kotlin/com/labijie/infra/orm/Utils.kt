@@ -5,9 +5,9 @@ import java.util.*
 /**
  *
  * @Author: Anders Xiao
- * @Date: 2021/12/27
+ * @Date: 2021/12/28
  * @Description:
  */
-fun String.ToUUID(): UUID {
+fun String.toUUID(): UUID {
     return UUID.fromString(this)
 }

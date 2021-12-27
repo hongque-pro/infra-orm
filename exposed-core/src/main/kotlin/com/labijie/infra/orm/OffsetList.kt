@@ -8,16 +8,24 @@ import java.util.*
  * @Date: 2021/12/27
  * @Description:
  */
-class OffsetList<T>(var list:List<T> = listOf(), var forwardToken: String? = null) {
+class OffsetList<T>(var list: List<T> = emptyList(), var forwardToken: String? = null) {
+
     companion object {
+
+        @JvmStatic
+        fun <T> empty(): OffsetList<T> {
+            return OffsetList(emptyList(), null)
+        }
+
         @JvmStatic
         fun <TElement> encodeToken(
             queryResult: List<TElement>,
-            offsetField:TElement.()->Any?,
-            keyField:TElement.()->Any?):String{
+            offsetField: TElement.() -> Any,
+            keyField: TElement.() -> Any
+        ): String? {
 
-            if(queryResult.isEmpty()){
-                return ""
+            if (queryResult.isEmpty()) {
+                return null
             }
             val keys = mutableSetOf<String>()
             val last = queryResult.last()
@@ -41,7 +49,7 @@ class OffsetList<T>(var list:List<T> = listOf(), var forwardToken: String? = nul
         }
 
         @JvmStatic
-        fun decodeToken(forwardToken:String): Pair<String, List<String>> {
+        fun decodeToken(forwardToken: String): Pair<String, List<String>> {
             val tokenString = Base64.getUrlDecoder().decode(forwardToken).toString(Charsets.UTF_8)
             val elements = tokenString.split(":")
             val offset = elements.first()

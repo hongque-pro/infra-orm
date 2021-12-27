@@ -6,9 +6,12 @@ import com.squareup.kotlinpoet.*
 import com.squareup.kotlinpoet.MemberName.Companion.member
 import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
 import com.squareup.kotlinpoet.ksp.KotlinPoetKspPreview
+import com.squareup.kotlinpoet.ksp.toClassName
+import com.squareup.kotlinpoet.ksp.toTypeName
 import org.jetbrains.exposed.sql.Column
 import org.jetbrains.exposed.sql.ResultRow
 import org.jetbrains.exposed.sql.statements.UpdateBuilder
+import kotlin.reflect.KClass
 
 @KotlinPoetKspPreview
 object DSLWriter {
@@ -45,6 +48,7 @@ object DSLWriter {
 
         val applyInsert = generateApplyMethod(context)
         val getColumnValue = generateGetColumnValueMethod(context)
+        val getColumnType = generateGetColumnTypeMethod(context)
 
 
         val fileBuilder = FileSpec.builder(context.dslPackageName, fileName = context.dslClass.simpleName)
@@ -54,6 +58,7 @@ object DSLWriter {
                 TypeSpec.objectBuilder(context.dslClass)
                     .addComments("DSL support for ${context.tableClass.simpleName}", context)
                     .addFunction(parseRow)
+                    .addFunction(getColumnType)
                     .addFunction(getColumnValue)
                     .addFunction(applyInsert)
                     //exposed methods
@@ -65,6 +70,7 @@ object DSLWriter {
                             fileBuilder,
                             parseRow,
                             getColumnValue,
+                            getColumnType,
                             applyInsert,
                             rowMap,
                             slice,
@@ -125,6 +131,28 @@ object DSLWriter {
             .apply {
                 context.table.columns.forEach {
                     this.addStatement("${context.table.className}.${it.name}->this.${it.name} as T")
+                }
+                val errorMessage = "Unknown column <\${column.name}> for '${context.pojoClass.simpleName}'"
+                this.addStatement("else->throw %T(%P)", IllegalArgumentException::class, errorMessage)
+            }
+            .endControlFlow()
+            .build()
+    }
+
+    private fun generateGetColumnTypeMethod(context: GenerationContext): FunSpec {
+
+        val typeVar = TypeVariableName("T")
+
+        //@Suppress("UNCHECKED_CAST")
+        return FunSpec.builder("getColumnType")
+            .addTypeVariable(typeVar)
+            .receiver(context.tableClass)
+            .addParameter("column", Column::class.asTypeName().parameterizedBy(typeVar))
+            .returns(KClass::class.asTypeName().parameterizedWildcard())
+            .beginControlFlow("return when(column)")
+            .apply {
+                context.table.columns.forEach {
+                    this.addStatement("${it.name}->%T::class", it.rawType.toTypeName())
                 }
                 val errorMessage = "Unknown column <\${column.name}> for '${context.pojoClass.simpleName}'"
                 this.addStatement("else->throw %T(%P)", IllegalArgumentException::class, errorMessage)

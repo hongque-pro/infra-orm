@@ -9,6 +9,7 @@ data class DSLCodeContext(
     val file: FileSpec.Builder,
     val parseRowFunc: FunSpec,
     val getColumnValueFunc: FunSpec,
+    val getColumnTypeFunc: FunSpec,
     val applyFunc: FunSpec,
     val rowMapFunc: FunSpec,
     val rowListMapFunc: FunSpec,
