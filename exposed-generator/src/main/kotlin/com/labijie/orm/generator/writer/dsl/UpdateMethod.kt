@@ -1,14 +1,11 @@
 package com.labijie.orm.generator.writer.dsl
 
+import com.labijie.orm.generator.parameterizedWildcard
 import com.labijie.orm.generator.writer.AbstractDSLMethodBuilder
 import com.labijie.orm.generator.writer.DSLCodeContext
-import com.labijie.orm.generator.writer.DSLWriter
-import com.labijie.orm.generator.writer.IDSLMethodBuilder
-import com.squareup.kotlinpoet.FunSpec
-import com.squareup.kotlinpoet.LambdaTypeName
-import com.squareup.kotlinpoet.ParameterSpec
+import com.squareup.kotlinpoet.*
 import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
-import com.squareup.kotlinpoet.asTypeName
+import org.jetbrains.exposed.sql.Column
 import org.jetbrains.exposed.sql.Op
 import org.jetbrains.exposed.sql.SqlExpressionBuilder
 
@@ -26,24 +23,43 @@ object UpdateMethod : AbstractDSLMethodBuilder() {
             .build()
 
 
+        val columnArray = Array::class.asClassName().parameterizedBy(Column::class.asTypeName().parameterizedWildcard())
+        val ignore = ParameterSpec.builder("ignore", columnArray)
+            .defaultValue("arrayOf()")
+            .build()
+
+        val selective = ParameterSpec.builder("selective", columnArray.copy(nullable = true))
+            .defaultValue("null")
+            .build()
+
         return FunSpec.builder("update")
             .receiver(context.base.tableClass)
             .addParameter(context.entityParamName, context.base.pojoClass)
+            .addParameter(selective)
+            .addParameter(ignore)
             .addParameter(limitParam)
             .addParameter(whereParam)
             .returns(Int::class)
-            .beginControlFlow("return %T.%M(where, limit)", context.base.tableClass, getExposedSqlMember("update"))
-            .addStatement("%N(it, ${context.entityParamName})", context.applyUpdateFunc)
+            .beginControlFlow("return %T.%M(%N, limit)", context.base.tableClass, getExposedSqlMember("update"), whereParam)
+            .addStatement("%N(it, ${context.entityParamName}, selective = %N, *${ignore.name})", context.applyFunc, selective)
             .endControlFlow()
             .build()
     }
 
     private fun buildUpdateByIdMethod(context: DSLCodeContext, baseUpdateMethod: FunSpec): FunSpec {
-        return FunSpec.builder("update")
+        val columnArray = Array::class.asClassName().parameterizedBy(Column::class.asTypeName().parameterizedWildcard())
+
+        val selective = ParameterSpec.builder("selective", columnArray.copy(nullable = true))
+            .defaultValue("null")
+            .build()
+
+        val primaryKeys = context.base.table.primaryKeys.joinToString(", ") { it.name }
+        return FunSpec.builder("updateByPrimaryKey")
             .receiver(context.base.tableClass)
             .addParameter(context.entityParamName, context.base.pojoClass)
+            .addParameter(selective)
             .returns(Int::class)
-            .beginControlFlow("return %T.%N(${context.entityParamName})", context.base.tableClass, baseUpdateMethod)
+            .beginControlFlow("return %T.%N(${context.entityParamName}, selective = %N, ignore = arrayOf(${primaryKeys}))", context.base.tableClass, baseUpdateMethod, selective)
             .addCode(buildPrimaryKeyWhere(context))
             .endControlFlow()
             .build()

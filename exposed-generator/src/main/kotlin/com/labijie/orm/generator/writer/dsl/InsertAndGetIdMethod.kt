@@ -1,6 +1,5 @@
 package com.labijie.orm.generator.writer.dsl
 
-import com.labijie.orm.generator.ExposedGenerationException
 import com.labijie.orm.generator.TableKind
 import com.labijie.orm.generator.writer.AbstractDSLMethodBuilder
 import com.labijie.orm.generator.writer.DSLCodeContext
@@ -27,7 +26,7 @@ object InsertAndGetIdMethod : AbstractDSLMethodBuilder() {
             .addParameter(context.entityParamName, context.base.pojoClass)
             .returns(resultType)
             .beginControlFlow("return %T.%M", context.base.tableClass, getExposedSqlMember("insertAndGetId"))
-            .addStatement("%N(it, ${context.entityParamName})", context.applyInsertFunc)
+            .addStatement("%N(it, ${context.entityParamName})", context.applyFunc)
             .endControlFlow()
             .build()
     }

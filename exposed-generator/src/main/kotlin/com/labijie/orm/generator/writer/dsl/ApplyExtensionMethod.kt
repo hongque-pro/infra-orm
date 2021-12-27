@@ -3,14 +3,12 @@ package com.labijie.orm.generator.writer.dsl
 import com.labijie.orm.generator.writer.AbstractDSLMethodBuilder
 import com.labijie.orm.generator.writer.DSLCodeContext
 import com.squareup.kotlinpoet.FunSpec
-import com.squareup.kotlinpoet.KModifier
 
 object ApplyExtensionMethod : AbstractDSLMethodBuilder() {
 
     override fun buildMethods(context: DSLCodeContext): List<FunSpec> {
         return listOf(
-            buildApplyExtension(context.applyInsertFunc, context),
-            buildApplyExtension(context.applyUpdateFunc, context)
+            buildApplyExtension(context.applyFunc, context),
         )
     }
 

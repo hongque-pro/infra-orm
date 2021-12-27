@@ -6,9 +6,9 @@ import com.squareup.kotlinpoet.*
 import com.squareup.kotlinpoet.MemberName.Companion.member
 import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
 import com.squareup.kotlinpoet.ksp.KotlinPoetKspPreview
-import org.jetbrains.exposed.sql.*
+import org.jetbrains.exposed.sql.Column
+import org.jetbrains.exposed.sql.ResultRow
 import org.jetbrains.exposed.sql.statements.UpdateBuilder
-import org.jetbrains.exposed.sql.statements.UpdateStatement
 
 @KotlinPoetKspPreview
 object DSLWriter {
@@ -24,6 +24,7 @@ object DSLWriter {
         methodBuilders.add(UpdateMethod)
         methodBuilders.add(DeleteByPrimaryKeyMethod)
         methodBuilders.add(SelectByPrimaryMethod)
+        methodBuilders.add(SelectMethod)
     }
 
     private fun TypeSpec.Builder.buildMethods(context: DSLCodeContext){
@@ -39,11 +40,12 @@ object DSLWriter {
     fun write(context: GenerationContext) {
 
         val parseRow = generateParseRowMethod(context)
-        val applyInsert = generateApplyInsertMethod(context)
-        val applyUpdate = generateApplyUpdateMethod(context)
-
         val rowMap = generateRowMapMethod(context, parseRow)
         val slice = generateSliceExtensionMethod(context, parseRow)
+
+        val applyInsert = generateApplyMethod(context)
+        val getColumnValue = generateGetColumnValueMethod(context)
+
 
         val fileBuilder = FileSpec.builder(context.dslPackageName, fileName = context.dslClass.simpleName)
         val file = fileBuilder
@@ -52,8 +54,8 @@ object DSLWriter {
                 TypeSpec.objectBuilder(context.dslClass)
                     .addComments("DSL support for ${context.tableClass.simpleName}", context)
                     .addFunction(parseRow)
+                    .addFunction(getColumnValue)
                     .addFunction(applyInsert)
-                    .addFunction(applyUpdate)
                     //exposed methods
                     .addFunction(rowMap)
                     .addFunction(slice)
@@ -62,8 +64,8 @@ object DSLWriter {
                             context,
                             fileBuilder,
                             parseRow,
+                            getColumnValue,
                             applyInsert,
-                            applyUpdate,
                             rowMap,
                             slice,
                             OBJECT_PARAMETER_NAME
@@ -104,41 +106,63 @@ object DSLWriter {
             .build()
     }
 
+    private fun generateGetColumnValueMethod(context: GenerationContext): FunSpec {
 
+        val typeVar = TypeVariableName("T")
 
-    private fun generateApplyUpdateMethod(
-        context: GenerationContext
-    ): FunSpec {
-        val updateStatementType = UpdateStatement::class.asTypeName()
+        val suppress = AnnotationSpec.builder(Suppress::class)
+            .addMember("%S", "UNCHECKED_CAST")
+            .build()
 
-        val applyUpdate = FunSpec.builder("apply${context.pojoClass.simpleName}")
-            .addParameter("statement", updateStatementType)
-            .addParameter(OBJECT_PARAMETER_NAME, context.pojoClass)
-            .returns(Unit::class.asTypeName())
+        //@Suppress("UNCHECKED_CAST")
+        return FunSpec.builder("getColumnValue")
+            .addTypeVariable(typeVar)
+            .addAnnotation(suppress)
+            .receiver(context.pojoClass)
+            .addParameter("column", Column::class.asTypeName().parameterizedBy(typeVar))
+            .returns(typeVar)
+            .beginControlFlow("return when(column)")
             .apply {
                 context.table.columns.forEach {
-                    if (!it.isEntityId) {
-                        this.addStatement("statement[${it.name}] = ${OBJECT_PARAMETER_NAME}.${it.name}")
-                    }
+                    this.addStatement("${context.table.className}.${it.name}->this.${it.name} as T")
                 }
+                val errorMessage = "Unknown column <\${column.name}> for '${context.pojoClass.simpleName}'"
+                this.addStatement("else->throw %T(%P)", IllegalArgumentException::class, errorMessage)
             }
+            .endControlFlow()
             .build()
-        return applyUpdate
     }
 
-    private fun generateApplyInsertMethod(context: GenerationContext): FunSpec {
-        val insertStatementType = UpdateBuilder::class.asTypeName().parameterizedWildcard()
 
-        insertStatementType.copy()
+
+    private fun generateApplyMethod(context: GenerationContext): FunSpec {
+        val updateBuilder = UpdateBuilder::class.asTypeName().parameterizedWildcard()
+
+        updateBuilder.copy()
+
+        val ignore = ParameterSpec.builder("ignore", Column::class.asTypeName().parameterizedWildcard())
+            .apply {
+                modifiers.add(KModifier.VARARG)
+            }
+            .build()
+
+        val columnArray = Array::class.asClassName().parameterizedBy(Column::class.asTypeName().parameterizedWildcard()).copy(nullable = true)
+
+        val selective = ParameterSpec.builder("selective", columnArray)
+            .defaultValue("null")
+            .build()
 
         val applyInsert = FunSpec.builder("apply${context.pojoClass.simpleName}")
-            .addParameter("statement", insertStatementType)
+            .addParameter("builder", updateBuilder)
             .addParameter(OBJECT_PARAMETER_NAME, context.pojoClass)
+            .addParameter(selective)
+            .addParameter(ignore)
             .returns(Unit::class.asTypeName())
             .apply {
                 context.table.columns.forEach {
                     if (!it.isEntityId) {
-                        this.addStatement("statement[${it.name}] = ${OBJECT_PARAMETER_NAME}.${it.name}")
+                        this.addStatement("if((selective == null || selective.contains(${it.name})) && !%N.contains(${it.name}))", ignore)
+                        this.addStatement("  builder[${it.name}] = ${OBJECT_PARAMETER_NAME}.${it.name}")
                     }
                 }
             }

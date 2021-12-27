@@ -1,6 +1,5 @@
 package com.labijie.orm.generator.writer
 
-import com.labijie.orm.generator.GenerationContext
 import com.squareup.kotlinpoet.CodeBlock
 import com.squareup.kotlinpoet.FunSpec
 import com.squareup.kotlinpoet.MemberName
@@ -28,6 +27,10 @@ abstract class AbstractDSLMethodBuilder: IDSLMethodBuilder {
 
     protected fun getExposedSqlMember(member: String, isExtension: Boolean = true): MemberName {
         return MemberName("org.jetbrains.exposed.sql", member, isExtension)
+    }
+
+    protected val kotlinLetMethod: MemberName by lazy {
+        MemberName("kotlin", "let", true)
     }
 
     protected fun buildPrimaryKeyWhere(context: DSLCodeContext): CodeBlock {

@@ -8,8 +8,8 @@ data class DSLCodeContext(
     val base: GenerationContext,
     val file: FileSpec.Builder,
     val parseRowFunc: FunSpec,
-    val applyInsertFunc: FunSpec,
-    val applyUpdateFunc: FunSpec,
+    val getColumnValueFunc: FunSpec,
+    val applyFunc: FunSpec,
     val rowMapFunc: FunSpec,
     val rowListMapFunc: FunSpec,
     val entityParamName: String
