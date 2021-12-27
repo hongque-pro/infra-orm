@@ -17,31 +17,51 @@ import kotlin.reflect.full.companionObject
  */
 object SelectMethod : AbstractDSLMethodBuilder() {
     private fun buildSelectMany(context: DSLCodeContext): FunSpec {
-        val rec = Query::class.asTypeName()
-        val where = LambdaTypeName.get(rec, returnType = Op::class.parameterizedBy(Boolean::class))
+        val whereParam = createQueryExpressionParameter()
 
         return FunSpec.builder("selectMany")
             .receiver(context.base.tableClass)
-            .addParameter("where", where)
+            .addParameter(whereParam)
             .returns(List::class.asTypeName().parameterizedBy(context.base.pojoClass))
             .addStatement("val query = %T.%M()", context.base.tableClass, getExposedSqlMember("selectAll"))
-            .addStatement("where.invoke(query)")
+            .addStatement("%N.invoke(query)", whereParam)
             .addStatement("return query.%N()", context.rowListMapFunc)
             .build()
     }
 
     private fun buildSelectOne(context: DSLCodeContext): FunSpec {
-        val rec = SqlExpressionBuilder::class.asTypeName()
-        val where = LambdaTypeName.get(rec, returnType = Op::class.parameterizedBy(Boolean::class))
-        val whereParam = ParameterSpec.builder("where", where)
-            .build()
+        val whereParam = createQueryExpressionParameter()
 
         return FunSpec.builder("selectOne")
             .receiver(context.base.tableClass)
-            .addParameter("where", where)
+            .addParameter(whereParam)
             .returns(context.base.pojoClass.copy(nullable = true))
-            .addStatement("val query = %T.%M(%N)", context.base.tableClass, getExposedSqlMember("select"), whereParam)
+            .addStatement("val query = %T.%M()", context.base.tableClass, getExposedSqlMember("selectAll"))
+            .addStatement("%N.invoke(query)", whereParam)
             .addStatement("return query.firstOrNull()?.%N()", context.rowMapFunc)
+            .build()
+    }
+
+    private fun createQueryExpressionParameter(
+        name: String = "where",
+        nullable: Boolean = false,
+        defaultValue: String? = null
+    ): ParameterSpec {
+        val rec = Query::class.asTypeName()
+        val where = LambdaTypeName.get(rec, returnType = Unit::class.asTypeName()).let {
+            if (nullable) {
+                it.copy(nullable = true)
+            } else {
+                it
+            }
+        }
+
+        return ParameterSpec.builder("where", where)
+            .apply {
+                if (!defaultValue.isNullOrBlank()) {
+                    this.defaultValue(defaultValue)
+                }
+            }
             .build()
     }
 
@@ -77,12 +97,7 @@ object SelectMethod : AbstractDSLMethodBuilder() {
         val t = TypeVariableName("T")
         val typeVar = TypeVariableName("T", Comparable::class.asClassName().parameterizedBy(t))
 
-        val rec = SqlExpressionBuilder::class.asTypeName()
-        val where = LambdaTypeName.get(rec, returnType = Op::class.parameterizedBy(Boolean::class))
-
-        val whereParam = ParameterSpec.builder("where", where.copy(nullable = true))
-            .defaultValue("null")
-            .build()
+        val whereParam = createQueryExpressionParameter(nullable = true, defaultValue = "null")
 
         val pageSize = ParameterSpec.builder("pageSize", Int::class)
             .defaultValue("50")
@@ -167,7 +182,7 @@ object SelectMethod : AbstractDSLMethodBuilder() {
             //end if
             .endControlFlow()
 
-            .addStatement("%N?.let { query.andWhere(it) }", whereParam)
+            .addStatement("%N?.invoke(query)", whereParam)
 
             .beginControlFlow("val sorted = if(%N != %M)", sortColumn, primaryKey)
             .addStatement("query.orderBy(Pair(%N, order), Pair(%M,order))", sortColumn, primaryKey)
@@ -203,12 +218,7 @@ object SelectMethod : AbstractDSLMethodBuilder() {
             .defaultValue("50")
             .build()
 
-        val rec = SqlExpressionBuilder::class.asTypeName()
-        val where = LambdaTypeName.get(rec, returnType = Op::class.parameterizedBy(Boolean::class))
-
-        val whereParam = ParameterSpec.builder("where", where.copy(nullable = true))
-            .defaultValue("null")
-            .build()
+        val whereParam = createQueryExpressionParameter(nullable = true, defaultValue = "null")
 
         val primaryKey = context.base.table.primaryKeys.first()
 
@@ -218,7 +228,14 @@ object SelectMethod : AbstractDSLMethodBuilder() {
             .addParameter(order)
             .addParameter(pageSize)
             .addParameter(whereParam)
-            .addStatement("return this.%N(${context.base.table.className}.${primaryKey.name}, %N, %N, %N, %N)", forwardFun, forwardToken, order, pageSize, whereParam)
+            .addStatement(
+                "return this.%N(${context.base.table.className}.${primaryKey.name}, %N, %N, %N, %N)",
+                forwardFun,
+                forwardToken,
+                order,
+                pageSize,
+                whereParam
+            )
             .build()
     }
 
