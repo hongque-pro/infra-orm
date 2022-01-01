@@ -23,12 +23,16 @@ object UpdateMethod : AbstractDSLMethodBuilder() {
             .build()
 
 
-        val columnArray = Array::class.asClassName().parameterizedBy(Column::class.asTypeName().parameterizedWildcard())
+        val colType = Column::class.asTypeName().parameterizedWildcard()
+        val columnArray = Array::class.asClassName()
+            .parameterizedBy(WildcardTypeName.producerOf(colType))
+            .copy(nullable = true)
+
         val ignore = ParameterSpec.builder("ignore", columnArray)
             .defaultValue("arrayOf()")
             .build()
 
-        val selective = ParameterSpec.builder("selective", columnArray.copy(nullable = true))
+        val selective = ParameterSpec.builder("selective", columnArray)
             .defaultValue("null")
             .build()
 
@@ -41,16 +45,18 @@ object UpdateMethod : AbstractDSLMethodBuilder() {
             .addParameter(whereParam)
             .returns(Int::class)
             .beginControlFlow("return %T.%M(%N, limit)", context.base.tableClass, getExposedSqlMember("update"), whereParam)
-            .addStatement("%N(it, ${context.entityParamName}, selective = %N, *${ignore.name})", context.applyFunc, selective)
+            .addStatement("val ignoreColumns = ${ignore.name} ?: arrayOf()")
+            .addStatement("%N(it, ${context.entityParamName}, selective = %N, *ignoreColumns)", context.applyFunc, selective)
             .endControlFlow()
             .build()
     }
 
     private fun buildUpdateByIdMethod(context: DSLCodeContext, baseUpdateMethod: FunSpec): FunSpec {
-        val columnArray = Array::class.asClassName().parameterizedBy(Column::class.asTypeName().parameterizedWildcard())
 
-        val selective = ParameterSpec.builder("selective", columnArray.copy(nullable = true))
-            .defaultValue("null")
+        val selective = ParameterSpec.builder("selective", Column::class.asTypeName().parameterizedWildcard())
+            .apply {
+                modifiers.add(KModifier.VARARG)
+            }
             .build()
 
         val primaryKeys = context.base.table.primaryKeys.joinToString(", ") { it.name }

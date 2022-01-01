@@ -12,7 +12,6 @@ import java.nio.file.Path
 import kotlin.io.path.Path
 import kotlin.io.path.createDirectories
 import kotlin.io.path.isDirectory
-import kotlin.text.StringBuilder
 
 fun KSPLogger.println(message: String, symbol: KSNode? = null) {
     this.info("[expose gen] $message", symbol)
@@ -129,3 +128,7 @@ fun findProjectSourceDir(sourceFile: String): Path {
     }
     return folders[sourceFile] ?: throw ExposedGenerationException("Unable to get project folder from file '${sourceFile}'")
 }
+
+val suppressAnnotation = AnnotationSpec.builder(Suppress::class)
+    .addMember("%S", "UNCHECKED_CAST")
+    .build()

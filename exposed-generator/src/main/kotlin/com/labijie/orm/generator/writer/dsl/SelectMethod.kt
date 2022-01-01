@@ -1,7 +1,6 @@
 package com.labijie.orm.generator.writer.dsl
 
 import com.labijie.infra.orm.OffsetList
-import com.labijie.orm.generator.ColumnMetadata
 import com.labijie.orm.generator.DefaultValues
 import com.labijie.orm.generator.writer.AbstractDSLMethodBuilder
 import com.labijie.orm.generator.writer.DSLCodeContext
@@ -18,16 +17,19 @@ import kotlin.reflect.full.companionObject
  * @Description:
  */
 object SelectMethod : AbstractDSLMethodBuilder() {
+
+
     private fun buildSelectMany(context: DSLCodeContext): FunSpec {
         val whereParam = createQueryExpressionParameter()
 
         return FunSpec.builder("selectMany")
             .receiver(context.base.tableClass)
+            .addParameter(columnSelectiveParameter)
             .addParameter(whereParam)
             .returns(List::class.asTypeName().parameterizedBy(context.base.pojoClass))
-            .addStatement("val query = %T.%M()", context.base.tableClass, getExposedSqlMember("selectAll"))
+            .addStatement("val query = %T.%N(*%N)", context.base.tableClass, context.selectSliceFunc, columnSelectiveParameter)
             .addStatement("%N.invoke(query)", whereParam)
-            .addStatement("return query.%N()", context.rowListMapFunc)
+            .addStatement("return query.%N(*%N)", context.rowListMapFunc, columnSelectiveParameter)
             .build()
     }
 
@@ -36,36 +38,16 @@ object SelectMethod : AbstractDSLMethodBuilder() {
 
         return FunSpec.builder("selectOne")
             .receiver(context.base.tableClass)
+            .addParameter(columnSelectiveParameter)
             .addParameter(whereParam)
             .returns(context.base.pojoClass.copy(nullable = true))
-            .addStatement("val query = %T.%M()", context.base.tableClass, getExposedSqlMember("selectAll"))
+            .addStatement("val query = %T.%N(*%N)", context.base.tableClass, context.selectSliceFunc, columnSelectiveParameter)
             .addStatement("%N.invoke(query)", whereParam)
-            .addStatement("return query.firstOrNull()?.%N()", context.rowMapFunc)
+            .addStatement("return query.firstOrNull()?.%N(*%N)", context.rowMapFunc, columnSelectiveParameter)
             .build()
     }
 
-    private fun createQueryExpressionParameter(
-        name: String = "where",
-        nullable: Boolean = false,
-        defaultValue: String? = null
-    ): ParameterSpec {
-        val rec = Query::class.asTypeName()
-        val where = LambdaTypeName.get(rec, returnType = Unit::class.asTypeName()).let {
-            if (nullable) {
-                it.copy(nullable = true)
-            } else {
-                it
-            }
-        }
 
-        return ParameterSpec.builder("where", where)
-            .apply {
-                if (!defaultValue.isNullOrBlank()) {
-                    this.defaultValue(defaultValue)
-                }
-            }
-            .build()
-    }
 
 
     private fun buildSelectForward(context: DSLCodeContext, selectForwardByPrimary: FunSpec): FunSpec {
@@ -106,6 +88,7 @@ object SelectMethod : AbstractDSLMethodBuilder() {
             .addParameter(forwardToken)
             .addParameter(order)
             .addParameter(pageSize)
+            .addParameter(columnSelectiveListParameter)
             .addParameter(whereParam)
             .returns(OffsetList::class.asTypeName().parameterizedBy(context.base.pojoClass))
 
@@ -115,12 +98,13 @@ object SelectMethod : AbstractDSLMethodBuilder() {
 
             .beginControlFlow("if(%N == %M)", sortColumn, primaryKey)
             .addStatement(
-                "return this.%N(%N, %N, %N, %N)",
+                "return this.%N(%N, %N, %N, %N, %N)",
                 selectForwardByPrimary,
                 forwardToken,
                 order,
                 pageSize,
-                whereParam
+                columnSelectiveListParameter,
+                whereParam,
             )
             .endControlFlow()
 
@@ -141,7 +125,7 @@ object SelectMethod : AbstractDSLMethodBuilder() {
                     addStatement("val excludeKeys = kp?.second")
                 }
             }
-            .addStatement("val query = %T.%M()", context.base.tableClass, getExposedSqlMember("selectAll"))
+            .addStatement("val query = %T.%N(*%N.%N())", context.base.tableClass, context.selectSliceFunc, columnSelectiveListParameter, kotlinToTypedArray)
             .beginControlFlow("offsetKey?.%N", kotlinLetMethod)
             //when
             .beginControlFlow("when(order)")
@@ -189,7 +173,7 @@ object SelectMethod : AbstractDSLMethodBuilder() {
             .addStatement("query.orderBy(%M, order)", primaryKey)
             .endControlFlow()
 
-            .addStatement("val list = sorted.limit(pageSize).%N()", context.rowListMapFunc)
+            .addStatement("val list = sorted.limit(pageSize).%N(*%N.%N())", context.rowListMapFunc, columnSelectiveListParameter, kotlinToTypedArray)
 
             .addStatement(
                 "val token = if(list.size < pageSize) null else %M(list, { %N(%N) }, %T::%N)",
@@ -226,6 +210,7 @@ object SelectMethod : AbstractDSLMethodBuilder() {
             .addParameter(forwardToken)
             .addParameter(order)
             .addParameter(pageSize)
+            .addParameter(columnSelectiveListParameter)
             .addParameter(whereParam)
             .returns(OffsetList::class.asTypeName().parameterizedBy(context.base.pojoClass))
 
@@ -239,7 +224,7 @@ object SelectMethod : AbstractDSLMethodBuilder() {
                 Base64::class.java.asTypeName(),
                 Charsets::class.asTypeName()
             )
-            .addStatement("val query = %T.%M()", context.base.tableClass, getExposedSqlMember("selectAll"))
+            .addStatement("val query = %T.%N(*%N.%N())", context.base.tableClass, context.selectSliceFunc, columnSelectiveListParameter, kotlinToTypedArray)
 
             .beginControlFlow("offsetKey?.%N", kotlinLetMethod)
             //when
@@ -268,7 +253,7 @@ object SelectMethod : AbstractDSLMethodBuilder() {
             .addStatement("%N?.invoke(query)", whereParam)
 
             .addStatement("val sorted = query.orderBy(%M, order)", primaryKey)
-            .addStatement("val list = sorted.limit(pageSize).%N()", context.rowListMapFunc)
+            .addStatement("val list = sorted.limit(pageSize).%N(*%N.%N())", context.rowListMapFunc, columnSelectiveListParameter, kotlinToTypedArray)
 
 
             .beginControlFlow("val token = if(list.size >= pageSize)")
@@ -292,6 +277,7 @@ object SelectMethod : AbstractDSLMethodBuilder() {
     override fun buildMethods(context: DSLCodeContext): List<FunSpec> {
         return if (context.base.table.primaryKeys.size == 1) {
             val selectForwardByPrimary = buildSelectForwardByPrimaryKey(context)
+
             listOf(
                 buildSelectMany(context),
                 buildSelectOne(context),
