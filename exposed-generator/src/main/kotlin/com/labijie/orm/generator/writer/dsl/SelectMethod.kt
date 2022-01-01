@@ -166,12 +166,7 @@ object SelectMethod : AbstractDSLMethodBuilder() {
 
             .addStatement("%N?.invoke(query)", whereParam)
 
-            .beginControlFlow("val sorted = if(%N != %M)", sortColumn, primaryKey)
-            .addStatement("query.orderBy(Pair(%N, order), Pair(%M,order))", sortColumn, primaryKey)
-            .endControlFlow()
-            .beginControlFlow("else")
-            .addStatement("query.orderBy(%M, order)", primaryKey)
-            .endControlFlow()
+            .addStatement("val sorted = query.orderBy(Pair(%N, order), Pair(%M, order))", sortColumn, primaryKey)
 
             .addStatement("val list = sorted.limit(pageSize).%N(*%N.%N())", context.rowListMapFunc, columnSelectiveListParameter, kotlinToTypedArray)
 
