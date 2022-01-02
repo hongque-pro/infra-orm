@@ -23,7 +23,7 @@ object DSLWriter {
     private val methodBuilders: MutableList<IDSLMethodBuilder> = mutableListOf()
 
     init {
-        methodBuilders.add(ApplyExtensionMethod)
+        methodBuilders.add(SetValueExtensionMethod)
         methodBuilders.add(InsertMethod)
         methodBuilders.add(InsertAndGetIdMethod)
         methodBuilders.add(BatchInsertMethod)
@@ -59,7 +59,7 @@ object DSLWriter {
         val listMap = generateSliceExtensionMethod(context, rowMap)
         val allColumns = generateAllColumnsField(context)
 
-        val applyInsert = generateApplyMethod(context)
+        val applyInsert = generateAssignMethod(context)
         val getColumnValue = generateGetColumnValueMethod(context)
         val getColumnType = generateGetColumnTypeMethod(context)
         val selectSlice = generateSelectSliceMethod(context)
@@ -188,7 +188,7 @@ object DSLWriter {
     }
 
 
-    private fun generateApplyMethod(context: GenerationContext): FunSpec {
+    private fun generateAssignMethod(context: GenerationContext): FunSpec {
         val updateBuilder = UpdateBuilder::class.asTypeName().parameterizedWildcard()
 
         updateBuilder.copy()
@@ -207,7 +207,7 @@ object DSLWriter {
             .defaultValue("null")
             .build()
 
-        val applyInsert = FunSpec.builder("apply")
+        val applyInsert = FunSpec.builder("assign")
             .addParameter("builder", updateBuilder)
             .addParameter(OBJECT_PARAMETER_NAME, context.pojoClass)
             .addParameter(selective)

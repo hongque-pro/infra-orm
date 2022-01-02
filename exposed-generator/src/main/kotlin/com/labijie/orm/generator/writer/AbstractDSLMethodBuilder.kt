@@ -9,8 +9,6 @@ import org.jetbrains.exposed.sql.Query
 abstract class AbstractDSLMethodBuilder : IDSLMethodBuilder {
 
     companion object {
-        @JvmStatic
-        private val EMPTY_METHOD = FunSpec.builder("EMPTY").build()
 
         val columnSelectiveParameter by lazy {
             val colType = Column::class.asTypeName().parameterizedWildcard()
@@ -21,10 +19,10 @@ abstract class AbstractDSLMethodBuilder : IDSLMethodBuilder {
                 }.build()
         }
 
-        val columnSelectiveListParameter by lazy {
+        val columnSelectiveCollectionParameter by lazy {
             val colType = Column::class.asTypeName().parameterizedWildcard()
 
-            ParameterSpec.builder("selective", List::class.asTypeName().parameterizedBy(colType))
+            ParameterSpec.builder("selective", Collection::class.asTypeName().parameterizedBy(colType))
                 .defaultValue(CodeBlock.of("listOf()"))
                 .build()
         }
@@ -78,20 +76,15 @@ abstract class AbstractDSLMethodBuilder : IDSLMethodBuilder {
         val exposedAndWhere = getExposedSqlMember("andWhere")
     }
 
-    protected fun getNoneMethod() = EMPTY_METHOD
-
 
 
     override fun buildMethods(context: DSLCodeContext): List<FunSpec> {
-        val m = build(context)
-        if (m === EMPTY_METHOD) {
-            return listOf()
-        }
+        val m = build(context) ?: return listOf()
         return listOf(m)
     }
 
-    protected open fun build(context: DSLCodeContext): FunSpec {
-        return getNoneMethod()
+    protected open fun build(context: DSLCodeContext): FunSpec? {
+        return null
     }
 
     protected fun DSLCodeContext.isSinglePrimaryKey(): Boolean {

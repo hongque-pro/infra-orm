@@ -88,7 +88,7 @@ object SelectMethod : AbstractDSLMethodBuilder() {
             .addParameter(forwardToken)
             .addParameter(order)
             .addParameter(pageSize)
-            .addParameter(columnSelectiveListParameter)
+            .addParameter(columnSelectiveCollectionParameter)
             .addParameter(whereParam)
             .returns(OffsetList::class.asTypeName().parameterizedBy(context.base.pojoClass))
 
@@ -103,7 +103,7 @@ object SelectMethod : AbstractDSLMethodBuilder() {
                 forwardToken,
                 order,
                 pageSize,
-                columnSelectiveListParameter,
+                columnSelectiveCollectionParameter,
                 whereParam,
             )
             .endControlFlow()
@@ -125,7 +125,7 @@ object SelectMethod : AbstractDSLMethodBuilder() {
                     addStatement("val excludeKeys = kp?.second")
                 }
             }
-            .addStatement("val query = %T.%N(*%N.%N())", context.base.tableClass, context.selectSliceFunc, columnSelectiveListParameter, kotlinToTypedArray)
+            .addStatement("val query = %T.%N(*%N.%N())", context.base.tableClass, context.selectSliceFunc, columnSelectiveCollectionParameter, kotlinToTypedArray)
             .beginControlFlow("offsetKey?.%N", kotlinLetMethod)
             //when
             .beginControlFlow("when(order)")
@@ -168,7 +168,7 @@ object SelectMethod : AbstractDSLMethodBuilder() {
 
             .addStatement("val sorted = query.orderBy(Pair(%N, order), Pair(%M, order))", sortColumn, primaryKey)
 
-            .addStatement("val list = sorted.limit(pageSize).%N(*%N.%N())", context.rowListMapFunc, columnSelectiveListParameter, kotlinToTypedArray)
+            .addStatement("val list = sorted.limit(pageSize).%N(*%N.%N())", context.rowListMapFunc, columnSelectiveCollectionParameter, kotlinToTypedArray)
 
             .addStatement(
                 "val token = if(list.size < pageSize) null else %M(list, { %N(%N) }, %T::%N)",
@@ -205,7 +205,7 @@ object SelectMethod : AbstractDSLMethodBuilder() {
             .addParameter(forwardToken)
             .addParameter(order)
             .addParameter(pageSize)
-            .addParameter(columnSelectiveListParameter)
+            .addParameter(columnSelectiveCollectionParameter)
             .addParameter(whereParam)
             .returns(OffsetList::class.asTypeName().parameterizedBy(context.base.pojoClass))
 
@@ -219,7 +219,7 @@ object SelectMethod : AbstractDSLMethodBuilder() {
                 Base64::class.java.asTypeName(),
                 Charsets::class.asTypeName()
             )
-            .addStatement("val query = %T.%N(*%N.%N())", context.base.tableClass, context.selectSliceFunc, columnSelectiveListParameter, kotlinToTypedArray)
+            .addStatement("val query = %T.%N(*%N.%N())", context.base.tableClass, context.selectSliceFunc, columnSelectiveCollectionParameter, kotlinToTypedArray)
 
             .beginControlFlow("offsetKey?.%N", kotlinLetMethod)
             //when
@@ -248,7 +248,7 @@ object SelectMethod : AbstractDSLMethodBuilder() {
             .addStatement("%N?.invoke(query)", whereParam)
 
             .addStatement("val sorted = query.orderBy(%M, order)", primaryKey)
-            .addStatement("val list = sorted.limit(pageSize).%N(*%N.%N())", context.rowListMapFunc, columnSelectiveListParameter, kotlinToTypedArray)
+            .addStatement("val list = sorted.limit(pageSize).%N(*%N.%N())", context.rowListMapFunc, columnSelectiveCollectionParameter, kotlinToTypedArray)
 
 
             .beginControlFlow("val token = if(list.size >= pageSize)")

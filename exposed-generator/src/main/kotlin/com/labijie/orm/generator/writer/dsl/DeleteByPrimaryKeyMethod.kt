@@ -8,11 +8,10 @@ import com.squareup.kotlinpoet.ksp.toClassName
 
 @KotlinPoetKspPreview
 object DeleteByPrimaryKeyMethod : AbstractDSLMethodBuilder() {
-    override fun build(context: DSLCodeContext): FunSpec {
+    override fun build(context: DSLCodeContext): FunSpec? {
         if(!context.base.table.hasPrimaryKey()){
-            return getNoneMethod()
+            return null
         }
-
         val block = buildPrimaryKeyWhere(context)
 
         return FunSpec.builder("deleteByPrimaryKey")

@@ -11,9 +11,6 @@ import com.squareup.kotlinpoet.ksp.toClassName
 @KotlinPoetKspPreview
 object SelectByPrimaryMethod : AbstractDSLMethodBuilder() {
     private fun buildSelectByPrimaryKey(context: DSLCodeContext): FunSpec {
-        if (!context.base.table.hasPrimaryKey()) {
-            return getNoneMethod()
-        }
 
         val block = buildPrimaryKeyWhere(context)
 
@@ -40,9 +37,6 @@ object SelectByPrimaryMethod : AbstractDSLMethodBuilder() {
     }
 
     private fun buildSelectByPrimaryKeys(context: DSLCodeContext): FunSpec {
-        if (!context.base.table.hasPrimaryKey()) {
-            return getNoneMethod()
-        }
 
         val primaryKey = context.base.table.primaryKeys.first()
 
@@ -50,7 +44,7 @@ object SelectByPrimaryMethod : AbstractDSLMethodBuilder() {
             .receiver(context.base.tableClass)
             .addParameter(
                 "ids",
-                List::class.asTypeName().parameterizedBy(primaryKey.type.toClassName())
+                Iterable::class.asTypeName().parameterizedBy(primaryKey.type.toClassName())
             )
             .addParameter(columnSelectiveParameter)
             .returns(List::class.asTypeName().parameterizedBy(context.base.pojoClass))
@@ -68,6 +62,9 @@ object SelectByPrimaryMethod : AbstractDSLMethodBuilder() {
     }
 
     override fun buildMethods(context: DSLCodeContext): List<FunSpec> {
+        if(!context.base.table.hasPrimaryKey()){
+            return listOf()
+        }
         if(context.isSinglePrimaryKey()){
             return listOf(
                 buildSelectByPrimaryKey(context),

@@ -29,7 +29,7 @@ object UpdateMethod : AbstractDSLMethodBuilder() {
             .copy(nullable = true)
 
         val ignore = ParameterSpec.builder("ignore", columnArray)
-            .defaultValue("arrayOf()")
+            .defaultValue("null")
             .build()
 
         val selective = ParameterSpec.builder("selective", columnArray)
@@ -46,7 +46,7 @@ object UpdateMethod : AbstractDSLMethodBuilder() {
             .returns(Int::class)
             .beginControlFlow("return %T.%M(%N, limit)", context.base.tableClass, getExposedSqlMember("update"), whereParam)
             .addStatement("val ignoreColumns = ${ignore.name} ?: arrayOf()")
-            .addStatement("%N(it, ${context.entityParamName}, selective = %N, *ignoreColumns)", context.applyFunc, selective)
+            .addStatement("%N(it, ${context.entityParamName}, selective = %N, *ignoreColumns)", context.assignFunc, selective)
             .endControlFlow()
             .build()
     }

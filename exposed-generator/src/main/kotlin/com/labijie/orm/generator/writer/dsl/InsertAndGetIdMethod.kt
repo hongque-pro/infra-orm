@@ -14,9 +14,9 @@ import org.jetbrains.exposed.dao.id.EntityID
 object InsertAndGetIdMethod : AbstractDSLMethodBuilder() {
 
 
-    override fun build(context: DSLCodeContext): FunSpec {
+    override fun build(context: DSLCodeContext): FunSpec? {
         if (context.base.table.kind != TableKind.ExposedIdTable) {
-            return getNoneMethod()
+            return null
         }
         val entityIdType = context.base.table.primaryKeys.first().type.toClassName()
 
@@ -26,7 +26,7 @@ object InsertAndGetIdMethod : AbstractDSLMethodBuilder() {
             .addParameter(context.entityParamName, context.base.pojoClass)
             .returns(resultType)
             .beginControlFlow("return %T.%M", context.base.tableClass, getExposedSqlMember("insertAndGetId"))
-            .addStatement("%N(it, ${context.entityParamName})", context.applyFunc)
+            .addStatement("%N(it, ${context.entityParamName})", context.assignFunc)
             .endControlFlow()
             .build()
     }
