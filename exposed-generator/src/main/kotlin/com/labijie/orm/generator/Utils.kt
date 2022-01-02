@@ -132,3 +132,20 @@ fun findProjectSourceDir(sourceFile: String): Path {
 val suppressAnnotation = AnnotationSpec.builder(Suppress::class)
     .addMember("%S", "UNCHECKED_CAST")
     .build()
+
+fun FileSpec.Builder.suppressWarningTypes(vararg types: String): FileSpec.Builder {
+    if (types.isNotEmpty()) {
+
+        val format = "%S,".repeat(types.count()).trimEnd(',')
+        return addAnnotation(
+            AnnotationSpec.builder(ClassName("", "Suppress"))
+                .addMember(format, *types)
+                .build()
+        )
+    }
+    return this
+}
+
+fun FileSpec.Builder.suppressRedundantVisibilityModifierWarning(): FileSpec.Builder {
+    return this.suppressWarningTypes("RedundantVisibilityModifier")
+}

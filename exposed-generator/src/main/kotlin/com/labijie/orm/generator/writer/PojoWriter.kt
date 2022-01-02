@@ -11,6 +11,7 @@ object PojoWriter {
     fun write(context: GenerationContext) {
 
         val file = FileSpec.builder(context.pojoPackageName, fileName = context.pojoClass.simpleName)
+            .suppressRedundantVisibilityModifierWarning()
             .addType(
                 TypeSpec.classBuilder(context.pojoClass)
                     .addComments("POJO for ${context.tableClass.simpleName}", context)

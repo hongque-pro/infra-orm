@@ -65,7 +65,10 @@ object DSLWriter {
         val selectSlice = generateSelectSliceMethod(context)
 
 
-        val fileBuilder = FileSpec.builder(context.dslPackageName, fileName = context.dslClass.simpleName)
+        val fileBuilder = FileSpec
+            .builder(context.dslPackageName, fileName = context.dslClass.simpleName)
+            .suppressRedundantVisibilityModifierWarning()
+
         val file = fileBuilder
             .addImport(context.tableClass, context.table.columns.map { it.name })
             .addType(
@@ -116,7 +119,11 @@ object DSLWriter {
             .receiver(ResultRow::class)
             .addParameter(selectiveParameter)
             .returns(context.pojoClass)
-            .beginControlFlow("if(%N.%M())", selectiveParameter, MemberName("kotlin.collections", "isNotEmpty", isExtension = true))
+            .beginControlFlow(
+                "if(%N.%M())",
+                selectiveParameter,
+                MemberName("kotlin.collections", "isNotEmpty", isExtension = true)
+            )
             .addStatement("return %N(this)", parseSelectiveMethod)
             .endControlFlow()
             .addStatement("return %N(this)", parseMethod)
@@ -143,7 +150,6 @@ object DSLWriter {
     private fun generateGetColumnValueMethod(context: GenerationContext): FunSpec {
 
         val typeVar = TypeVariableName("T")
-
 
 
         //@Suppress("UNCHECKED_CAST")
@@ -268,7 +274,7 @@ object DSLWriter {
                     .addStatement("arrayOf(")
                     .apply {
                         context.table.columns.mapIndexed { index, col ->
-                            addStatement(if(index == context.table.columns.size) col.name else "${col.name},")
+                            addStatement(if (index == context.table.columns.size) col.name else "${col.name},")
                         }
                     }
                     .addStatement(")")
@@ -302,7 +308,11 @@ object DSLWriter {
         return parseRow
     }
 
-    private fun FunSpec.Builder.addSelectSelective(varName: String, context: GenerationContext, selectiveParameter: ParameterSpec): FunSpec.Builder {
+    private fun FunSpec.Builder.addSelectSelective(
+        varName: String,
+        context: GenerationContext,
+        selectiveParameter: ParameterSpec
+    ): FunSpec.Builder {
         this.beginControlFlow("val $varName = if(%N.%M())", columnSelectiveParameter, kotlinIsNotEmpty)
             .addStatement(
                 "%T.slice(%N.%M()).%M()",
