@@ -2,10 +2,8 @@ package com.labijie.orm.generator.writer
 
 import com.labijie.orm.generator.*
 import com.squareup.kotlinpoet.*
-import com.squareup.kotlinpoet.ksp.KotlinPoetKspPreview
 import com.squareup.kotlinpoet.ksp.toTypeName
 
-@KotlinPoetKspPreview
 object PojoWriter {
 
     fun write(context: GenerationContext) {

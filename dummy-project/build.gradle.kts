@@ -1,13 +1,8 @@
-plugins {
-    id("com.google.devtools.ksp") version Versions.kspVersion
+
+infra {
+    useKspPlugin(project(":exposed-generator"))
 }
 
 dependencies {
     implementation(project(":exposed-starter"))
-    implementation(project(":exposed-generator"))
-    ksp(project(":exposed-generator"))
-}
-
-ksp {
-
 }

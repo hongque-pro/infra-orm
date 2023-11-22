@@ -1,3 +1,5 @@
+@file:Suppress("RedundantVisibilityModifier")
+
 package com.labijie.orm.dummy.pojo
 
 import com.labijie.orm.dummy.TestEnum

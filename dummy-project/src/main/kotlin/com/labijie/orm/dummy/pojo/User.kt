@@ -1,3 +1,5 @@
+@file:Suppress("RedundantVisibilityModifier")
+
 package com.labijie.orm.dummy.pojo
 
 import com.labijie.orm.dummy.TestEnum
@@ -19,6 +21,8 @@ public open class User {
   public var status: TestEnum = TestEnum.OK
 
   public var count: Int = 0
+
+  public var description: String = ""
 
   public var id: Long = 0L
 }

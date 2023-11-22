@@ -17,10 +17,3 @@ repositories {
     }
     mavenCentral()
 }
-
-dependencies {
-    val kotlinVersion = "1.6.0"
-
-    api("io.github.gradle-nexus:publish-plugin:1.1.0")
-    runtimeOnly("org.jetbrains.kotlin:kotlin-allopen:${kotlinVersion}")
-}

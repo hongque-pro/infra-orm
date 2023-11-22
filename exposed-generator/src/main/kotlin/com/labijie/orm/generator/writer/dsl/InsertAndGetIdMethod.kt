@@ -6,11 +6,9 @@ import com.labijie.orm.generator.writer.DSLCodeContext
 import com.squareup.kotlinpoet.FunSpec
 import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
 import com.squareup.kotlinpoet.asTypeName
-import com.squareup.kotlinpoet.ksp.KotlinPoetKspPreview
 import com.squareup.kotlinpoet.ksp.toClassName
 import org.jetbrains.exposed.dao.id.EntityID
 
-@KotlinPoetKspPreview
 object InsertAndGetIdMethod : AbstractDSLMethodBuilder() {
 
 

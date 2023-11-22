@@ -10,11 +10,9 @@ import com.google.devtools.ksp.visitor.KSDefaultVisitor
 import com.labijie.orm.generator.*
 import com.labijie.orm.generator.writer.DSLWriter
 import com.labijie.orm.generator.writer.PojoWriter
-import com.squareup.kotlinpoet.ksp.KotlinPoetKspPreview
 import org.jetbrains.exposed.sql.Table
 
 
-@KotlinPoetKspPreview
 class ExposedSymbolProcessor(
     private val logger: KSPLogger,
     options: Map<String, String>

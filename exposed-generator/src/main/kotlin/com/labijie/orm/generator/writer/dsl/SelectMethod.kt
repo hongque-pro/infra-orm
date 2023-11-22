@@ -79,7 +79,7 @@ object SelectMethod : AbstractDSLMethodBuilder() {
         val primary = context.base.table.primaryKeys.first()
         val primaryKey = MemberName(context.base.tableClass, primary.name)
 
-        val parseMethod = DefaultValues.getParseMethod(primary.rawType)
+        val parseMethod = DefaultValues.getParseMethod(primary.type)
 
         return FunSpec.builder("selectForward")
             .receiver(context.base.tableClass)

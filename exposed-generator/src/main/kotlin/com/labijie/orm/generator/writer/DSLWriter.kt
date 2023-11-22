@@ -8,15 +8,14 @@ import com.labijie.orm.generator.writer.AbstractDSLMethodBuilder.Companion.kotli
 import com.labijie.orm.generator.writer.dsl.*
 import com.squareup.kotlinpoet.*
 import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
-import com.squareup.kotlinpoet.ksp.KotlinPoetKspPreview
 import com.squareup.kotlinpoet.ksp.toTypeName
+import org.jetbrains.exposed.dao.id.EntityID
 import org.jetbrains.exposed.sql.Column
 import org.jetbrains.exposed.sql.Query
 import org.jetbrains.exposed.sql.ResultRow
 import org.jetbrains.exposed.sql.statements.UpdateBuilder
 import kotlin.reflect.KClass
 
-@KotlinPoetKspPreview
 object DSLWriter {
 
     private const val OBJECT_PARAMETER_NAME = "raw"
@@ -71,6 +70,7 @@ object DSLWriter {
 
         val file = fileBuilder
             .addImport(context.tableClass, context.table.columns.map { it.name })
+            .addImport("org.jetbrains.exposed.sql.SqlExpressionBuilder", "eq")
             .addType(
                 TypeSpec.objectBuilder(context.dslClass)
                     .addComments("DSL support for ${context.tableClass.simpleName}", context)
@@ -184,7 +184,17 @@ object DSLWriter {
             .beginControlFlow("return when(column)")
             .apply {
                 context.table.columns.forEach {
-                    this.addStatement("${it.name}->%T::class", it.rawType.toTypeName())
+//                    if(it.isEntityId) {
+//                        this.addStatement("${it.name}->%T::class", it.type.toTypeName())
+//                    }
+//                    else {
+//                        val t =
+//                            if (!it.rawType.isMarkedNullable) it.rawType.toTypeName() else it.rawType.makeNotNullable()
+//                                .toTypeName()
+//                        this.addStatement("${it.name}->%T::class", t)
+//                    }
+                    val t = if (!it.type.isMarkedNullable) it.type.toTypeName() else it.type.makeNotNullable().toTypeName()
+                    this.addStatement("${it.name}->%T::class", t)
                 }
                 val errorMessage = "Unknown column <\${column.name}> for '${context.pojoClass.simpleName}'"
                 this.addStatement("else->throw %T(%P)", IllegalArgumentException::class, errorMessage)

@@ -5,10 +5,8 @@ import com.labijie.orm.generator.writer.DSLCodeContext
 import com.squareup.kotlinpoet.FunSpec
 import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
 import com.squareup.kotlinpoet.asTypeName
-import com.squareup.kotlinpoet.ksp.KotlinPoetKspPreview
 import com.squareup.kotlinpoet.ksp.toClassName
 
-@KotlinPoetKspPreview
 object SelectByPrimaryMethod : AbstractDSLMethodBuilder() {
     private fun buildSelectByPrimaryKey(context: DSLCodeContext): FunSpec {
 

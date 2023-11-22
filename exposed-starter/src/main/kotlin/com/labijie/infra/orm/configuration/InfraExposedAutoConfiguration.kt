@@ -1,6 +1,7 @@
 package com.labijie.infra.orm.configuration
 
 import org.jetbrains.exposed.spring.SpringTransactionManager
+import org.jetbrains.exposed.sql.DatabaseConfig
 import org.jetbrains.exposed.sql.SchemaUtils
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.BeanFactory
@@ -41,8 +42,8 @@ class InfraExposedAutoConfiguration  {
 
     @Bean
     @ConditionalOnMissingBean(SpringTransactionManager::class)
-    fun exposedSpringTransactionManager(properties: InfraExposedProperties, dataSource: DataSource): SpringTransactionManager {
-        return SpringTransactionManager(dataSource, properties.showSql)
+    fun exposedSpringTransactionManager(properties: InfraExposedProperties, databaseConfig: DatabaseConfig, dataSource: DataSource): SpringTransactionManager {
+        return SpringTransactionManager(dataSource, databaseConfig, properties.showSql)
     }
 
     class ExposedTableRegistrar : BeanFactoryAware, ImportBeanDefinitionRegistrar  {

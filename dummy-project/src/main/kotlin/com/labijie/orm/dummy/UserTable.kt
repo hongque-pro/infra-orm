@@ -13,6 +13,7 @@ object UserTable : SimpleLongIdTable("my", "id") {
     var name: Column<String> = varchar("name", 50)
     var status = enumeration("status", TestEnum::class)
     var count = integer("count")
+    var description = varchar("desc", 255)
 }
 
 object ShopTable : SimpleLongIdTable("my", "id") {

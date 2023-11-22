@@ -5,7 +5,7 @@
 ## 1. 添加实体生成器配置
 仅对使用 kotlin dsl 的 gradle.build 支持， groovy 风格的配置文件暂未测试兼容性。   
 在你的 **Table** 类所在的项目 gradle.build.kts 中加入如下内容:
-```kotlin
+```groovy
 plugins {
     id("com.google.devtools.ksp") version Versions.kspVersion
 }
@@ -16,6 +16,19 @@ dependencies {
 
 ksp {
     arg("key", "value")
+}
+
+```
+
+如果你使用 [infra-gradle-plugin](https://github.com/hongque-pro/infra-gradle-plugin), 配置能够进一步简化
+
+```groovy
+infra {
+    useKspPlugin(project("com.labijie.orm:exposed-generator:${Versions.ormVersion}"))
+}
+
+dependencies {
+    implementation(project("com.labijie.orm:exposed-starter:${Versions.ormVersion}"))
 }
 
 ```

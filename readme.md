@@ -1,7 +1,7 @@
 # Infra-ORM
 
 ![maven central version](https://img.shields.io/maven-central/v/com.labijie.orm/exposed-core?logo=java)
-![workflow status](https://img.shields.io/github/workflow/status/hongque-pro/infra-orm/Gradle%20Build%20And%20Release/main?logo=github)
+![workflow status](https://img.shields.io/github/actions/workflow/status/hongque-pro/infra-orm/build.yml?branch=main)
 ![license](https://img.shields.io/github/license/hongque-pro/infra-orm?style=flat-square)
 
 欢迎使用 **Infra-ORM**, 这是一个基于 [Exposed](https://github.com/JetBrains/Exposed)
