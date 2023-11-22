@@ -33,7 +33,7 @@ https://github.com/JetBrains/Exposed/issues/24
 
 贴一段看看 C# 方向的 EntityFramework 的语法，你就知道 JAVA 领域这些框架有多弱：
 
-```C#
+```csharp
 var query = from photo in context.Set<PersonPhoto>()
             join person in context.Set<Person>()
                 on new { Id = (int?)photo.PersonPhotoId, photo.Caption }
