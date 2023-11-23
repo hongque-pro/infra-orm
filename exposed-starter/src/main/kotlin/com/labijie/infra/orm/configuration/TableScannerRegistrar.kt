@@ -10,7 +10,7 @@ import org.springframework.util.ClassUtils
 import org.springframework.util.StringUtils
 
 
-class TabScannerRegistrar : ImportBeanDefinitionRegistrar {
+class TableScannerRegistrar : ImportBeanDefinitionRegistrar {
     override fun registerBeanDefinitions(importingClassMetadata: AnnotationMetadata, registry: BeanDefinitionRegistry) {
         val tableScanAttrs = AnnotationAttributes
             .fromMap(importingClassMetadata.getAnnotationAttributes(TableScan::class.java.name))
@@ -53,7 +53,7 @@ class TabScannerRegistrar : ImportBeanDefinitionRegistrar {
     }
 
     private fun generateBaseBeanName(importingClassMetadata: AnnotationMetadata, index: Int): String? {
-        return importingClassMetadata.className + "#" + TabScannerRegistrar::class.java.simpleName + "#" + index
+        return importingClassMetadata.className + "#" + TableScannerRegistrar::class.java.simpleName + "#" + index
     }
 
     private fun getDefaultBasePackage(importingClassMetadata: AnnotationMetadata): String {

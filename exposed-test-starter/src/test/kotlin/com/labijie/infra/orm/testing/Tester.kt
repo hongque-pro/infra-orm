@@ -10,6 +10,7 @@ import org.springframework.beans.factory.ObjectProvider
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.test.context.ContextConfiguration
 import org.springframework.test.context.junit.jupiter.SpringExtension
+import org.springframework.transaction.annotation.EnableTransactionManagement
 import org.springframework.transaction.annotation.Transactional
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -18,7 +19,6 @@ import kotlin.test.assertNotNull
 @ExposedTest
 @ExtendWith(SpringExtension::class)
 @ContextConfiguration(classes = [TestingContext::class])
-@Transactional
 @TableScan
 class Tester {
 
@@ -26,11 +26,13 @@ class Tester {
     private lateinit var tables: ObjectProvider<Table>
 
     @Test
+    @Transactional
     fun testTableAutoLoaded(){
         assertEquals(1, tables.count())
     }
 
     @Test
+    @Transactional
     fun testCRUD(){
 
         TestEntityTable.insert {

@@ -8,6 +8,48 @@
 的 ORM 框架，可以和 Spring Boot 集成良好，如果你是 Kotlin 开发者，推荐你试试 Exposed, 
 配合 Infra-ORM 可以给你带来最佳的开发体验。
 
+## 只需编写表结构，配合 KSP 自动生成实体对象和 Dao 方法
+
+### 1. 引入插件
+示例中使用 `com.labijie.infra` gradle 插件简化配置
+
+```ktolin
+
+plugins {
+    id("com.labijie.infra") version 2.0.2 apply true
+}
+
+infra {
+    useKspPlugin(project("com.labijie.infra:exposed-generator"))
+}
+
+dependencies {
+    implementation(project("com.labijie.infra:exposed-starter"))
+}
+
+```
+
+### 2. 编写表结构类
+
+```kotlin
+
+object UserTable : SimpleLongIdTable("my", "id") {
+    var name: Column<String> = varchar("name", 50)
+    var status = enumeration("status", TestEnum::class)
+    var count = integer("count")
+    var description = varchar("desc", 255)
+}
+
+```
+
+### 3. 生成 POJO 和 DSL 代码
+执行 gradle 命令
+```shell
+gradle kspKotlin
+```
+
+---
+
 ## 为什么造这个轮子？
 
 Exposed 提供了 Dao 和 DSL 编程模型，具体编程模型的争论可以看下面的 issue 连接， Infra-ORM 主要解决该讨论中的问题，
@@ -16,6 +58,7 @@ Exposed 提供了 Dao 和 DSL 编程模型，具体编程模型的争论可以�
 DAO VS DSL 讨论原帖：   
 https://github.com/JetBrains/Exposed/issues/24
 
+---
 
 ## DAO编程模型的问题：   
 

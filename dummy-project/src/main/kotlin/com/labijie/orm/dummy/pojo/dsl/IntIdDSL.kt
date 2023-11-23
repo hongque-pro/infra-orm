@@ -310,8 +310,8 @@ public object IntIdDSL {
     offsetKey?.let {
       when(order) {
         SortOrder.DESC, SortOrder.DESC_NULLS_FIRST, SortOrder.DESC_NULLS_LAST->
-        query.andWhere { id less it }
-        else-> query.andWhere { id greater it }
+        query.andWhere { id less it.toInt() }
+        else-> query.andWhere { id greater it.toInt() }
       }
     }
     `where`?.invoke(query)

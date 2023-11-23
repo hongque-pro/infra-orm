@@ -3,6 +3,7 @@ plugins {
     id("com.labijie.infra") version Versions.infraPluginVersion apply true
 }
 
+
 allprojects {
     group = "com.labijie.orm"
     version = "2.0.0"

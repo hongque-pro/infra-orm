@@ -6,6 +6,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.test.autoconfigure.OverrideAutoConfiguration
 import org.springframework.boot.test.autoconfigure.filter.TypeExcludeFilters
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase
+import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.context.annotation.ComponentScan.Filter
 import org.springframework.test.context.BootstrapWith
 import org.springframework.transaction.annotation.EnableTransactionManagement
@@ -17,13 +18,12 @@ import java.lang.annotation.Inherited
 @MustBeDocumented
 @Inherited
 @BootstrapWith(ExposedTestContextBootstrapper::class)
-@OverrideAutoConfiguration(enabled = false)
+//@OverrideAutoConfiguration(enabled = false)
 @TypeExcludeFilters(ExposedTypeExcludeFilter::class)
 @EnableTransactionManagement
 @AutoConfigureTestDatabase
 @ImportAutoConfiguration
 @EnableAutoConfiguration
-@AutoConfigureExposed
 annotation class ExposedTest(
     /**
      * Properties in form key=value that should be added to the Spring [Environment] before the test

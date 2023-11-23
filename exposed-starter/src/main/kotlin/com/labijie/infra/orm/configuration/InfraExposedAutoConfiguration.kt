@@ -22,6 +22,7 @@ import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Import
 import org.springframework.context.annotation.ImportBeanDefinitionRegistrar
 import org.springframework.core.type.AnnotationMetadata
+import org.springframework.transaction.annotation.EnableTransactionManagement
 import org.springframework.transaction.support.TransactionTemplate
 import org.springframework.util.StringUtils
 import java.util.function.Consumer
@@ -31,13 +32,19 @@ import javax.sql.DataSource
 @Configuration(proxyBeanMethods = false)
 @AutoConfigureAfter(DataSourceAutoConfiguration::class)
 @EnableConfigurationProperties(InfraExposedProperties::class)
-@AutoConfigureBefore(TransactionAutoConfiguration::class)
+@EnableTransactionManagement
 class InfraExposedAutoConfiguration  {
 
     companion object {
         private val logger by lazy {
             LoggerFactory.getLogger(InfraExposedAutoConfiguration::class.java)
         }
+    }
+
+    @Bean
+    @ConditionalOnMissingBean(DatabaseConfig::class)
+    open fun databaseConfig(): DatabaseConfig {
+        return DatabaseConfig {}
     }
 
     @Bean

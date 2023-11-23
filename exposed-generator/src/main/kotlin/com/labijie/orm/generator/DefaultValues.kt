@@ -43,9 +43,11 @@ object DefaultValues {
         Byte::class.qualifiedName to kotlinTextExtensionMethod("toByte"),
     )
 
+
     fun getParseMethod(type: KSType): MemberName? {
         val typeName = type.declaration.qualifiedName!!.asString()
-        return parseMethods[typeName]
+        val name = parseMethods[typeName]
+        return name;
     }
 
     fun getValue(type: KSType): String {

@@ -1,5 +1,4 @@
 
-
 dependencies {
     api(project(":exposed-core"))
     api("org.jetbrains.exposed:spring-transaction:${Versions.exposedVersion}")
