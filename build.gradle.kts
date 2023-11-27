@@ -26,9 +26,8 @@ subprojects {
                     description = "Orm and tooling for kotlin based exposed"
                     githubUrl("hongque-pro", "infra-orm")
                 }
+                toGithubPackages("hongque-pro", "infra-orm")
             }
-
-            //useGitHubPackages("hongque-pro", "infra-orm")
         }
     }
 
