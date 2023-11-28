@@ -26,11 +26,6 @@ ksp {
 infra {
     useKspPlugin(project("com.labijie.orm:exposed-generator:${Versions.ormVersion}"))
 }
-
-dependencies {
-    implementation(project("com.labijie.orm:exposed-starter:${Versions.ormVersion}"))
-}
-
 ```
 
 > 加入 KSP , 同时引入 Infra-ORM 的代码生成器
