@@ -17,7 +17,7 @@ fun KSPLogger.println(message: String, symbol: KSNode? = null) {
     this.info("[expose gen] $message", symbol)
 }
 
-private val DEFAULT_CLASS_COMMENTS = "This class made by a code generator (https://github.com/hongque-pro/infra-orm)."
+private val DEFAULT_CLASS_COMMENTS = "This class made by a code generation tool (https://github.com/hongque-pro/infra-orm)."
 
 fun TypeSpec.Builder.addComments(classComment: String, context:GenerationContext): TypeSpec.Builder {
 
@@ -26,6 +26,9 @@ fun TypeSpec.Builder.addComments(classComment: String, context:GenerationContext
         .add("\n")
         .add("\n")
         .add(DEFAULT_CLASS_COMMENTS)
+        .add("\n")
+        .add("\n")
+        .add("Don't modify these codes !!")
         .add("\n")
         .add("\n")
         .add("Origin Exposed Table:")

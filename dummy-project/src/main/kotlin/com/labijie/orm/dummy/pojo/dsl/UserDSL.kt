@@ -53,7 +53,9 @@ import org.jetbrains.exposed.sql.update
 /**
  * DSL support for UserTable
  *
- * This class made by a code generator (https://github.com/hongque-pro/infra-orm).
+ * This class made by a code generation tool (https://github.com/hongque-pro/infra-orm).
+ *
+ * Don't modify these codes !!
  *
  * Origin Exposed Table:
  * @see com.labijie.orm.dummy.UserTable
