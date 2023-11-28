@@ -62,6 +62,8 @@ import org.jetbrains.exposed.sql.update
 @kotlin.Suppress(
   "unused",
   "DuplicatedCode",
+  "MemberVisibilityCanBePrivate",
+  "RemoveRedundantQualifierName",
 )
 public object ShopDSL {
   public val ShopTable.allColumns: Array<Column<*>> by lazy {

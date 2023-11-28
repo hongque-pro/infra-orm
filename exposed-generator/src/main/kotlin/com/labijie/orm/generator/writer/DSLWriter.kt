@@ -72,7 +72,7 @@ object DSLWriter {
             .addImport("org.jetbrains.exposed.sql.SqlExpressionBuilder", "eq")
             .addType(
                 TypeSpec.objectBuilder(context.dslClass)
-                    .addAnnotation(suppressAnnotation("unused", "DuplicatedCode"))
+                    .addAnnotation(suppressAnnotation("unused", "DuplicatedCode", "MemberVisibilityCanBePrivate", "RemoveRedundantQualifierName"))
                     .addComments("DSL support for ${context.tableClass.simpleName}", context)
                     .addProperty(allColumns)
                     .addFunction(parseRow)
