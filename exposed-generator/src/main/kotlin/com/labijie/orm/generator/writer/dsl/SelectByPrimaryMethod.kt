@@ -22,8 +22,7 @@ object SelectByPrimaryMethod : AbstractDSLMethodBuilder() {
             .addParameter(columnSelectiveParameter)
             .returns(context.base.pojoClass.copy(nullable = true))
             .beginControlFlow(
-                "val query = %T.%N(*%N).%N",
-                context.base.tableClass,
+                "val query = %N(*%N).%N",
                 context.selectSliceFunc,
                 columnSelectiveParameter,
                 exposedAndWhere
@@ -47,8 +46,7 @@ object SelectByPrimaryMethod : AbstractDSLMethodBuilder() {
             .addParameter(columnSelectiveParameter)
             .returns(List::class.asTypeName().parameterizedBy(context.base.pojoClass))
             .beginControlFlow(
-                "val query = %T.%N(*%N).%N",
-                context.base.tableClass,
+                "val query = %N(*%N).%N",
                 context.selectSliceFunc,
                 columnSelectiveParameter,
                 exposedAndWhere

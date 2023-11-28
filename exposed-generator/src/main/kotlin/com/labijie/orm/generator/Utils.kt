@@ -129,9 +129,19 @@ fun findProjectSourceDir(sourceFile: String): Path {
     return folders[sourceFile] ?: throw ExposedGenerationException("Unable to get project folder from file '${sourceFile}'")
 }
 
-val suppressAnnotation = AnnotationSpec.builder(Suppress::class)
+val suppressUncheckedCastAnnotation = AnnotationSpec.builder(Suppress::class)
     .addMember("%S", "UNCHECKED_CAST")
     .build()
+
+fun suppressAnnotation(vararg args: String): AnnotationSpec {
+    return AnnotationSpec.builder(Suppress::class)
+        .apply {
+            args.forEach {
+                this.addMember("%S", it)
+            }
+        }
+    .build()
+}
 
 fun FileSpec.Builder.suppressWarningTypes(vararg types: String): FileSpec.Builder {
     if (types.isNotEmpty()) {

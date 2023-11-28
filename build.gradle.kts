@@ -12,7 +12,6 @@ allprojects {
         useDefault {
             includeSource = false
             useMavenProxy = false
-            addHongQueGitHubPackages()
         }
         usePublishPlugin()
     }

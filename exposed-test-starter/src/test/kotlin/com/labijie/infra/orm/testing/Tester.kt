@@ -20,20 +20,20 @@ import kotlin.test.assertNotNull
 @ExtendWith(SpringExtension::class)
 @ContextConfiguration(classes = [TestingContext::class])
 @TableScan
-class Tester {
+open class Tester {
 
     @Autowired
     private lateinit var tables: ObjectProvider<Table>
 
     @Test
     @Transactional
-    fun testTableAutoLoaded(){
+    open fun testTableAutoLoaded(){
         assertEquals(1, tables.count())
     }
 
     @Test
     @Transactional
-    fun testCRUD(){
+    open fun testCRUD(){
 
         TestEntityTable.insert {
             it[name] = "ccc"

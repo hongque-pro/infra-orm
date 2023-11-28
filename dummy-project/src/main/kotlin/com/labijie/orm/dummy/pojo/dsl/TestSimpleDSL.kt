@@ -66,6 +66,10 @@ import org.jetbrains.exposed.sql.update
  * Origin Exposed Table:
  * @see com.labijie.orm.dummy.TestSimpleTable
  */
+@kotlin.Suppress(
+  "unused",
+  "DuplicatedCode",
+)
 public object TestSimpleDSL {
   public val TestSimpleTable.allColumns: Array<Column<*>> by lazy {
     arrayOf(
@@ -213,10 +217,10 @@ public object TestSimpleDSL {
 
   public fun TestSimpleTable.selectSlice(vararg selective: Column<*>): Query {
     val query = if(selective.isNotEmpty()) {
-      TestSimpleTable.slice(selective.toList()).selectAll()
+      slice(selective.toList()).selectAll()
     }
     else {
-      TestSimpleTable.selectAll()
+      selectAll()
     }
     return query
   }
@@ -227,8 +231,7 @@ public object TestSimpleDSL {
   public fun UpdateBuilder<*>.setValueSelective(raw: TestSimple, vararg selective: Column<*>): Unit
       = assign(this, raw, selective = selective)
 
-  public fun TestSimpleTable.insert(raw: TestSimple): InsertStatement<Number> =
-      TestSimpleTable.insert {
+  public fun TestSimpleTable.insert(raw: TestSimple): InsertStatement<Number> = insert {
     assign(it, raw)
   }
 
@@ -237,7 +240,7 @@ public object TestSimpleDSL {
     ignoreErrors: Boolean = false,
     shouldReturnGeneratedValues: Boolean = false,
   ): List<ResultRow> {
-    val rows = TestSimpleTable.batchInsert(list, ignoreErrors, shouldReturnGeneratedValues) {
+    val rows = batchInsert(list, ignoreErrors, shouldReturnGeneratedValues) {
       entry -> assign(this, entry)
     }
     return rows
@@ -249,23 +252,23 @@ public object TestSimpleDSL {
     ignore: Array<out Column<*>>? = null,
     limit: Int? = null,
     `where`: SqlExpressionBuilder.() -> Op<Boolean>,
-  ): Int = TestSimpleTable.update(`where`, limit) {
+  ): Int = update(`where`, limit) {
     val ignoreColumns = ignore ?: arrayOf()
     assign(it, raw, selective = selective, *ignoreColumns)
   }
 
   public fun TestSimpleTable.updateByPrimaryKey(raw: TestSimple, vararg selective: Column<*>): Int =
-      TestSimpleTable.update(raw, selective = selective, ignore = arrayOf(id)) {
+      update(raw, selective = selective, ignore = arrayOf(id)) {
     TestSimpleTable.id eq id
   }
 
-  public fun TestSimpleTable.deleteByPrimaryKey(id: String): Int = TestSimpleTable.deleteWhere {
+  public fun TestSimpleTable.deleteByPrimaryKey(id: String): Int = deleteWhere {
     TestSimpleTable.id eq id
   }
 
   public fun TestSimpleTable.selectByPrimaryKey(id: String, vararg selective: Column<*>):
       TestSimple? {
-    val query = TestSimpleTable.selectSlice(*selective).andWhere {
+    val query = selectSlice(*selective).andWhere {
       TestSimpleTable.id eq id
     }
     return query.firstOrNull()?.toTestSimple(*selective)
@@ -273,7 +276,7 @@ public object TestSimpleDSL {
 
   public fun TestSimpleTable.selectByPrimaryKeys(ids: Iterable<String>, vararg
       selective: Column<*>): List<TestSimple> {
-    val query = TestSimpleTable.selectSlice(*selective).andWhere {
+    val query = selectSlice(*selective).andWhere {
       TestSimpleTable.id inList ids
     }
     return query.toTestSimpleList(*selective)
@@ -281,14 +284,14 @@ public object TestSimpleDSL {
 
   public fun TestSimpleTable.selectMany(vararg selective: Column<*>, `where`: Query.() -> Unit):
       List<TestSimple> {
-    val query = TestSimpleTable.selectSlice(*selective)
+    val query = selectSlice(*selective)
     `where`.invoke(query)
     return query.toTestSimpleList(*selective)
   }
 
   public fun TestSimpleTable.selectOne(vararg selective: Column<*>, `where`: Query.() -> Unit):
       TestSimple? {
-    val query = TestSimpleTable.selectSlice(*selective)
+    val query = selectSlice(*selective)
     `where`.invoke(query)
     return query.firstOrNull()?.toTestSimple(*selective)
   }
@@ -304,7 +307,7 @@ public object TestSimpleDSL {
       return OffsetList.empty()
     }
     val offsetKey = forwardToken?.let { Base64.getUrlDecoder().decode(it).toString(Charsets.UTF_8) }
-    val query = TestSimpleTable.selectSlice(*selective.toTypedArray())
+    val query = selectSlice(*selective.toTypedArray())
     offsetKey?.let {
       when(order) {
         SortOrder.DESC, SortOrder.DESC_NULLS_FIRST, SortOrder.DESC_NULLS_LAST->
@@ -342,7 +345,7 @@ public object TestSimpleDSL {
     val kp = forwardToken?.let { decodeToken(it) }
     val offsetKey = kp?.first
     val excludeKeys = kp?.second
-    val query = TestSimpleTable.selectSlice(*selective.toTypedArray())
+    val query = selectSlice(*selective.toTypedArray())
     offsetKey?.let {
       when(order) {
         SortOrder.DESC, SortOrder.DESC_NULLS_FIRST, SortOrder.DESC_NULLS_LAST->

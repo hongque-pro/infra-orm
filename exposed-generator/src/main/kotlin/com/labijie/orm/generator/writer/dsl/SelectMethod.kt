@@ -31,8 +31,7 @@ object SelectMethod : AbstractDSLMethodBuilder() {
             .addParameter(whereParam)
             .returns(List::class.asTypeName().parameterizedBy(context.base.pojoClass))
             .addStatement(
-                "val query = %T.%N(*%N)",
-                context.base.tableClass,
+                "val query = %N(*%N)",
                 context.selectSliceFunc,
                 columnSelectiveParameter
             )
@@ -50,8 +49,7 @@ object SelectMethod : AbstractDSLMethodBuilder() {
             .addParameter(whereParam)
             .returns(context.base.pojoClass.copy(nullable = true))
             .addStatement(
-                "val query = %T.%N(*%N)",
-                context.base.tableClass,
+                "val query = %N(*%N)",
                 context.selectSliceFunc,
                 columnSelectiveParameter
             )
@@ -137,8 +135,7 @@ object SelectMethod : AbstractDSLMethodBuilder() {
                 }
             }
             .addStatement(
-                "val query = %T.%N(*%N.%N())",
-                context.base.tableClass,
+                "val query = %N(*%N.%N())",
                 context.selectSliceFunc,
                 columnSelectiveCollectionParameter,
                 kotlinToTypedArray
@@ -254,8 +251,7 @@ object SelectMethod : AbstractDSLMethodBuilder() {
                 Charsets::class.asTypeName()
             )
             .addStatement(
-                "val query = %T.%N(*%N.%N())",
-                context.base.tableClass,
+                "val query = %N(*%N.%N())",
                 context.selectSliceFunc,
                 columnSelectiveCollectionParameter,
                 kotlinToTypedArray

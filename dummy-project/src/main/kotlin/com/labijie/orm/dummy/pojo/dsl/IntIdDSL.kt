@@ -70,6 +70,10 @@ import org.jetbrains.exposed.sql.update
  * Origin Exposed Table:
  * @see com.labijie.orm.dummy.IntIdTable
  */
+@kotlin.Suppress(
+  "unused",
+  "DuplicatedCode",
+)
 public object IntIdDSL {
   public val IntIdTable.allColumns: Array<Column<*>> by lazy {
     arrayOf(
@@ -214,10 +218,10 @@ public object IntIdDSL {
 
   public fun IntIdTable.selectSlice(vararg selective: Column<*>): Query {
     val query = if(selective.isNotEmpty()) {
-      IntIdTable.slice(selective.toList()).selectAll()
+      slice(selective.toList()).selectAll()
     }
     else {
-      IntIdTable.selectAll()
+      selectAll()
     }
     return query
   }
@@ -228,7 +232,7 @@ public object IntIdDSL {
   public fun UpdateBuilder<*>.setValueSelective(raw: IntId, vararg selective: Column<*>): Unit =
       assign(this, raw, selective = selective)
 
-  public fun IntIdTable.insert(raw: IntId): InsertStatement<Number> = IntIdTable.insert {
+  public fun IntIdTable.insert(raw: IntId): InsertStatement<Number> = insert {
     assign(it, raw)
   }
 
@@ -241,7 +245,7 @@ public object IntIdDSL {
     ignoreErrors: Boolean = false,
     shouldReturnGeneratedValues: Boolean = false,
   ): List<ResultRow> {
-    val rows = IntIdTable.batchInsert(list, ignoreErrors, shouldReturnGeneratedValues) {
+    val rows = batchInsert(list, ignoreErrors, shouldReturnGeneratedValues) {
       entry -> assign(this, entry)
     }
     return rows
@@ -253,22 +257,22 @@ public object IntIdDSL {
     ignore: Array<out Column<*>>? = null,
     limit: Int? = null,
     `where`: SqlExpressionBuilder.() -> Op<Boolean>,
-  ): Int = IntIdTable.update(`where`, limit) {
+  ): Int = update(`where`, limit) {
     val ignoreColumns = ignore ?: arrayOf()
     assign(it, raw, selective = selective, *ignoreColumns)
   }
 
   public fun IntIdTable.updateByPrimaryKey(raw: IntId, vararg selective: Column<*>): Int =
-      IntIdTable.update(raw, selective = selective, ignore = arrayOf(id)) {
+      update(raw, selective = selective, ignore = arrayOf(id)) {
     IntIdTable.id eq id
   }
 
-  public fun IntIdTable.deleteByPrimaryKey(id: Int): Int = IntIdTable.deleteWhere {
+  public fun IntIdTable.deleteByPrimaryKey(id: Int): Int = deleteWhere {
     IntIdTable.id eq id
   }
 
   public fun IntIdTable.selectByPrimaryKey(id: Int, vararg selective: Column<*>): IntId? {
-    val query = IntIdTable.selectSlice(*selective).andWhere {
+    val query = selectSlice(*selective).andWhere {
       IntIdTable.id eq id
     }
     return query.firstOrNull()?.toIntId(*selective)
@@ -276,7 +280,7 @@ public object IntIdDSL {
 
   public fun IntIdTable.selectByPrimaryKeys(ids: Iterable<Int>, vararg selective: Column<*>):
       List<IntId> {
-    val query = IntIdTable.selectSlice(*selective).andWhere {
+    val query = selectSlice(*selective).andWhere {
       IntIdTable.id inList ids
     }
     return query.toIntIdList(*selective)
@@ -284,13 +288,13 @@ public object IntIdDSL {
 
   public fun IntIdTable.selectMany(vararg selective: Column<*>, `where`: Query.() -> Unit):
       List<IntId> {
-    val query = IntIdTable.selectSlice(*selective)
+    val query = selectSlice(*selective)
     `where`.invoke(query)
     return query.toIntIdList(*selective)
   }
 
   public fun IntIdTable.selectOne(vararg selective: Column<*>, `where`: Query.() -> Unit): IntId? {
-    val query = IntIdTable.selectSlice(*selective)
+    val query = selectSlice(*selective)
     `where`.invoke(query)
     return query.firstOrNull()?.toIntId(*selective)
   }
@@ -306,7 +310,7 @@ public object IntIdDSL {
       return OffsetList.empty()
     }
     val offsetKey = forwardToken?.let { Base64.getUrlDecoder().decode(it).toString(Charsets.UTF_8) }
-    val query = IntIdTable.selectSlice(*selective.toTypedArray())
+    val query = selectSlice(*selective.toTypedArray())
     offsetKey?.let {
       when(order) {
         SortOrder.DESC, SortOrder.DESC_NULLS_FIRST, SortOrder.DESC_NULLS_LAST->
@@ -344,7 +348,7 @@ public object IntIdDSL {
     val kp = forwardToken?.let { decodeToken(it) }
     val offsetKey = kp?.first
     val excludeKeys = kp?.second?.map { it.toInt() }
-    val query = IntIdTable.selectSlice(*selective.toTypedArray())
+    val query = selectSlice(*selective.toTypedArray())
     offsetKey?.let {
       when(order) {
         SortOrder.DESC, SortOrder.DESC_NULLS_FIRST, SortOrder.DESC_NULLS_LAST->

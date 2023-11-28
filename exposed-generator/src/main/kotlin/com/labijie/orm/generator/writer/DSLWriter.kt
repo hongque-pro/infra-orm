@@ -9,7 +9,6 @@ import com.labijie.orm.generator.writer.dsl.*
 import com.squareup.kotlinpoet.*
 import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
 import com.squareup.kotlinpoet.ksp.toTypeName
-import org.jetbrains.exposed.dao.id.EntityID
 import org.jetbrains.exposed.sql.Column
 import org.jetbrains.exposed.sql.Query
 import org.jetbrains.exposed.sql.ResultRow
@@ -73,6 +72,7 @@ object DSLWriter {
             .addImport("org.jetbrains.exposed.sql.SqlExpressionBuilder", "eq")
             .addType(
                 TypeSpec.objectBuilder(context.dslClass)
+                    .addAnnotation(suppressAnnotation("unused", "DuplicatedCode"))
                     .addComments("DSL support for ${context.tableClass.simpleName}", context)
                     .addProperty(allColumns)
                     .addFunction(parseRow)
@@ -155,7 +155,7 @@ object DSLWriter {
         //@Suppress("UNCHECKED_CAST")
         return FunSpec.builder("getColumnValue")
             .addTypeVariable(typeVar)
-            .addAnnotation(suppressAnnotation)
+            .addAnnotation(suppressUncheckedCastAnnotation)
             .receiver(context.pojoClass)
             .addParameter("column", Column::class.asTypeName().parameterizedBy(typeVar))
             .returns(typeVar)
@@ -325,15 +325,14 @@ object DSLWriter {
     ): FunSpec.Builder {
         this.beginControlFlow("val $varName = if(%N.%M())", columnSelectiveParameter, kotlinIsNotEmpty)
             .addStatement(
-                "%T.slice(%N.%M()).%M()",
-                context.tableClass,
+                "slice(%N.%M()).%M()",
                 selectiveParameter,
                 kotlinToList,
                 getExposedSqlMember("selectAll")
             )
             .endControlFlow()
             .beginControlFlow("else")
-            .addStatement("%T.%M()", context.tableClass, getExposedSqlMember("selectAll"))
+            .addStatement("%M()", getExposedSqlMember("selectAll"))
             .endControlFlow()
         return this
     }

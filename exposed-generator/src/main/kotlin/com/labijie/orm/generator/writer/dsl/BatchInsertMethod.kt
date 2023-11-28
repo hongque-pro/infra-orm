@@ -24,7 +24,7 @@ object BatchInsertMethod : AbstractDSLMethodBuilder() {
             .addParameter(ignoreErrors)
             .addParameter(shouldReturnGeneratedValues)
             .returns(List::class.asTypeName().parameterizedBy(ResultRow::class.asTypeName()))
-            .beginControlFlow("val rows = %T.%M(list, ignoreErrors, shouldReturnGeneratedValues)", context.base.tableClass, getExposedSqlMember("batchInsert"))
+            .beginControlFlow("val rows = %M(list, ignoreErrors, shouldReturnGeneratedValues)", getExposedSqlMember("batchInsert"))
             .addStatement("entry -> %N(this, entry)", context.assignFunc)
             .endControlFlow()
             .addStatement("return rows")

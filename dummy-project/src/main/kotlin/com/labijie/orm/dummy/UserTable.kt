@@ -3,6 +3,7 @@ package com.labijie.orm.dummy
 
 import com.labijie.infra.orm.SimpleLongIdTable
 import com.labijie.infra.orm.SimpleStringIdTable
+import com.labijie.infra.orm.TableKspIgnore
 import org.jetbrains.exposed.dao.id.IntIdTable
 import org.jetbrains.exposed.sql.*
 
@@ -14,6 +15,9 @@ object UserTable : SimpleLongIdTable("my", "id") {
     var status = enumeration("status", TestEnum::class)
     var count = integer("count")
     var description = varchar("desc", 255)
+
+    override val tableName: String
+        get() = super.tableName
 }
 
 object ShopTable : SimpleLongIdTable("my", "id") {
@@ -51,9 +55,7 @@ object TestSimpleTable : SimpleStringIdTable("exposed_test_entities") {
     val byteCol = byte("dddd")
 }
 
-fun AA(){
-//    val list = mutableListOf<TestEntity>()
-//    val r = TestEntityTable.batchInsert(list){raw->
-//        TestEntityDSL.applyInsert(this, raw)
-//    }
+@TableKspIgnore
+object IgnoreTable : SimpleStringIdTable("ignore") {
+    var name: Column<String> = varchar("name", 50)
 }

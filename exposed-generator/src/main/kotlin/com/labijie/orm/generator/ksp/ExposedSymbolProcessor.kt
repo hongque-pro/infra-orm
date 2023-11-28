@@ -1,12 +1,12 @@
 package com.labijie.orm.generator.ksp
 
 import com.google.devtools.ksp.getAllSuperTypes
-import com.google.devtools.ksp.processing.CodeGenerator
 import com.google.devtools.ksp.processing.KSPLogger
 import com.google.devtools.ksp.processing.Resolver
 import com.google.devtools.ksp.processing.SymbolProcessor
 import com.google.devtools.ksp.symbol.*
 import com.google.devtools.ksp.visitor.KSDefaultVisitor
+import com.labijie.infra.orm.TableKspIgnore
 import com.labijie.orm.generator.*
 import com.labijie.orm.generator.writer.DSLWriter
 import com.labijie.orm.generator.writer.PojoWriter
@@ -107,7 +107,12 @@ class ExposedSymbolProcessor(
         override fun visitClassDeclaration(classDeclaration: KSClassDeclaration, data: VisitContext) {
             val isTable = classDeclaration.getAllSuperTypes()
                 .any { it.declaration.qualifiedName?.asString() == Table::class.qualifiedName }
-            if (classDeclaration.classKind == ClassKind.OBJECT && isTable) {
+
+            val isIgnore = classDeclaration.annotations.any {
+                it.shortName.asString() == TableKspIgnore::class.simpleName
+            }
+
+            if (classDeclaration.classKind == ClassKind.OBJECT && isTable && !isIgnore) {
                 acceptTable(classDeclaration, data)
             } else {
                 logger.println("skip symbol: ${classDeclaration.qualifiedName?.asString()}")

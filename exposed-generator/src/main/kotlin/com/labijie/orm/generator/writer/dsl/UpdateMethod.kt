@@ -44,7 +44,7 @@ object UpdateMethod : AbstractDSLMethodBuilder() {
             .addParameter(limitParam)
             .addParameter(whereParam)
             .returns(Int::class)
-            .beginControlFlow("return %T.%M(%N, limit)", context.base.tableClass, getExposedSqlMember("update"), whereParam)
+            .beginControlFlow("return %M(%N, limit)", getExposedSqlMember("update"), whereParam)
             .addStatement("val ignoreColumns = ${ignore.name} ?: arrayOf()")
             .addStatement("%N(it, ${context.entityParamName}, selective = %N, *ignoreColumns)", context.assignFunc, selective)
             .endControlFlow()
@@ -65,7 +65,9 @@ object UpdateMethod : AbstractDSLMethodBuilder() {
             .addParameter(context.entityParamName, context.base.pojoClass)
             .addParameter(selective)
             .returns(Int::class)
-            .beginControlFlow("return %T.%N(${context.entityParamName}, selective = %N, ignore = arrayOf(${primaryKeys}))", context.base.tableClass, baseUpdateMethod, selective)
+            .beginControlFlow("return %N(${context.entityParamName}, selective = %N, ignore = arrayOf(${primaryKeys}))",
+                baseUpdateMethod,
+                selective)
             .addCode(buildPrimaryKeyWhere(context))
             .endControlFlow()
             .build()

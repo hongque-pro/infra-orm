@@ -58,6 +58,10 @@ import org.jetbrains.exposed.sql.update
  * Origin Exposed Table:
  * @see com.labijie.orm.dummy.UserTable
  */
+@kotlin.Suppress(
+  "unused",
+  "DuplicatedCode",
+)
 public object UserDSL {
   public val UserTable.allColumns: Array<Column<*>> by lazy {
     arrayOf(
@@ -150,10 +154,10 @@ public object UserDSL {
 
   public fun UserTable.selectSlice(vararg selective: Column<*>): Query {
     val query = if(selective.isNotEmpty()) {
-      UserTable.slice(selective.toList()).selectAll()
+      slice(selective.toList()).selectAll()
     }
     else {
-      UserTable.selectAll()
+      selectAll()
     }
     return query
   }
@@ -164,7 +168,7 @@ public object UserDSL {
   public fun UpdateBuilder<*>.setValueSelective(raw: User, vararg selective: Column<*>): Unit =
       assign(this, raw, selective = selective)
 
-  public fun UserTable.insert(raw: User): InsertStatement<Number> = UserTable.insert {
+  public fun UserTable.insert(raw: User): InsertStatement<Number> = insert {
     assign(it, raw)
   }
 
@@ -173,7 +177,7 @@ public object UserDSL {
     ignoreErrors: Boolean = false,
     shouldReturnGeneratedValues: Boolean = false,
   ): List<ResultRow> {
-    val rows = UserTable.batchInsert(list, ignoreErrors, shouldReturnGeneratedValues) {
+    val rows = batchInsert(list, ignoreErrors, shouldReturnGeneratedValues) {
       entry -> assign(this, entry)
     }
     return rows
@@ -185,22 +189,22 @@ public object UserDSL {
     ignore: Array<out Column<*>>? = null,
     limit: Int? = null,
     `where`: SqlExpressionBuilder.() -> Op<Boolean>,
-  ): Int = UserTable.update(`where`, limit) {
+  ): Int = update(`where`, limit) {
     val ignoreColumns = ignore ?: arrayOf()
     assign(it, raw, selective = selective, *ignoreColumns)
   }
 
-  public fun UserTable.updateByPrimaryKey(raw: User, vararg selective: Column<*>): Int =
-      UserTable.update(raw, selective = selective, ignore = arrayOf(id)) {
+  public fun UserTable.updateByPrimaryKey(raw: User, vararg selective: Column<*>): Int = update(raw,
+      selective = selective, ignore = arrayOf(id)) {
     UserTable.id eq id
   }
 
-  public fun UserTable.deleteByPrimaryKey(id: Long): Int = UserTable.deleteWhere {
+  public fun UserTable.deleteByPrimaryKey(id: Long): Int = deleteWhere {
     UserTable.id eq id
   }
 
   public fun UserTable.selectByPrimaryKey(id: Long, vararg selective: Column<*>): User? {
-    val query = UserTable.selectSlice(*selective).andWhere {
+    val query = selectSlice(*selective).andWhere {
       UserTable.id eq id
     }
     return query.firstOrNull()?.toUser(*selective)
@@ -208,7 +212,7 @@ public object UserDSL {
 
   public fun UserTable.selectByPrimaryKeys(ids: Iterable<Long>, vararg selective: Column<*>):
       List<User> {
-    val query = UserTable.selectSlice(*selective).andWhere {
+    val query = selectSlice(*selective).andWhere {
       UserTable.id inList ids
     }
     return query.toUserList(*selective)
@@ -216,13 +220,13 @@ public object UserDSL {
 
   public fun UserTable.selectMany(vararg selective: Column<*>, `where`: Query.() -> Unit):
       List<User> {
-    val query = UserTable.selectSlice(*selective)
+    val query = selectSlice(*selective)
     `where`.invoke(query)
     return query.toUserList(*selective)
   }
 
   public fun UserTable.selectOne(vararg selective: Column<*>, `where`: Query.() -> Unit): User? {
-    val query = UserTable.selectSlice(*selective)
+    val query = selectSlice(*selective)
     `where`.invoke(query)
     return query.firstOrNull()?.toUser(*selective)
   }
@@ -238,7 +242,7 @@ public object UserDSL {
       return OffsetList.empty()
     }
     val offsetKey = forwardToken?.let { Base64.getUrlDecoder().decode(it).toString(Charsets.UTF_8) }
-    val query = UserTable.selectSlice(*selective.toTypedArray())
+    val query = selectSlice(*selective.toTypedArray())
     offsetKey?.let {
       when(order) {
         SortOrder.DESC, SortOrder.DESC_NULLS_FIRST, SortOrder.DESC_NULLS_LAST->
@@ -276,7 +280,7 @@ public object UserDSL {
     val kp = forwardToken?.let { decodeToken(it) }
     val offsetKey = kp?.first
     val excludeKeys = kp?.second?.map { it.toLong() }
-    val query = UserTable.selectSlice(*selective.toTypedArray())
+    val query = selectSlice(*selective.toTypedArray())
     offsetKey?.let {
       when(order) {
         SortOrder.DESC, SortOrder.DESC_NULLS_FIRST, SortOrder.DESC_NULLS_LAST->

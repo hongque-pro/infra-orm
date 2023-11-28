@@ -57,6 +57,10 @@ import org.jetbrains.exposed.sql.update
  * Origin Exposed Table:
  * @see com.labijie.orm.dummy.ShopTable
  */
+@kotlin.Suppress(
+  "unused",
+  "DuplicatedCode",
+)
 public object ShopDSL {
   public val ShopTable.allColumns: Array<Column<*>> by lazy {
     arrayOf(
@@ -140,10 +144,10 @@ public object ShopDSL {
 
   public fun ShopTable.selectSlice(vararg selective: Column<*>): Query {
     val query = if(selective.isNotEmpty()) {
-      ShopTable.slice(selective.toList()).selectAll()
+      slice(selective.toList()).selectAll()
     }
     else {
-      ShopTable.selectAll()
+      selectAll()
     }
     return query
   }
@@ -154,7 +158,7 @@ public object ShopDSL {
   public fun UpdateBuilder<*>.setValueSelective(raw: Shop, vararg selective: Column<*>): Unit =
       assign(this, raw, selective = selective)
 
-  public fun ShopTable.insert(raw: Shop): InsertStatement<Number> = ShopTable.insert {
+  public fun ShopTable.insert(raw: Shop): InsertStatement<Number> = insert {
     assign(it, raw)
   }
 
@@ -163,7 +167,7 @@ public object ShopDSL {
     ignoreErrors: Boolean = false,
     shouldReturnGeneratedValues: Boolean = false,
   ): List<ResultRow> {
-    val rows = ShopTable.batchInsert(list, ignoreErrors, shouldReturnGeneratedValues) {
+    val rows = batchInsert(list, ignoreErrors, shouldReturnGeneratedValues) {
       entry -> assign(this, entry)
     }
     return rows
@@ -175,22 +179,22 @@ public object ShopDSL {
     ignore: Array<out Column<*>>? = null,
     limit: Int? = null,
     `where`: SqlExpressionBuilder.() -> Op<Boolean>,
-  ): Int = ShopTable.update(`where`, limit) {
+  ): Int = update(`where`, limit) {
     val ignoreColumns = ignore ?: arrayOf()
     assign(it, raw, selective = selective, *ignoreColumns)
   }
 
-  public fun ShopTable.updateByPrimaryKey(raw: Shop, vararg selective: Column<*>): Int =
-      ShopTable.update(raw, selective = selective, ignore = arrayOf(id)) {
+  public fun ShopTable.updateByPrimaryKey(raw: Shop, vararg selective: Column<*>): Int = update(raw,
+      selective = selective, ignore = arrayOf(id)) {
     ShopTable.id eq id
   }
 
-  public fun ShopTable.deleteByPrimaryKey(id: Long): Int = ShopTable.deleteWhere {
+  public fun ShopTable.deleteByPrimaryKey(id: Long): Int = deleteWhere {
     ShopTable.id eq id
   }
 
   public fun ShopTable.selectByPrimaryKey(id: Long, vararg selective: Column<*>): Shop? {
-    val query = ShopTable.selectSlice(*selective).andWhere {
+    val query = selectSlice(*selective).andWhere {
       ShopTable.id eq id
     }
     return query.firstOrNull()?.toShop(*selective)
@@ -198,7 +202,7 @@ public object ShopDSL {
 
   public fun ShopTable.selectByPrimaryKeys(ids: Iterable<Long>, vararg selective: Column<*>):
       List<Shop> {
-    val query = ShopTable.selectSlice(*selective).andWhere {
+    val query = selectSlice(*selective).andWhere {
       ShopTable.id inList ids
     }
     return query.toShopList(*selective)
@@ -206,13 +210,13 @@ public object ShopDSL {
 
   public fun ShopTable.selectMany(vararg selective: Column<*>, `where`: Query.() -> Unit):
       List<Shop> {
-    val query = ShopTable.selectSlice(*selective)
+    val query = selectSlice(*selective)
     `where`.invoke(query)
     return query.toShopList(*selective)
   }
 
   public fun ShopTable.selectOne(vararg selective: Column<*>, `where`: Query.() -> Unit): Shop? {
-    val query = ShopTable.selectSlice(*selective)
+    val query = selectSlice(*selective)
     `where`.invoke(query)
     return query.firstOrNull()?.toShop(*selective)
   }
@@ -228,7 +232,7 @@ public object ShopDSL {
       return OffsetList.empty()
     }
     val offsetKey = forwardToken?.let { Base64.getUrlDecoder().decode(it).toString(Charsets.UTF_8) }
-    val query = ShopTable.selectSlice(*selective.toTypedArray())
+    val query = selectSlice(*selective.toTypedArray())
     offsetKey?.let {
       when(order) {
         SortOrder.DESC, SortOrder.DESC_NULLS_FIRST, SortOrder.DESC_NULLS_LAST->
@@ -266,7 +270,7 @@ public object ShopDSL {
     val kp = forwardToken?.let { decodeToken(it) }
     val offsetKey = kp?.first
     val excludeKeys = kp?.second?.map { it.toLong() }
-    val query = ShopTable.selectSlice(*selective.toTypedArray())
+    val query = selectSlice(*selective.toTypedArray())
     offsetKey?.let {
       when(order) {
         SortOrder.DESC, SortOrder.DESC_NULLS_FIRST, SortOrder.DESC_NULLS_LAST->

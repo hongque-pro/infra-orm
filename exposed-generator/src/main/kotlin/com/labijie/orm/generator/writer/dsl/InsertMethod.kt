@@ -14,7 +14,7 @@ object InsertMethod: AbstractDSLMethodBuilder() {
             .receiver(context.base.tableClass)
             .addParameter(context.entityParamName, context.base.pojoClass)
             .returns(resultType)
-            .beginControlFlow("return %T.%M", context.base.tableClass, getExposedSqlMember("insert"))
+            .beginControlFlow("return %M", getExposedSqlMember("insert"))
             .addStatement("%N(it, ${context.entityParamName})", context.assignFunc)
             .endControlFlow()
             .build()
