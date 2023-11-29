@@ -10,7 +10,7 @@ Infra-ORM 提供 exposed-starter 和 exposed-test-starter 包, 帮助你快速�
 
 ```kotlin
 dependencies {
-    api("com.labijie.orm:exposed-starter", Versions.ormVersion)
+    api("com.labijie.orm:exposed-springboot-starter", Versions.ormVersion)
 }
 ```
 
