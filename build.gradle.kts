@@ -10,8 +10,8 @@ allprojects {
 
     infra {
         useDefault {
-            includeSource = false
-            useMavenProxy = false
+            includeSource = true
+            includeDocument = true
         }
         usePublishPlugin()
     }

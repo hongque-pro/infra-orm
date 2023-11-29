@@ -16,14 +16,11 @@
 ```ktolin
 
 plugins {
-    id("com.labijie.infra") version 2.0.2 apply true
-}
-
-infra {
-    useKspPlugin(project("com.labijie.infra:exposed-generator"))
+    id("com.google.devtools.ksp") version <ksp plugin version>
 }
 
 dependencies {
+    ksp("com.labijie.orm:exposed-generator:<infra exposed version>")
     implementation(project("com.labijie.infra:exposed-starter"))
 }
 
