@@ -1,14 +1,11 @@
 package com.labijie.orm.generator.writer.dsl
 
-import com.google.devtools.ksp.processing.KSBuiltIns
 import com.labijie.infra.orm.OffsetList
-import com.labijie.orm.generator.ColumnMetadata
 import com.labijie.orm.generator.DefaultValues
 import com.labijie.orm.generator.writer.AbstractDSLMethodBuilder
 import com.labijie.orm.generator.writer.DSLCodeContext
 import com.squareup.kotlinpoet.*
 import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
-import com.squareup.kotlinpoet.ksp.toClassName
 import org.jetbrains.exposed.sql.*
 import java.util.*
 import kotlin.reflect.full.companionObject
@@ -151,12 +148,12 @@ object SelectMethod : AbstractDSLMethodBuilder() {
             )
             .addStatement(
                 "query.%M { %N lessEq it }",
-                getExposedSqlMember("andWhere"),
+                andWhereMethod,
                 sortColumn
             )
             .addStatement(
                 "else-> query.%M { %N greaterEq it }",
-                getExposedSqlMember("andWhere"),
+                andWhereMethod,
                 sortColumn
             )
             .endControlFlow()
@@ -171,7 +168,7 @@ object SelectMethod : AbstractDSLMethodBuilder() {
             )
             .addStatement(
                 "query.%M { %M notInList it }",
-                getExposedSqlMember("andWhere"),
+                andWhereMethod,
                 primaryKey
             )
             .endControlFlow()
@@ -269,26 +266,26 @@ object SelectMethod : AbstractDSLMethodBuilder() {
             .apply {
                 if (parseMethod != null) {
                     addStatement(
-                        "query.%N { %M less it.%M() }",
-                        getExposedSqlMember("andWhere"),
+                        "query.%M { %M less it.%M() }",
+                        andWhereMethod,
                         primaryKey,
                         parseMethod
                     )
                     .addStatement(
                         "else-> query.%M { %N greater it.%M() }",
-                        getExposedSqlMember("andWhere"),
+                        andWhereMethod,
                         primaryKey,
                         parseMethod
                     )
                 } else {
                     addStatement(
-                        "query.%N { %M less it }",
-                        getExposedSqlMember("andWhere"),
+                        "query.%M { %M less it }",
+                        andWhereMethod,
                         primaryKey
                     )
                     .addStatement(
                         "else-> query.%M { %N greater it }",
-                        getExposedSqlMember("andWhere"),
+                        andWhereMethod,
                         primaryKey
                     )
                 }

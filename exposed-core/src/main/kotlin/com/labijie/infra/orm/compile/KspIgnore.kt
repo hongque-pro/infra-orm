@@ -1,4 +1,4 @@
-package com.labijie.infra.orm
+package com.labijie.infra.orm.compile
 
 /**
  * @author Anders Xiao
@@ -6,4 +6,4 @@ package com.labijie.infra.orm
  */
 @Retention(AnnotationRetention.SOURCE)
 @Target(AnnotationTarget.CLASS)
-annotation class TableKspIgnore
+annotation class KspIgnore

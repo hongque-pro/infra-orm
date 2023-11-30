@@ -20,8 +20,9 @@ object DeleteByPrimaryKeyMethod : AbstractDSLMethodBuilder() {
                 }
             }
             .returns(Int::class)
-            .beginControlFlow("return %M", getExposedSqlMember("deleteWhere"))
+            .beginControlFlow("return %M", getSqlExtendMethod("deleteWhere"))
             .addCode(block)
+            .addStatement("")
             .endControlFlow()
             .build()
     }

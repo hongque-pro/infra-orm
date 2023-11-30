@@ -6,7 +6,8 @@ import com.google.devtools.ksp.processing.Resolver
 import com.google.devtools.ksp.processing.SymbolProcessor
 import com.google.devtools.ksp.symbol.*
 import com.google.devtools.ksp.visitor.KSDefaultVisitor
-import com.labijie.infra.orm.TableKspIgnore
+import com.labijie.infra.orm.compile.KspIgnore
+import com.labijie.infra.orm.compile.KspPrimaryKey
 import com.labijie.orm.generator.*
 import com.labijie.orm.generator.writer.DSLWriter
 import com.labijie.orm.generator.writer.PojoWriter
@@ -15,7 +16,7 @@ import org.jetbrains.exposed.sql.Table
 
 class ExposedSymbolProcessor(
     private val logger: KSPLogger,
-    options: Map<String, String>
+    options: Map<String, String> = mapOf()
 ) : SymbolProcessor {
 
     private var invoked = false
@@ -39,7 +40,7 @@ class ExposedSymbolProcessor(
         logger.println("${tables.size} exposed table processed")
 
         tables.forEach {
-            val context = GenerationContext(it, writerOptions, logger)
+            val context = GenerationContext(it, writerOptions)
             PojoWriter.write(context)
             DSLWriter.write(context)
         }
@@ -56,7 +57,7 @@ class ExposedSymbolProcessor(
         override fun visitFile(file: KSFile, data: VisitContext) {
             if(data.checkVisited(file)) return
             currentFile = file.filePath
-            logger.println("process file: ${file.filePath}")
+            logger.info("process file: ${file.filePath}")
             file.declarations.forEach {
                 it.accept(this, data)
             }
@@ -72,21 +73,16 @@ class ExposedSymbolProcessor(
                 val columnType = property.getColumnType()
                 if (columnType != null) {
                     val columnName = property.simpleName.getShortName()
-                    val isPrimary = ((table.kind == TableKind.ExposedIdTable || table.kind == TableKind.SimpleIdTable) && columnName == "id")
+                    val isSimplePrimary = ((table.kind == TableKind.ExposedIdTable || table.kind == TableKind.SimpleIdTable) && columnName == "id")
+                    val isAnnotatedPrimary = property.annotations.any {
+                        it.annotationType.resolve().declaration.qualifiedName?.asString() == KspPrimaryKey::class.qualifiedName
+                    }
 
+                    val isPrimaryKey = isSimplePrimary || isAnnotatedPrimary
 
-                    logger.println("property: ${columnName}, table: ${table.kind}")
+                    val col = collectColumn(property, columnType, isPrimaryKey, table)
 
-                    val col = ColumnMetadata(
-                        name = property.simpleName.getShortName(),
-                        type = columnType.type,
-                        rawType = columnType.rawType,
-                        isNull = columnType.isNullable,
-                        isPrimary = isPrimary,
-                        isEntityId = isPrimary && table.kind == TableKind.ExposedIdTable
-                    )
-
-                    if (isPrimary) {
+                    if (isPrimaryKey) {
                         table.primaryKeys.add(col)
                     }
 
@@ -95,6 +91,23 @@ class ExposedSymbolProcessor(
             }
         }
 
+        private fun collectColumn(
+            property: KSPropertyDeclaration,
+            columnType: ColumnType,
+            isPrimary: Boolean,
+            table: TableMetadata
+        ): ColumnMetadata {
+            logger.info("column: ${property.simpleName.getShortName()}")
+            val col = ColumnMetadata(
+                name = property.simpleName.getShortName(),
+                type = columnType.type,
+                rawType = columnType.rawType,
+                isNull = columnType.isNullable,
+                isPrimary = isPrimary,
+                isEntityId = isPrimary && table.kind == TableKind.ExposedIdTable
+            )
+            return col
+        }
 
         override fun visitDeclaration(declaration: KSDeclaration, data: VisitContext) {
             if(data.checkVisited(declaration)) return
@@ -106,10 +119,13 @@ class ExposedSymbolProcessor(
 
         override fun visitClassDeclaration(classDeclaration: KSClassDeclaration, data: VisitContext) {
             val isTable = classDeclaration.getAllSuperTypes()
-                .any { it.declaration.qualifiedName?.asString() == Table::class.qualifiedName }
+                .any {
+                    it.declaration.qualifiedName?.asString() == Table::class.qualifiedName
+
+                }
 
             val isIgnore = classDeclaration.annotations.any {
-                it.shortName.asString() == TableKspIgnore::class.simpleName
+                it.shortName.asString() == KspIgnore::class.simpleName
             }
 
             if (classDeclaration.classKind == ClassKind.OBJECT && isTable && !isIgnore) {

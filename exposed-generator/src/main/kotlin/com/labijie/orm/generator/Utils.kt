@@ -6,6 +6,7 @@ import com.squareup.kotlinpoet.*
 import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
 import org.jetbrains.exposed.dao.id.EntityID
 import org.jetbrains.exposed.sql.Column
+import org.jetbrains.exposed.sql.Table
 import java.io.File
 import java.nio.file.Files
 import java.nio.file.Path
@@ -55,6 +56,8 @@ private fun KSType.getIDTypeFromEntityID(): KSType? {
     }
     return this.arguments.first().type?.resolve()
 }
+
+
 
 fun KSPropertyDeclaration.getColumnType(): ColumnType? {
     val argCount = this.type.element?.typeArguments?.count()

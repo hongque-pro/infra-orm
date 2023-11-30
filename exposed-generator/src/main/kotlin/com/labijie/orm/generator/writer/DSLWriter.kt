@@ -2,7 +2,7 @@ package com.labijie.orm.generator.writer
 
 import com.labijie.orm.generator.*
 import com.labijie.orm.generator.writer.AbstractDSLMethodBuilder.Companion.columnSelectiveParameter
-import com.labijie.orm.generator.writer.AbstractDSLMethodBuilder.Companion.getExposedSqlMember
+import com.labijie.orm.generator.writer.AbstractDSLMethodBuilder.Companion.getSqlExtendMethod
 import com.labijie.orm.generator.writer.AbstractDSLMethodBuilder.Companion.kotlinIsNotEmpty
 import com.labijie.orm.generator.writer.AbstractDSLMethodBuilder.Companion.kotlinToList
 import com.labijie.orm.generator.writer.dsl.*
@@ -69,7 +69,6 @@ object DSLWriter {
 
         val file = fileBuilder
             .addImport(context.tableClass, context.table.columns.map { it.name })
-            .addImport("org.jetbrains.exposed.sql.SqlExpressionBuilder", "eq")
             .addType(
                 TypeSpec.objectBuilder(context.dslClass)
                     .addAnnotation(suppressAnnotation("unused", "DuplicatedCode", "MemberVisibilityCanBePrivate", "RemoveRedundantQualifierName"))
@@ -105,7 +104,6 @@ object DSLWriter {
             )
             .build()
         val folder = context.options.getSourceFolder(context.table)
-        context.logger.println("File generate in '${folder}'")
         file.writeTo(folder)
     }
 
@@ -229,11 +227,12 @@ object DSLWriter {
             .addParameter(selective)
             .addParameter(ignore)
             .returns(Unit::class.asTypeName())
+            .addStatement("val list = if(selective.isNullOrEmpty()) null else selective")
             .apply {
                 context.table.columns.forEach {
                     if (!it.isEntityId) {
                         this.addStatement(
-                            "if((selective == null || selective.contains(${it.name})) && !%N.contains(${it.name}))",
+                            "if((list == null || list.contains(${it.name})) && !%N.contains(${it.name}))",
                             ignore
                         )
                         this.addStatement("  builder[${it.name}] = ${OBJECT_PARAMETER_NAME}.${it.name}")
@@ -328,11 +327,11 @@ object DSLWriter {
                 "slice(%N.%M()).%M()",
                 selectiveParameter,
                 kotlinToList,
-                getExposedSqlMember("selectAll")
+                getSqlExtendMethod("selectAll")
             )
             .endControlFlow()
             .beginControlFlow("else")
-            .addStatement("%M()", getExposedSqlMember("selectAll"))
+            .addStatement("%M()", getSqlExtendMethod("selectAll"))
             .endControlFlow()
         return this
     }

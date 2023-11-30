@@ -12,6 +12,7 @@ allprojects {
         useDefault {
             includeSource = true
             includeDocument = true
+            useMavenProxy = false
         }
         usePublishPlugin()
     }

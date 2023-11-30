@@ -3,8 +3,7 @@ package com.labijie.orm.generator.writer
 import com.labijie.orm.generator.parameterizedWildcard
 import com.squareup.kotlinpoet.*
 import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
-import org.jetbrains.exposed.sql.Column
-import org.jetbrains.exposed.sql.Query
+import org.jetbrains.exposed.sql.*
 
 abstract class AbstractDSLMethodBuilder : IDSLMethodBuilder {
 
@@ -50,8 +49,17 @@ abstract class AbstractDSLMethodBuilder : IDSLMethodBuilder {
                 .build()
         }
 
+        fun getExposedSqlExpressionBuilderMember(member: String, isExtension: Boolean = true): MemberName {
+            val className = SqlExpressionBuilder::class.asClassName()
+            return MemberName(className, member, isExtension)
+        }
 
-        fun getExposedSqlMember(member: String, isExtension: Boolean = true): MemberName {
+        fun getExpressionMethod(methodName: String): MemberName {
+            val expressionClassName = Expression::class.asClassName()
+            return MemberName(expressionClassName, methodName, true)
+        }
+
+        fun getSqlExtendMethod(member: String, isExtension: Boolean = true): MemberName {
             return MemberName("org.jetbrains.exposed.sql", member, isExtension)
         }
 
@@ -73,7 +81,11 @@ abstract class AbstractDSLMethodBuilder : IDSLMethodBuilder {
         val kotlinToList = kotlinCollectionExtensionMethod("toList")
         val kotlinToTypedArray = kotlinCollectionExtensionMethod("toTypedArray")
 
-        val exposedAndWhere = getExposedSqlMember("andWhere")
+
+
+        val eqMethod = getExposedSqlExpressionBuilderMember("eq")
+        val andMethod = getSqlExtendMethod("and")
+        val andWhereMethod = getSqlExtendMethod("andWhere")
     }
 
 
@@ -91,19 +103,14 @@ abstract class AbstractDSLMethodBuilder : IDSLMethodBuilder {
         return this.base.table.primaryKeys.count() == 1
     }
 
-    protected fun buildPrimaryKeyWhere(context: DSLCodeContext): CodeBlock {
-        val primaryKeyCount = context.base.table.primaryKeys.size
+    protected fun buildPrimaryKeyWhere(context: DSLCodeContext, objectVarName: String ? = null): CodeBlock {
 
+        val pbjectPrefix = if(objectVarName.isNullOrBlank()) "" else "${objectVarName}."
         return CodeBlock.builder().apply {
-            if (primaryKeyCount == 1) {
-                val key = context.base.table.primaryKeys.first()
-                addStatement("%L eq ${key.name}", "${context.base.table.className}.${key.name}")
-            } else {
-                context.base.table.primaryKeys.mapIndexed { i, it ->
-                    addStatement("(%L eq ${it.name})", "${context.base.table.className}.${it.name}")
-                    if (i < context.base.table.primaryKeys.size - 1) {
-                        addStatement(" %M ", getExposedSqlMember("and"))
-                    }
+            context.base.table.primaryKeys.forEachIndexed { i, key ->
+                add("%L.%M(${pbjectPrefix}${key.name})", "${context.base.table.className}.${key.name}", eqMethod)
+                if (i < context.base.table.primaryKeys.size - 1) {
+                    add(" %M ", andMethod)
                 }
             }
         }.build()

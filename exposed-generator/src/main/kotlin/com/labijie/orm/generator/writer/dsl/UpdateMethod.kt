@@ -5,9 +5,11 @@ import com.labijie.orm.generator.writer.AbstractDSLMethodBuilder
 import com.labijie.orm.generator.writer.DSLCodeContext
 import com.squareup.kotlinpoet.*
 import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
+import com.squareup.kotlinpoet.ksp.toTypeName
 import org.jetbrains.exposed.sql.Column
 import org.jetbrains.exposed.sql.Op
 import org.jetbrains.exposed.sql.SqlExpressionBuilder
+import org.jetbrains.exposed.sql.statements.UpdateStatement
 
 object UpdateMethod : AbstractDSLMethodBuilder() {
 
@@ -44,7 +46,7 @@ object UpdateMethod : AbstractDSLMethodBuilder() {
             .addParameter(limitParam)
             .addParameter(whereParam)
             .returns(Int::class)
-            .beginControlFlow("return %M(%N, limit)", getExposedSqlMember("update"), whereParam)
+            .beginControlFlow("return %M(%N, limit)", getSqlExtendMethod("update"), whereParam)
             .addStatement("val ignoreColumns = ${ignore.name} ?: arrayOf()")
             .addStatement("%N(it, ${context.entityParamName}, selective = %N, *ignoreColumns)", context.assignFunc, selective)
             .endControlFlow()
@@ -52,6 +54,7 @@ object UpdateMethod : AbstractDSLMethodBuilder() {
     }
 
     private fun buildUpdateByIdMethod(context: DSLCodeContext, baseUpdateMethod: FunSpec): FunSpec {
+
 
         val selective = ParameterSpec.builder("selective", Column::class.asTypeName().parameterizedWildcard())
             .apply {
@@ -68,8 +71,47 @@ object UpdateMethod : AbstractDSLMethodBuilder() {
             .beginControlFlow("return %N(${context.entityParamName}, selective = %N, ignore = arrayOf(${primaryKeys}))",
                 baseUpdateMethod,
                 selective)
-            .addCode(buildPrimaryKeyWhere(context))
+            .addCode(buildPrimaryKeyWhere(context, context.entityParamName))
+            .addStatement("")
             .endControlFlow()
+            .build()
+    }
+
+    private fun buildUpdateByIdMethod2(context: DSLCodeContext): FunSpec {
+
+        val params = context.base.table.primaryKeys.map {
+            ParameterSpec.builder(it.name, it.type.toTypeName())
+                .build()
+        }
+
+        /**
+         * public fun Table.updateByPrimaryKey(id: Int, body: Table.(UpdateStatement) -> Unit): Int =
+         *     IntIdTable.update({ Table.id.eq(id) }, body = body)
+         *
+         */
+
+        val rec = context.base.tableClass
+        val bodyLambda = LambdaTypeName.get(rec, UpdateStatement::class.asClassName(), returnType = Unit::class.asTypeName())
+
+        val body = ParameterSpec.builder("builder", bodyLambda)
+            .build()
+
+        return FunSpec.builder("updateByPrimaryKey")
+            .receiver(context.base.tableClass)
+            .apply {
+                params.forEach {
+                    addParameter(it)
+                }
+            }
+            .addParameter(body)
+            .returns(Int::class)
+            .addCode("return update({ ")
+            .apply {
+               addCode(buildPrimaryKeyWhere(context))
+            }
+            .addCode(" }")
+            .addCode(", body = builder")
+            .addCode(")")
             .build()
     }
 
@@ -79,8 +121,9 @@ object UpdateMethod : AbstractDSLMethodBuilder() {
             return listOf(baseUpdate)
         }
         val updateById = buildUpdateByIdMethod(context, baseUpdate)
+        val updateById2 = buildUpdateByIdMethod2(context)
 
-        return listOf(baseUpdate, updateById)
+        return listOf(baseUpdate, updateById, updateById2)
     }
 
 }

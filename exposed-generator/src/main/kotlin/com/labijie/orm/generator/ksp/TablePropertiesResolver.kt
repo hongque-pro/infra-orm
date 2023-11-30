@@ -4,9 +4,11 @@ import com.google.devtools.ksp.getDeclaredProperties
 import com.google.devtools.ksp.processing.KSPLogger
 import com.google.devtools.ksp.symbol.KSClassDeclaration
 import com.google.devtools.ksp.symbol.KSPropertyDeclaration
+import com.google.devtools.ksp.symbol.KSPropertySetter
 import org.jetbrains.exposed.sql.Table
 
 object TablePropertiesResolver {
+
 
     private fun resolveProperties(
         isTop: Boolean,
@@ -34,6 +36,15 @@ object TablePropertiesResolver {
         val agg = mutableMapOf<String, KSPropertyDeclaration>()
         resolveProperties(true, dc, agg) {
 
+            val matched = (it.qualifiedName!!.asString() != Table::class.qualifiedName)
+            matched
+        }
+        return agg.values
+    }
+
+    fun getPrimaryKey(dc: KSClassDeclaration): Collection<KSPropertyDeclaration> {
+        val agg = mutableMapOf<String, KSPropertyDeclaration>()
+        resolveProperties(true, dc, agg) {
             val matched = (it.qualifiedName!!.asString() != Table::class.qualifiedName)
             matched
         }

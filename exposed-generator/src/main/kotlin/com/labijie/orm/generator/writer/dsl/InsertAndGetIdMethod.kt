@@ -23,7 +23,7 @@ object InsertAndGetIdMethod : AbstractDSLMethodBuilder() {
             .receiver(context.base.tableClass)
             .addParameter(context.entityParamName, context.base.pojoClass)
             .returns(resultType)
-            .beginControlFlow("return %M", getExposedSqlMember("insertAndGetId"))
+            .beginControlFlow("return %M", getSqlExtendMethod("insertAndGetId"))
             .addStatement("%N(it, ${context.entityParamName})", context.assignFunc)
             .endControlFlow()
             .build()
