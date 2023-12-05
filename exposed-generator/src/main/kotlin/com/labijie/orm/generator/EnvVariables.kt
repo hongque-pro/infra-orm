@@ -1,6 +1,6 @@
 package com.labijie.orm.generator
 
 object EnvVariables {
-    const val PACKAGE_NAME = "exg_package"
-    const val PROJECT_DIR = "exg_out_dir"
+    const val PACKAGE_NAME = "orm.gen.package"
+    const val PROJECT_DIR = "orm.gen.dir"
 }

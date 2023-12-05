@@ -14,7 +14,7 @@ object PojoWriter {
                 TypeSpec.classBuilder(context.pojoClass)
                     .addComments("POJO for ${context.tableClass.simpleName}", context)
                     .addModifiers(KModifier.OPEN)
-                    .addProperty(context.table.columns)
+                    .addProperties(context.table.columns)
                     .build()
             )
             .build()
@@ -22,7 +22,7 @@ object PojoWriter {
         file.writeTo(context.options.getSourceFolder(context.table))
     }
 
-    private fun TypeSpec.Builder.addProperty(columns: Collection<ColumnMetadata>): TypeSpec.Builder {
+    private fun TypeSpec.Builder.addProperties(columns: Collection<ColumnMetadata>): TypeSpec.Builder {
         columns.forEach {
             addProperty(
                 PropertySpec.builder(

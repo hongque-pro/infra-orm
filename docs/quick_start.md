@@ -277,10 +277,10 @@ public open class MultiKey {
 > 为了降低学习成本，**Infra-ORM** 提供的配置不多，约定大于配置是不变的真理.
 
 
-|参数名|说明|
-|-------|-------|
-| exg_package| 生成代码的包名，如果不配置，默认会在你的 Table 类的包下创建 pojo 子包，代码文件将放入其中 |
-| exg_out_dir| 生成代码的目录，必须是**绝对路径**，如果不配置，默认生成到你的 Table 类所在的项目 kotlin 代码文件目录
+| 参数名          |说明|
+|--------------|-------|
+| orm.gen.package | 生成代码的包名，如果不配置，默认会在你的 Table 类的包下创建 pojo 子包，代码文件将放入其中 |
+| orm.gen.dir  | 生成代码的目录，必须是**绝对路径**，如果不配置，默认生成到你的 Table 类所在的项目 kotlin 代码文件目录
 
 > **exg_out_dir** 虽然要求**绝对路径**，但是你可以通过 gradle.build 中提供的变量得到项目目录,以达到相对路径的效果
 
@@ -291,8 +291,8 @@ public open class MultiKey {
 ```kotlin
 
 ksp {
-    arg("exg_package", "com.github.my.orm")
-    arg("exg_out_dir", project.rootProject.childProjects["other"]!!.projectDir.absolutePath)
+    arg("orm.gen.package", "com.github.my.orm")
+    arg("orm.gen.dir", project.rootProject.childProjects["other"]!!.projectDir.absolutePath)
 }
 
 ```

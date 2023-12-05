@@ -6,7 +6,7 @@ import com.google.devtools.ksp.processing.Resolver
 import com.google.devtools.ksp.processing.SymbolProcessor
 import com.google.devtools.ksp.symbol.*
 import com.google.devtools.ksp.visitor.KSDefaultVisitor
-import com.labijie.infra.orm.compile.KspIgnore
+import com.labijie.infra.orm.compile.KspTableIgnore
 import com.labijie.infra.orm.compile.KspPrimaryKey
 import com.labijie.orm.generator.*
 import com.labijie.orm.generator.writer.DSLWriter
@@ -125,7 +125,7 @@ class ExposedSymbolProcessor(
                 }
 
             val isIgnore = classDeclaration.annotations.any {
-                it.shortName.asString() == KspIgnore::class.simpleName
+                it.shortName.asString() == KspTableIgnore::class.simpleName
             }
 
             if (classDeclaration.classKind == ClassKind.OBJECT && isTable && !isIgnore) {

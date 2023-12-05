@@ -6,4 +6,4 @@ package com.labijie.infra.orm.compile
  */
 @Retention(AnnotationRetention.SOURCE)
 @Target(AnnotationTarget.CLASS)
-annotation class KspIgnore
+annotation class KspTableIgnore

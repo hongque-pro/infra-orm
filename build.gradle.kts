@@ -14,7 +14,6 @@ allprojects {
             includeDocument = true
             useMavenProxy = false
         }
-        usePublishPlugin()
     }
 }
 

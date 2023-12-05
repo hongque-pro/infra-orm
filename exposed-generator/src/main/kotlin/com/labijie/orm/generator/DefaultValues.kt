@@ -53,7 +53,7 @@ object DefaultValues {
     fun getValue(type: KSType): String {
         if(type.isEnum()){
             val enumDeclaration = type.declaration as KSClassDeclaration
-            val firstEnumEntry = enumDeclaration.declarations.firstOrNull() ?: throw java.lang.IllegalArgumentException("enum type '${type.declaration.simpleName.asString()}' value missed")
+            val firstEnumEntry = enumDeclaration.declarations.filter { it is KSClassDeclaration }.firstOrNull() ?: throw java.lang.IllegalArgumentException("enum type '${type.declaration.simpleName.asString()}' value missed")
             val filedName = firstEnumEntry.simpleName.asString()
             return "${type.declaration.simpleName.getShortName()}.${filedName}"
         }

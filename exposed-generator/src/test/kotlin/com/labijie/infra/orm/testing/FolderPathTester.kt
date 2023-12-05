@@ -29,16 +29,27 @@ package com.labijie.orm.testing
 
 import com.labijie.infra.orm.SimpleLongIdTable
 import org.jetbrains.exposed.sql.Column
+import org.jetbrains.exposed.sql.*
+import org.jetbrains.exposed.sql.Table
 
-object TestTable : SimpleLongIdTable("my", "id") {
+enum class Status(override val code: Byte, override val description: String) {
+    OK(0, "OK"),
+    Failed(1, "Failed")
+}
+
+
+object TestTable : Table("my") {
     var name: Column<String> = varchar("name", 50)
     var count = integer("count")
+    val status = enumeration("status", Status::class)
 }
     """
         )
         val compilation = KotlinCompilation().apply {
+
             sources = listOf(kotlinSource)
             symbolProcessorProviders = listOf(ExposedSymbolProcessorProvider())
+            inheritClassPath = true
         }
         val result = compilation.compile()
     }
