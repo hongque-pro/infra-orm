@@ -160,7 +160,7 @@ public object UserDSL {
 
   public fun UserTable.selectSlice(vararg selective: Column<*>): Query {
     val query = if(selective.isNotEmpty()) {
-      slice(selective.toList()).selectAll()
+      select(selective.toList())
     }
     else {
       selectAll()

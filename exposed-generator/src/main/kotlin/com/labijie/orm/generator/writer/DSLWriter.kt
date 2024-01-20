@@ -324,10 +324,9 @@ object DSLWriter {
     ): FunSpec.Builder {
         this.beginControlFlow("val $varName = if(%N.%M())", columnSelectiveParameter, kotlinIsNotEmpty)
             .addStatement(
-                "slice(%N.%M()).%M()",
+                "select(%N.%M())",
                 selectiveParameter,
-                kotlinToList,
-                getSqlExtendMethod("selectAll")
+                kotlinToList
             )
             .endControlFlow()
             .beginControlFlow("else")

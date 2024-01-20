@@ -224,7 +224,7 @@ public object IntIdDSL {
 
   public fun IntIdTable.selectSlice(vararg selective: Column<*>): Query {
     val query = if(selective.isNotEmpty()) {
-      slice(selective.toList()).selectAll()
+      select(selective.toList())
     }
     else {
       selectAll()

@@ -223,7 +223,7 @@ public object TestSimpleDSL {
 
   public fun TestSimpleTable.selectSlice(vararg selective: Column<*>): Query {
     val query = if(selective.isNotEmpty()) {
-      slice(selective.toList()).selectAll()
+      select(selective.toList())
     }
     else {
       selectAll()

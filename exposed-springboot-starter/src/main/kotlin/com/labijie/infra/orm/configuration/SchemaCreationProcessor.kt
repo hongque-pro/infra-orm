@@ -34,6 +34,7 @@ class SchemaCreationProcessor(
                 val sql = SchemaUtils.statementsRequiredToActualizeScheme(*exposedTables)
                 if (sql.isNotEmpty()) {
                     with(TransactionManager.current()) {
+                        this.queryTimeout = 30
                         this.execInBatch(sql)
                         commit()
                         currentDialect.resetCaches()
