@@ -4,20 +4,19 @@ package com.labijie.orm.dummy
 import com.labijie.infra.orm.SimpleIntIdTable
 import com.labijie.infra.orm.SimpleLongIdTable
 import com.labijie.infra.orm.SimpleStringIdTable
-import com.labijie.infra.orm.compile.KspTablePojo
-import com.labijie.infra.orm.compile.KspTableIgnore
 import com.labijie.infra.orm.compile.KspPrimaryKey
-import org.jetbrains.exposed.sql.*
+import com.labijie.infra.orm.compile.KspTableIgnore
+import org.jetbrains.exposed.sql.Column
+import org.jetbrains.exposed.sql.Table
 
 
 enum class TestEnum {
     OK, Error
 }
 
-object UserTable : SimpleLongIdTable("my", "id") {
-    var name: Column<String> = varchar("name", 50)
+object PostTable : SimpleLongIdTable("posts", "id") {
+    var title: Column<String> = varchar("name", 50)
     var status = enumeration("status", TestEnum::class)
-    var count = integer("count")
     var description = varchar("desc", 255)
 
     override val tableName: String
@@ -94,3 +93,6 @@ object DescribeEnumTable : Table("ignore") {
     override val primaryKey: PrimaryKey
         get() = PrimaryKey(key1, key2)
 }
+
+
+

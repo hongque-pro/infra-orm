@@ -1,14 +1,27 @@
-# Infra-ORM
+<div align="center">
+<h1>Infra-ORM</h1>
+</div>
+<br>
+
+<div align="center">
 
 ![maven central version](https://img.shields.io/maven-central/v/com.labijie.orm/exposed-core?logo=java)
 ![workflow status](https://img.shields.io/github/actions/workflow/status/hongque-pro/infra-orm/build.yml?branch=main)
 ![license](https://img.shields.io/github/license/hongque-pro/infra-orm?style=flat-square)
 
+</div>
+
+<div align="center">
+<strong>Document</strong>: 
+<a href="docs/quick_start.md">Quick Start</a>
+| <a href="docs/use_spring.md">Work with SpringBoot</a>
+</div>
+
 欢迎使用 **Infra-ORM**, 这是一个基于 [Exposed](https://github.com/JetBrains/Exposed)
 的 ORM 框架，可以和 Spring Boot 集成良好，如果你是 Kotlin 开发者，推荐你试试 Exposed, 
 配合 Infra-ORM 可以给你带来最佳的开发体验。
 
-## 只需编写表结构，配合 KSP 自动生成实体对象和 Dao 方法
+## 基于表结构的 Code First 开发模式
 
 ### 1. 引入插件
 示例中使用 `com.labijie.infra` gradle 插件简化配置
@@ -30,14 +43,19 @@ dependencies {
 
 ```kotlin
 
-object UserTable : SimpleLongIdTable("my", "id") {
-    var name: Column<String> = varchar("name", 50)
-    var status = enumeration("status", TestEnum::class)
-    var count = integer("count")
-    var description = varchar("desc", 255)
+public class Post {
+    public var title: String = ""
+
+    public var status: TestEnum = TestEnum.OK
+
+    public var description: String = ""
+
+    public var id: Long = 0L
 }
 
+
 ```
+> **注意**: Table 是一个 `object` , 请勿使用 `class` .
 
 ### 3. 生成 POJO 和 DSL 代码
 执行 gradle 命令
@@ -45,7 +63,105 @@ object UserTable : SimpleLongIdTable("my", "id") {
 gradle kspKotlin
 ```
 
+该命令将自动为你生成 `Post` 类 (POJO) 和 `PostDSL` (Table 扩展方法类)。
+
+```kotlin
+
+public class Post {
+  public var title: String = ""
+
+  public var status: TestEnum = TestEnum.OK
+
+  public var description: String = ""
+
+  public var id: Long = 0L
+}
+
+```
+
+
+更多信息请阅读文档：
+- [Quick Start](docs/quick_start.md)
+- [Work with SpringBoot](docs/use_spring.md)
+
+4. 在代码中使用 DSL 生成代码
+
+**Select**
+```kotlin
+//select by primary key
+val selectedPost: Post? = PostTable.selectByPrimaryKey(123)
+
+//select one by a column
+val postItem: Post? = PostTable.selectOne {
+    andWhere { PostTable.title eq  "Test" }
+}
+
+//select multiple by a column
+val postList: List<Post> = PostTable.selectMany {
+    andWhere { PostTable.title eq  "Test" }
+}
+
+//select multiple by a column, only select title, description columns
+val postListSelective: List<Post> = PostTable.selectMany(PostTable.title, PostTable.description) {
+    andWhere { PostTable.title like  "T%" }
+}
+```
+
+**Insert**
+```kotlin
+
+val post = Post().apply {
+    this.id = 123
+    this.title = "Test"
+    this.description = "Just a test."
+}
+
+//insert
+PostTable.insert(post)
+
+```
+
+**Update**
+
+```kotlin
+//update all columns by primary key
+PostTable.updateByPrimaryKey(post)
+
+//update by primary key, and only update title column.
+PostTable.updateByPrimaryKey(post, PostTable.title)
+
+//update by a column, and only update description column.
+PostTable.update(post, selective =  arrayOf(PostTable.description), limit = 1) {
+    PostTable.title.eq("Test")
+}
+
+
+//Update or insert
+PostTable.upsert(post)
+
+//Replace
+PostTable.replace(post)
+```
+
+**Delete** 
+```kotlin
+//delete by primary key
+PostTable.deleteByPrimaryKey(123)
+
+//delete many
+PostTable.deleteWhere {
+    PostTable.title inList listOf("Test", "Test1")
+}
+
+```
+
+更多 DSL 方法，请参考 [Exposed](https://github.com/JetBrains/Exposed) 文档：
+
+[https://jetbrains.github.io/Exposed/deep-dive-into-dsl.html](https://jetbrains.github.io/Exposed/deep-dive-into-dsl.html)
+
 ---
+
+
 
 ## 为什么造这个轮子？
 
@@ -87,11 +203,6 @@ var query = from photo in context.Set<PersonPhoto>()
 https://github.com/JetBrains/Exposed/wiki/DSL
 
 不幸的是官方似乎对 DAO 模型情有独钟，并不打算在 DSL + 简单对象映射的方向上给出方案，所以有了这个轮子。
-
-## 文档
-
-[Quick Start](docs/quick_start.md)   
-[Integrate with SpringBoot project](docs/use_spring.md)
 
 
 ## 数据库支持

@@ -3,26 +3,23 @@
 package com.labijie.orm.dummy.pojo
 
 import com.labijie.orm.dummy.TestEnum
-import kotlin.Int
 import kotlin.Long
 import kotlin.String
 
 /**
- * POJO for UserTable
+ * POJO for PostTable
  *
  * This class made by a code generation tool (https://github.com/hongque-pro/infra-orm).
  *
  * Don't modify these codes !!
  *
  * Origin Exposed Table:
- * @see com.labijie.orm.dummy.UserTable
+ * @see com.labijie.orm.dummy.PostTable
  */
-public class User {
-  public var name: String = ""
+public class Post {
+  public var title: String = ""
 
   public var status: TestEnum = TestEnum.OK
-
-  public var count: Int = 0
 
   public var description: String = ""
 
