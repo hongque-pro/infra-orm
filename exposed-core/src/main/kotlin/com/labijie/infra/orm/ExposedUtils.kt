@@ -4,14 +4,12 @@
  */
 package com.labijie.infra.orm
 
-import org.jetbrains.exposed.sql.*
-import org.jetbrains.exposed.sql.statements.api.ExposedDatabaseMetadata
+import org.jetbrains.exposed.sql.Table
 import org.jetbrains.exposed.sql.transactions.TransactionManager
 import org.jetbrains.exposed.sql.vendors.currentDialect
 
 
-object AdditionalSchemaUtils {
-
+object ExposedUtils {
     fun checkExcessiveColumns(vararg tables: Table, withLogs: Boolean = true): List<String> {
         val statements = ArrayList<String>()
 

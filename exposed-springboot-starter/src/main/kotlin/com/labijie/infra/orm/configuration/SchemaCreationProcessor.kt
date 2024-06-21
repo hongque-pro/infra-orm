@@ -1,6 +1,6 @@
 package com.labijie.infra.orm.configuration
 
-import com.labijie.infra.orm.AdditionalSchemaUtils
+import com.labijie.infra.orm.ExposedUtils
 import org.jetbrains.exposed.sql.SchemaUtils
 import org.jetbrains.exposed.sql.Table
 import org.jetbrains.exposed.sql.transactions.TransactionManager
@@ -45,7 +45,7 @@ class SchemaCreationProcessor(
                 }
 
                 if(properties.generateSchema.allowDropColumns) {
-                    val sql2 = AdditionalSchemaUtils.checkExcessiveColumns(*exposedTables)
+                    val sql2 = ExposedUtils.checkExcessiveColumns(*exposedTables)
                     if (sql2.isNotEmpty()) {
                         try {
                             with(TransactionManager.current()) {
