@@ -10,7 +10,9 @@ import java.lang.IllegalArgumentException
 import kotlin.Array
 import kotlin.Boolean
 import kotlin.Int
+import kotlin.Long
 import kotlin.Number
+import kotlin.Pair
 import kotlin.String
 import kotlin.Unit
 import kotlin.collections.Iterable
@@ -19,6 +21,7 @@ import kotlin.collections.isNotEmpty
 import kotlin.collections.toList
 import kotlin.reflect.KClass
 import org.jetbrains.exposed.sql.Column
+import org.jetbrains.exposed.sql.Expression
 import org.jetbrains.exposed.sql.Op
 import org.jetbrains.exposed.sql.Query
 import org.jetbrains.exposed.sql.ResultRow
@@ -29,11 +32,15 @@ import org.jetbrains.exposed.sql.andWhere
 import org.jetbrains.exposed.sql.batchInsert
 import org.jetbrains.exposed.sql.deleteWhere
 import org.jetbrains.exposed.sql.insert
+import org.jetbrains.exposed.sql.replace
 import org.jetbrains.exposed.sql.selectAll
 import org.jetbrains.exposed.sql.statements.InsertStatement
+import org.jetbrains.exposed.sql.statements.ReplaceStatement
 import org.jetbrains.exposed.sql.statements.UpdateBuilder
 import org.jetbrains.exposed.sql.statements.UpdateStatement
+import org.jetbrains.exposed.sql.statements.UpsertStatement
 import org.jetbrains.exposed.sql.update
+import org.jetbrains.exposed.sql.upsert
 
 /**
  * DSL support for MultiKeyTable
@@ -58,7 +65,6 @@ public object MultiKeyDSL {
     key2,
     )
   }
-
 
   public fun parseRow(raw: ResultRow): MultiKey {
     val plain = MultiKey()
@@ -136,6 +142,16 @@ public object MultiKeyDSL {
     assign(it, raw)
   }
 
+  public fun MultiKeyTable.upsert(
+    raw: MultiKey,
+    onUpdate: List<Pair<Column<*>, Expression<*>>>? = null,
+    onUpdateExclude: List<Column<*>>? = null,
+    `where`: (SqlExpressionBuilder.() -> Op<Boolean>)? = null,
+  ): UpsertStatement<Long> = upsert(where = where, onUpdate = onUpdate, onUpdateExclude =
+      onUpdateExclude) {
+    assign(it, raw)
+  }
+
   public fun MultiKeyTable.batchInsert(
     list: Iterable<MultiKey>,
     ignoreErrors: Boolean = false,
@@ -196,5 +212,9 @@ public object MultiKeyDSL {
     val query = selectSlice(*selective)
     `where`.invoke(query)
     return query.firstOrNull()?.toMultiKey(*selective)
+  }
+
+  public fun MultiKeyTable.replace(raw: MultiKey): ReplaceStatement<Long> = replace {
+    assign(it, raw)
   }
 }

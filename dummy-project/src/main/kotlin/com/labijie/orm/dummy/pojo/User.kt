@@ -17,7 +17,7 @@ import kotlin.String
  * Origin Exposed Table:
  * @see com.labijie.orm.dummy.UserTable
  */
-public open class User {
+public class User {
   public var name: String = ""
 
   public var status: TestEnum = TestEnum.OK

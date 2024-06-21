@@ -2,21 +2,32 @@
   "group":[
     {
       "name":"infra.exposed",
-      "type": "com.labijie.infra.exposed.configuration.InfraExposedProperties"
+      "type": "com.labijie.infra.orm.configuration.InfraExposedProperties"
+    },
+    {
+      "name":"infra.exposed.generate-schema",
+      "type": "com.labijie.infra.orm.configuration.SchemaGenerationSettings"
     }
   ],
   "properties":[
     {
-      "name":"infra.exposed.generate-schema",
+      "name":"infra.exposed.generate-schema.enabled",
       "type": "java.lang.Boolean",
-      "sourceType": "com.labijie.infra.exposed.configuration.InfraExposedProperties",
+      "sourceType": "com.labijie.infra.orm.configuration.SchemaGenerationSettings",
       "description": "Whether auto create schema when application started",
+      "defaultValue": false
+    },
+    {
+      "name":"infra.exposed.generate-schema.allow-drop-columns",
+      "type": "java.lang.Boolean",
+      "sourceType": "com.labijie.infra.orm.configuration.SchemaGenerationSettings",
+      "description": "Whether to allow the deletion of columns when a column in the db but not in Table define source code.",
       "defaultValue": false
     },
     {
       "name":"infra.exposed.show-sql",
       "type": "java.lang.Boolean",
-      "sourceType": "com.labijie.infra.exposed.configuration.InfraExposedProperties",
+      "sourceType": "com.labijie.infra.orm.configuration.InfraExposedProperties",
       "description": "show sql for exposed",
       "defaultValue": false
     }

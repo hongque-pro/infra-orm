@@ -22,7 +22,7 @@ import kotlin.String
  * Origin Exposed Table:
  * @see com.labijie.orm.dummy.IntIdTable
  */
-public open class IntId {
+public class IntId {
   public var name: String = ""
 
   public var memo: String? = null

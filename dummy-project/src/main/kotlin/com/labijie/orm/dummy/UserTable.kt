@@ -4,6 +4,7 @@ package com.labijie.orm.dummy
 import com.labijie.infra.orm.SimpleIntIdTable
 import com.labijie.infra.orm.SimpleLongIdTable
 import com.labijie.infra.orm.SimpleStringIdTable
+import com.labijie.infra.orm.compile.KspTablePojo
 import com.labijie.infra.orm.compile.KspTableIgnore
 import com.labijie.infra.orm.compile.KspPrimaryKey
 import org.jetbrains.exposed.sql.*
@@ -12,6 +13,7 @@ import org.jetbrains.exposed.sql.*
 enum class TestEnum {
     OK, Error
 }
+
 object UserTable : SimpleLongIdTable("my", "id") {
     var name: Column<String> = varchar("name", 50)
     var status = enumeration("status", TestEnum::class)

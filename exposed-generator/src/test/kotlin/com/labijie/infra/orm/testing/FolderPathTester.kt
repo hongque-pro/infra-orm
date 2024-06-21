@@ -1,7 +1,6 @@
 package com.labijie.infra.orm.testing
 
 import com.labijie.orm.generator.findProjectSourceDir
-import com.labijie.orm.generator.ksp.ExposedSymbolProcessor
 import com.labijie.orm.generator.ksp.ExposedSymbolProcessorProvider
 import com.tschuchort.compiletesting.KotlinCompilation
 import com.tschuchort.compiletesting.SourceFile
@@ -31,13 +30,14 @@ import com.labijie.infra.orm.SimpleLongIdTable
 import org.jetbrains.exposed.sql.Column
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.Table
+import com.labijie.infra.orm.compile.*
 
 enum class Status(override val code: Byte, override val description: String) {
     OK(0, "OK"),
     Failed(1, "Failed")
 }
 
-
+@KspPojoGeneration(true)
 object TestTable : Table("my") {
     var name: Column<String> = varchar("name", 50)
     var count = integer("count")

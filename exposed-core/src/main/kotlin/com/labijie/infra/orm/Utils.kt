@@ -1,5 +1,7 @@
 package com.labijie.infra.orm
 
+import org.jetbrains.exposed.sql.Table
+import org.jetbrains.exposed.sql.transactions.TransactionManager
 import java.util.*
 
 /**
@@ -10,4 +12,11 @@ import java.util.*
  */
 fun String.toUUID(): UUID {
     return UUID.fromString(this)
+}
+
+
+fun Table.dropColumn(column: String): List<String> {
+    val tr = TransactionManager.current()
+    val columnName = tr.db.identifierManager.quoteIdentifierWhenWrongCaseOrNecessary(column)
+    return listOf("ALTER TABLE ${tr.identity(this)} DROP COLUMN $columnName")
 }

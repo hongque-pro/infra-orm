@@ -29,7 +29,9 @@ import kotlin.ByteArray
 import kotlin.Char
 import kotlin.Comparable
 import kotlin.Int
+import kotlin.Long
 import kotlin.Number
+import kotlin.Pair
 import kotlin.Short
 import kotlin.String
 import kotlin.Unit
@@ -43,6 +45,7 @@ import kotlin.reflect.KClass
 import kotlin.text.Charsets
 import kotlin.text.toByteArray
 import org.jetbrains.exposed.sql.Column
+import org.jetbrains.exposed.sql.Expression
 import org.jetbrains.exposed.sql.Op
 import org.jetbrains.exposed.sql.Query
 import org.jetbrains.exposed.sql.ResultRow
@@ -53,11 +56,15 @@ import org.jetbrains.exposed.sql.andWhere
 import org.jetbrains.exposed.sql.batchInsert
 import org.jetbrains.exposed.sql.deleteWhere
 import org.jetbrains.exposed.sql.insert
+import org.jetbrains.exposed.sql.replace
 import org.jetbrains.exposed.sql.selectAll
 import org.jetbrains.exposed.sql.statements.InsertStatement
+import org.jetbrains.exposed.sql.statements.ReplaceStatement
 import org.jetbrains.exposed.sql.statements.UpdateBuilder
 import org.jetbrains.exposed.sql.statements.UpdateStatement
+import org.jetbrains.exposed.sql.statements.UpsertStatement
 import org.jetbrains.exposed.sql.update
+import org.jetbrains.exposed.sql.upsert
 
 /**
  * DSL support for TestSimpleTable
@@ -91,7 +98,6 @@ public object TestSimpleDSL {
     id,
     )
   }
-
 
   public fun parseRow(raw: ResultRow): TestSimple {
     val plain = TestSimple()
@@ -241,6 +247,16 @@ public object TestSimpleDSL {
     assign(it, raw)
   }
 
+  public fun TestSimpleTable.upsert(
+    raw: TestSimple,
+    onUpdate: List<Pair<Column<*>, Expression<*>>>? = null,
+    onUpdateExclude: List<Column<*>>? = null,
+    `where`: (SqlExpressionBuilder.() -> Op<Boolean>)? = null,
+  ): UpsertStatement<Long> = upsert(where = where, onUpdate = onUpdate, onUpdateExclude =
+      onUpdateExclude) {
+    assign(it, raw)
+  }
+
   public fun TestSimpleTable.batchInsert(
     list: Iterable<TestSimple>,
     ignoreErrors: Boolean = false,
@@ -374,5 +390,9 @@ public object TestSimpleDSL {
     val token = if(list.size < pageSize) null else encodeToken(list, { getColumnValue(sortColumn) },
         TestSimple::id)
     return OffsetList(list, token)
+  }
+
+  public fun TestSimpleTable.replace(raw: TestSimple): ReplaceStatement<Long> = replace {
+    assign(it, raw)
   }
 }

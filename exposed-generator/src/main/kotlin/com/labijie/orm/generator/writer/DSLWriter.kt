@@ -24,11 +24,13 @@ object DSLWriter {
         methodBuilders.add(SetValueExtensionMethod)
         methodBuilders.add(InsertMethod)
         methodBuilders.add(InsertAndGetIdMethod)
+        methodBuilders.add(UpsertMethod)
         methodBuilders.add(BatchInsertMethod)
         methodBuilders.add(UpdateMethod)
         methodBuilders.add(DeleteByPrimaryKeyMethod)
         methodBuilders.add(SelectByPrimaryMethod)
         methodBuilders.add(SelectMethod)
+        methodBuilders.add(ReplaceMethod)
     }
 
     private fun TypeSpec.Builder.buildMethods(context: DSLCodeContext) {

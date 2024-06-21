@@ -11,12 +11,12 @@ import org.springframework.beans.factory.support.BeanDefinitionBuilder
 import org.springframework.beans.factory.support.BeanDefinitionRegistry
 import org.springframework.boot.autoconfigure.AutoConfigurationPackages
 import org.springframework.boot.autoconfigure.AutoConfigureAfter
-import org.springframework.boot.autoconfigure.AutoConfigureBefore
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration
-import org.springframework.boot.autoconfigure.transaction.TransactionAutoConfiguration
 import org.springframework.boot.context.properties.EnableConfigurationProperties
+import org.springframework.context.ApplicationContext
+import org.springframework.context.ApplicationContextAware
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Import
@@ -33,7 +33,9 @@ import javax.sql.DataSource
 @AutoConfigureAfter(DataSourceAutoConfiguration::class)
 @EnableConfigurationProperties(InfraExposedProperties::class)
 @EnableTransactionManagement
-class InfraExposedAutoConfiguration  {
+class InfraExposedAutoConfiguration : ApplicationContextAware  {
+
+    private lateinit var applicationContext: ApplicationContext
 
     companion object {
         private val logger by lazy {
@@ -44,13 +46,14 @@ class InfraExposedAutoConfiguration  {
     @Bean
     @ConditionalOnMissingBean(DatabaseConfig::class)
     open fun databaseConfig(): DatabaseConfig {
-        return DatabaseConfig {}
+        return DatabaseConfig.invoke {  }
     }
 
     @Bean
     @ConditionalOnMissingBean(SpringTransactionManager::class)
     fun exposedSpringTransactionManager(properties: InfraExposedProperties, databaseConfig: DatabaseConfig, dataSource: DataSource): SpringTransactionManager {
-        return SpringTransactionManager(dataSource, databaseConfig, properties.showSql)
+        val txm = SpringTransactionManager(dataSource, databaseConfig, properties.showSql)
+        return txm
     }
 
     class ExposedTableRegistrar : BeanFactoryAware, ImportBeanDefinitionRegistrar  {
@@ -109,5 +112,11 @@ class InfraExposedAutoConfiguration  {
 
     @Bean
     @ConditionalOnProperty(prefix = "infra.exposed", name = ["generate-schema"], havingValue = "true", matchIfMissing = false)
-    fun schemaCreationProcessor(transactionTemplate: TransactionTemplate, properties: InfraExposedProperties) = SchemaCreationProcessor(transactionTemplate, properties)
+    fun schemaCreationProcessor(transactionTemplate: TransactionTemplate, properties: InfraExposedProperties): SchemaCreationProcessor {
+        return SchemaCreationProcessor(transactionTemplate, properties)
+    }
+
+    override fun setApplicationContext(applicationContext: ApplicationContext) {
+        this.applicationContext = applicationContext
+    }
 }

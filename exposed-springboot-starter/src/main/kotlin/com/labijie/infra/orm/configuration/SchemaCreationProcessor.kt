@@ -1,5 +1,6 @@
 package com.labijie.infra.orm.configuration
 
+import com.labijie.infra.orm.AdditionalSchemaUtils
 import org.jetbrains.exposed.sql.SchemaUtils
 import org.jetbrains.exposed.sql.Table
 import org.jetbrains.exposed.sql.transactions.TransactionManager
@@ -32,6 +33,7 @@ class SchemaCreationProcessor(
         if (exposedTables.isNotEmpty()) {
             transactionTemplate.execute {
                 val sql = SchemaUtils.statementsRequiredToActualizeScheme(*exposedTables)
+
                 if (sql.isNotEmpty()) {
                     with(TransactionManager.current()) {
                         this.queryTimeout = 30
@@ -41,8 +43,26 @@ class SchemaCreationProcessor(
                     }
 
                 }
+
+                val sql2 = AdditionalSchemaUtils.checkExcessiveColumns(*exposedTables)
+                if(sql2.isNotEmpty()) {
+                    try {
+                        with(TransactionManager.current()) {
+                            this.queryTimeout = 30
+                            this.execInBatch(sql)
+                            commit()
+                            currentDialect.resetCaches()
+                        }
+                    }
+                    catch (e: Throwable) {
+                        logger.warn("Drop excessive columns failed, columns patch has been skipped.", e)
+                    }
+                }
             }
         }
+
+
+
         if (!properties.showSql && logger.isInfoEnabled) {
             val msg = StringBuilder()
                 .appendLine("Schema of tables modified: ${exposedTables.count()} tables: ")
@@ -57,4 +77,6 @@ class SchemaCreationProcessor(
     override fun setApplicationContext(applicationContext: ApplicationContext) {
         context = applicationContext
     }
+
+
 }

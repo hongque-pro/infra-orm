@@ -3,22 +3,26 @@ package com.labijie.orm.generator
 import com.google.devtools.ksp.getAllSuperTypes
 import com.google.devtools.ksp.symbol.KSClassDeclaration
 import com.labijie.infra.orm.SimpleIdTable
+import com.labijie.infra.orm.compile.KspTablePojo
 import org.jetbrains.exposed.dao.id.IdTable
 
 class TableMetadata(declaration: KSClassDeclaration, val sourceFile: String) {
     val columns: MutableList<ColumnMetadata> = mutableListOf()
 
     val packageName = declaration.packageName.asString()
-    val className =declaration.simpleName.getShortName()
+    val className = declaration.simpleName.getShortName()
 
     var primaryKeys: MutableList<ColumnMetadata> = mutableListOf()
     var kind: TableKind = TableKind.Normal
         private set
 
+    val isSerializable: Boolean
+    val isOpen: Boolean
+
     init {
 
 
-        loop@ for (superType in declaration .getAllSuperTypes()) {
+        loop@ for (superType in declaration.getAllSuperTypes()) {
             val typeName = superType.declaration.qualifiedName?.asString()
             if (typeName == IdTable::class.qualifiedName) {
                 kind = TableKind.ExposedIdTable
@@ -30,6 +34,32 @@ class TableMetadata(declaration: KSClassDeclaration, val sourceFile: String) {
                 break@loop
             }
         }
+
+        val pojoAnnotation = declaration.annotations.firstOrNull {
+            it.annotationType.resolve().declaration.qualifiedName?.asString() == KspTablePojo::class.qualifiedName
+        }
+
+        val defaultArgs = pojoAnnotation?.defaultArguments
+        val defaultParams = mutableMapOf<Int, String>()
+        defaultArgs?.forEachIndexed { index, item ->
+            val name = item.name?.getShortName()
+            if (!name.isNullOrBlank()) {
+                defaultParams[index] = name
+            }
+        }
+
+        val args = pojoAnnotation?.arguments
+        val parameterValues = mutableMapOf<String, Any?>()
+        args?.forEachIndexed { index, item ->
+            val name = item.name?.getShortName() ?: defaultParams[index]
+            if (!name.isNullOrBlank()) {
+                parameterValues[name] = item.value
+            }
+        }
+
+
+        isSerializable = parameterValues.getOrDefault(KspTablePojo::kotlinSerializable.name, false) as? Boolean ?: false
+        isOpen = parameterValues.getOrDefault(KspTablePojo::isOpen.name, false) as? Boolean ?: true
     }
 
     fun hasPrimaryKey() = primaryKeys.size > 0
