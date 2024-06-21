@@ -18,9 +18,6 @@ object PostTable : SimpleLongIdTable("posts", "id") {
     var title: Column<String> = varchar("name", 50)
     var status = enumeration("status", TestEnum::class)
     var description = varchar("desc", 255)
-
-    override val tableName: String
-        get() = super.tableName
 }
 
 object ShopTable : SimpleLongIdTable("my", "id") {

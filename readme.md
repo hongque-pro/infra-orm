@@ -46,16 +46,11 @@ dependencies {
 
 ```kotlin
 
-public class Post {
-    public var title: String = ""
-
-    public var status: TestEnum = TestEnum.OK
-
-    public var description: String = ""
-
-    public var id: Long = 0L
+object PostTable : SimpleLongIdTable("posts", "id") {
+    var title: Column<String> = varchar("name", 50)
+    var status = enumeration("status", TestEnum::class)
+    var description = varchar("desc", 255)
 }
-
 
 ```
 > **注意**: Table 是一个 `object` , 请勿使用 `class` .
