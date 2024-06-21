@@ -4,7 +4,7 @@
  */
 package com.labijie.infra.orm.testing
 
-import com.labijie.infra.orm.AdditionalSchemaUtils
+import com.labijie.infra.orm.ExposedUtils.checkExcessiveColumns
 import com.labijie.infra.orm.SimpleLongIdTable
 import com.labijie.infra.orm.test.ExposedTest
 import org.jetbrains.exposed.sql.SchemaUtils
@@ -70,7 +70,7 @@ class AdditionalSchemaUtilsTester {
 
         this.transactionTemplate.execute {
             with(TransactionManager.current()) {
-                val sql = AdditionalSchemaUtils.checkExcessiveColumns(AfterTable)
+                val sql = checkExcessiveColumns(AfterTable)
                 this.queryTimeout = 30
                 this.execInBatch(sql)
                 commit()
