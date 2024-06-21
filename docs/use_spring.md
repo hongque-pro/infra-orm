@@ -24,17 +24,19 @@ dependencies {
 
 ```yaml
 infra:
-    exposed:
-      show-sql: true
-      generate-schema: true
+  exposed:
+    generate-schema:
+      enabled: true
+      allow-drop-columns: true
 ```
 
 exposed 配置属性说明:
 
-|   属性     |      说明      |
-|-----------|------------|
-| show-sql| 是否在日志中打印 SQL 语句，默认为 **false** |
-| generate-schema |  是否在启动时自动执行 schema ddl （自动建表、调整表结构），默认为 **false** |
+| 属性                      | 说明                                               |
+|-------------------------|--------------------------------------------------|
+| show-sql                | 是否在日志中打印 SQL 语句，默认为 **false**                    |
+| generate-schema.enabled | 是否在启动时自动执行 schema ddl （自动建表、调整表结构），默认为 **false** |
+| generate-schema.allow-drop-columns | 是否允许在自动执行 schema ddl 时删除多余的列，默认为 **false**       |
 
 ### 3. 通过 TableScan 注解来控制要生成的 Schema
 

@@ -44,18 +44,19 @@ class SchemaCreationProcessor(
 
                 }
 
-                val sql2 = AdditionalSchemaUtils.checkExcessiveColumns(*exposedTables)
-                if(sql2.isNotEmpty()) {
-                    try {
-                        with(TransactionManager.current()) {
-                            this.queryTimeout = 30
-                            this.execInBatch(sql)
-                            commit()
-                            currentDialect.resetCaches()
+                if(properties.generateSchema.allowDropColumns) {
+                    val sql2 = AdditionalSchemaUtils.checkExcessiveColumns(*exposedTables)
+                    if (sql2.isNotEmpty()) {
+                        try {
+                            with(TransactionManager.current()) {
+                                this.queryTimeout = 30
+                                this.execInBatch(sql)
+                                commit()
+                                currentDialect.resetCaches()
+                            }
+                        } catch (e: Throwable) {
+                            logger.warn("Drop excessive columns failed, columns patch has been skipped.", e)
                         }
-                    }
-                    catch (e: Throwable) {
-                        logger.warn("Drop excessive columns failed, columns patch has been skipped.", e)
                     }
                 }
             }

@@ -1,3 +1,5 @@
 infra:
   exposed:
-    generate-schema: true
+    generate-schema:
+      enabled: true
+      allow-drop-columns: true

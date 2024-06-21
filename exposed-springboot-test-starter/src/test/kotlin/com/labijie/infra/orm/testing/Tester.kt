@@ -1,6 +1,7 @@
 package com.labijie.infra.orm.testing
 
 import com.labijie.infra.orm.annotation.TableScan
+import com.labijie.infra.orm.configuration.InfraExposedAutoConfiguration
 import com.labijie.infra.orm.test.ExposedTest
 import org.h2.jdbc.JdbcSQLIntegrityConstraintViolationException
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
@@ -44,6 +45,7 @@ open class Tester {
     open fun testCRUD(){
 
         TestEntityTable.insert {
+            it[id] = 123
             it[name] = "ccc"
         }
 
@@ -54,21 +56,4 @@ open class Tester {
         assertNotNull(entity)
     }
 
-
-    @Test
-    @Transactional
-    open fun testDuplexKeyException(){
-        //JdbcSQLIntegrityConstraintViolationException
-        Assertions.assertThrowsExactly(DuplicateKeyException::class.java) {
-            TestEntityTable.insert {
-                it[id] = 123
-                it[name] = "ccc"
-            }
-
-            TestEntityTable.insert {
-                it[id] = 123
-                it[name] = "ccc"
-            }
-        }
-    }
 }

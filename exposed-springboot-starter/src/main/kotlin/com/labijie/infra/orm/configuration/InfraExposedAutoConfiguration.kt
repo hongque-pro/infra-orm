@@ -111,7 +111,7 @@ class InfraExposedAutoConfiguration : ApplicationContextAware  {
     fun exposedConfigurationOverride() = ExposedConfigurationOverride()
 
     @Bean
-    @ConditionalOnProperty(prefix = "infra.exposed", name = ["generate-schema"], havingValue = "true", matchIfMissing = false)
+    @ConditionalOnProperty(prefix = "infra.exposed", name = ["generate-schema.enabled"], havingValue = "true", matchIfMissing = false)
     fun schemaCreationProcessor(transactionTemplate: TransactionTemplate, properties: InfraExposedProperties): SchemaCreationProcessor {
         return SchemaCreationProcessor(transactionTemplate, properties)
     }
