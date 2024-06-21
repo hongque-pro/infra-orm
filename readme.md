@@ -84,8 +84,8 @@ public class Post {
 
 更多信息请阅读文档：
 - [Quick Start](docs/quick_start.md)
-- [Work with SpringBoot](docs/use_spring.md)
-
+- [Work with SpringBoot](docs/use_spring.md)   
+   
 4. 在代码中使用 DSL 生成代码
 
 **Select**
