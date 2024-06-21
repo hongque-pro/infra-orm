@@ -81,11 +81,6 @@ public class Post {
 
 ```
 
-
-更多信息请阅读文档：
-- [Quick Start](docs/quick_start.md)
-- [Work with SpringBoot](docs/use_spring.md)   
-   
 4. 在代码中使用 DSL 生成代码
 
 **Select**
@@ -160,6 +155,11 @@ PostTable.deleteWhere {
 更多 DSL 方法，请参考 [Exposed](https://github.com/JetBrains/Exposed) 文档：
 
 [https://jetbrains.github.io/Exposed/deep-dive-into-dsl.html](https://jetbrains.github.io/Exposed/deep-dive-into-dsl.html)
+
+
+**Infra-Orm** 详细使用方法请阅读文档：
+- [Quick Start](docs/quick_start.md)
+- [Work with SpringBoot](docs/use_spring.md)
 
 ---
 
