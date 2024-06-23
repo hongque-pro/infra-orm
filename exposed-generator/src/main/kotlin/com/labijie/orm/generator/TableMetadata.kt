@@ -59,7 +59,7 @@ class TableMetadata(declaration: KSClassDeclaration, val sourceFile: String) {
 
 
         isSerializable = parameterValues.getOrDefault(KspTablePojo::kotlinSerializable.name, false) as? Boolean ?: false
-        isOpen = parameterValues.getOrDefault(KspTablePojo::isOpen.name, false) as? Boolean ?: true
+        isOpen = parameterValues.getOrDefault(KspTablePojo::isOpen.name, true) as? Boolean ?: true
     }
 
     fun hasPrimaryKey() = primaryKeys.size > 0
