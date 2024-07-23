@@ -15,8 +15,8 @@ fun String.toUUID(): UUID {
 }
 
 
-fun Table.dropColumn(column: String): List<String> {
+fun Table.dropColumn(column: String): String {
     val tr = TransactionManager.current()
     val columnName = tr.db.identifierManager.quoteIdentifierWhenWrongCaseOrNecessary(column)
-    return listOf("ALTER TABLE ${tr.identity(this)} DROP COLUMN $columnName")
+    return "ALTER TABLE ${tr.identity(this)} DROP COLUMN $columnName"
 }

@@ -13,7 +13,7 @@ import org.springframework.context.ApplicationListener
 import org.springframework.transaction.support.TransactionTemplate
 import java.util.stream.Collectors
 
-class SchemaCreationProcessor(
+class SchemaChangesProcessor(
     private val transactionTemplate: TransactionTemplate,
     private val properties: InfraExposedProperties
 ) : ApplicationListener<ApplicationStartedEvent>, ApplicationContextAware {
@@ -30,8 +30,13 @@ class SchemaCreationProcessor(
         val exposedTables =
             context.getBeanProvider(Table::class.java).orderedStream().collect(Collectors.toList()).toTypedArray()
 
+
         if (exposedTables.isNotEmpty()) {
-            transactionTemplate.execute {
+            var hasSql = false
+            val sb = StringBuilder()
+            sb.appendLine("-------------Start Migrate Schema--------------")
+
+            val executedSql = transactionTemplate.execute {
                 val sql = SchemaUtils.statementsRequiredToActualizeScheme(*exposedTables)
 
                 if (sql.isNotEmpty()) {
@@ -41,37 +46,41 @@ class SchemaCreationProcessor(
                         commit()
                         currentDialect.resetCaches()
                     }
-
                 }
+                sql
+            }!!
+            hasSql = hasSql || executedSql.isNotEmpty()
+            sb.appendLine(executedSql.joinToString(System.lineSeparator()))
 
-                if(properties.generateSchema.allowDropColumns) {
-                    val sql2 = ExposedUtils.checkExcessiveColumns(*exposedTables)
-                    if (sql2.isNotEmpty()) {
-                        try {
+            if (properties.generateSchema.allowDropColumns) {
+
+                try {
+                    val commands = transactionTemplate.execute {
+                        val sql2 = ExposedUtils.checkExcessiveColumns(*exposedTables)
+                        if (sql2.isNotEmpty()) {
                             with(TransactionManager.current()) {
                                 this.queryTimeout = 30
-                                this.execInBatch(sql)
+                                this.execInBatch(sql2.map { it.sql })
                                 commit()
                                 currentDialect.resetCaches()
                             }
-                        } catch (e: Throwable) {
-                            logger.warn("Drop excessive columns failed, columns patch has been skipped.", e)
                         }
-                    }
+                        sql2
+                    }!!
+                    hasSql = hasSql || commands.isNotEmpty()
+                    sb.appendLine(commands.joinToString(System.lineSeparator()) { it.sql })
+
+                } catch (e: Throwable) {
+                    logger.warn("Drop excessive columns failed, columns patch has been skipped.", e)
                 }
+
             }
-        }
+            sb.appendLine("--------------End Migrate Schema---------------")
 
 
-
-        if (!properties.showSql && logger.isInfoEnabled) {
-            val msg = StringBuilder()
-                .appendLine("Schema of tables modified: ${exposedTables.count()} tables: ")
-                .apply {
-                    this.appendLine(exposedTables.joinToString(System.lineSeparator()) { it.tableName })
-                }.toString()
-
-            logger.info(msg)
+            if (hasSql && !properties.showSql && logger.isInfoEnabled) {
+                logger.info(sb.toString())
+            }
         }
     }
 

@@ -10,8 +10,15 @@ import org.jetbrains.exposed.sql.vendors.currentDialect
 
 
 object ExposedUtils {
-    fun checkExcessiveColumns(vararg tables: Table, withLogs: Boolean = true): List<String> {
-        val statements = ArrayList<String>()
+
+    data class DropColumnCommand(
+        val table: String,
+        val sql: String,
+        val column: String
+    )
+
+    fun checkExcessiveColumns(vararg tables: Table, withLogs: Boolean = true): List<DropColumnCommand> {
+        val statements = ArrayList<DropColumnCommand>()
 
         val dbSupportsAlterTableWithAddColumn = TransactionManager.current().db.supportsAlterTableWithAddColumn
         if (dbSupportsAlterTableWithAddColumn) {
@@ -34,7 +41,14 @@ object ExposedUtils {
 //                }
 
                 if (excessiveColumns.isNotEmpty()) {
-                    excessiveColumns.flatMapTo(statements) { col -> table.dropColumn(col.name) }
+                    excessiveColumns.mapTo(statements) {
+                        col->
+                        DropColumnCommand(
+                            table = table.tableName,
+                            column = col.name,
+                            sql = table.dropColumn(col.name)
+                        )
+                    }
                 }
             }
         }
