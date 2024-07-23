@@ -21,7 +21,7 @@ import kotlin.String
  * Origin Exposed Table:
  * @see com.labijie.orm.dummy.TestSimpleTable
  */
-public class TestSimple {
+public open class TestSimple {
   public var name: String = ""
 
   public var memo: String? = null

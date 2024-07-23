@@ -32,9 +32,9 @@ import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.Table
 import com.labijie.infra.orm.compile.*
 
-enum class Status(override val code: Byte, override val description: String) {
-    OK(0, "OK"),
-    Failed(1, "Failed")
+enum class Status {
+    OK,
+    Failed
 }
 
 @KspPojoGeneration(true)
@@ -46,11 +46,14 @@ object TestTable : Table("my") {
     """
         )
         val compilation = KotlinCompilation().apply {
-
+            //TODO: upgrade kotlin 2.0
+            languageVersion = "1.9"
             sources = listOf(kotlinSource)
-            symbolProcessorProviders = listOf(ExposedSymbolProcessorProvider())
+            symbolProcessorProviders = mutableListOf(ExposedSymbolProcessorProvider())
             inheritClassPath = true
+            messageOutputStream = System.out
         }
         val result = compilation.compile()
+        assertEquals(result.exitCode, KotlinCompilation.ExitCode.OK, result.messages)
     }
 }

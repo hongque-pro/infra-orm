@@ -16,7 +16,7 @@ import kotlin.String
  * Origin Exposed Table:
  * @see com.labijie.orm.dummy.DescribeEnumTable
  */
-public class DescribeEnum {
+public open class DescribeEnum {
   public var key1: String = ""
 
   public var key2: Int = 0

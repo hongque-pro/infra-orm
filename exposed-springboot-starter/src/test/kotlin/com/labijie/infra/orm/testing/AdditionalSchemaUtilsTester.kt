@@ -72,7 +72,7 @@ class AdditionalSchemaUtilsTester {
             with(TransactionManager.current()) {
                 val sql = checkExcessiveColumns(AfterTable)
                 this.queryTimeout = 30
-                this.execInBatch(sql)
+                this.execInBatch(sql.map { it.sql })
                 commit()
                 currentDialect.resetCaches()
             }

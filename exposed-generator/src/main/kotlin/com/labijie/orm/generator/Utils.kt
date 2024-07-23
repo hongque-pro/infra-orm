@@ -10,6 +10,7 @@ import org.jetbrains.exposed.sql.Table
 import java.io.File
 import java.nio.file.Files
 import java.nio.file.Path
+import java.nio.file.Paths
 import kotlin.io.path.Path
 import kotlin.io.path.createDirectories
 import kotlin.io.path.isDirectory
@@ -131,6 +132,8 @@ fun findProjectSourceDir(sourceFile: String): Path {
     if(index > 0) {
         val folder = sourceFile.substring(0, index)
         folders[sourceFile] = Path("${folder}${srcPath}".trimEnd(File.separatorChar))
+    }else {
+        folders[sourceFile] = Path(File(sourceFile).parentFile.absolutePath)
     }
     return folders[sourceFile] ?: throw ExposedGenerationException("Unable to get project folder from file '${sourceFile}'")
 }

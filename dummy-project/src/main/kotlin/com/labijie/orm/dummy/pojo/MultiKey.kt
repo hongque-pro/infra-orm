@@ -15,7 +15,7 @@ import kotlin.String
  * Origin Exposed Table:
  * @see com.labijie.orm.dummy.MultiKeyTable
  */
-public class MultiKey {
+public open class MultiKey {
   public var key1: String = ""
 
   public var key2: Int = 0

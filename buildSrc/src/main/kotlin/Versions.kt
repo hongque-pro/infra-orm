@@ -4,6 +4,6 @@ object Versions {
 
     const val exposedVersion = "0.52.0"
 
-    const val kotlinPoetVersion = "1.17.0"
-    const val kotlinCompileTesting = "0.4.0"
+    const val kotlinPoetVersion = "1.18.1"
+    const val kotlinCompileTesting = "0.5.1"
 }

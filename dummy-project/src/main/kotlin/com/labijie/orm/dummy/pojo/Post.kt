@@ -16,7 +16,7 @@ import kotlin.String
  * Origin Exposed Table:
  * @see com.labijie.orm.dummy.PostTable
  */
-public class Post {
+public open class Post {
   public var title: String = ""
 
   public var status: TestEnum = TestEnum.OK

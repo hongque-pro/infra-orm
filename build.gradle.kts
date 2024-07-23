@@ -4,6 +4,7 @@ plugins {
 }
 
 
+
 allprojects {
     group = "com.labijie.orm"
     version = "2.0.3"
@@ -17,6 +18,8 @@ allprojects {
     }
 }
 
+
+
 subprojects {
     infra {
         if (!project.name.startsWith("dummy")) {
@@ -29,6 +32,8 @@ subprojects {
             }
         }
     }
+
+
 
     dependencies {
         add("api", platform("org.jetbrains.exposed:exposed-bom:${Versions.exposedVersion}"))
