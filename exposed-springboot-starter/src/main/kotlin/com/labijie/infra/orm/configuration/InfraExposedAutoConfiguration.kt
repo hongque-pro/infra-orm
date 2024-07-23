@@ -1,5 +1,6 @@
 package com.labijie.infra.orm.configuration
 
+import com.labijie.infra.orm.ExposedTransactionListener
 import org.jetbrains.exposed.spring.SpringTransactionManager
 import org.jetbrains.exposed.sql.DatabaseConfig
 import org.jetbrains.exposed.sql.SchemaUtils
@@ -52,7 +53,8 @@ class InfraExposedAutoConfiguration : ApplicationContextAware  {
     @Bean
     @ConditionalOnMissingBean(SpringTransactionManager::class)
     fun exposedSpringTransactionManager(properties: InfraExposedProperties, databaseConfig: DatabaseConfig, dataSource: DataSource): SpringTransactionManager {
-        val txm = SpringTransactionManager(dataSource, databaseConfig, properties.showSql)
+        val txm = SpringTransactionManager(dataSource, databaseConfig, false)
+        txm.addListener(ExposedTransactionListener(properties))
         return txm
     }
 

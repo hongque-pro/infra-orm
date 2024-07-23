@@ -26,11 +26,12 @@ import kotlin.test.Test
 @EnableAutoConfiguration
 @ExtendWith(SpringExtension::class)
 @ContextConfiguration(classes = [TestingContext::class])
-class AdditionalSchemaUtilsTester {
+class SchemaChangesProcessorTester {
 
     object BeforeTable : SimpleLongIdTable("t1") {
         val name1 = varchar("name1", 32).index()
         val name2 = varchar("name2", 32).index()
+        val delete = bool("deleted").index()
     }
 
     object AfterTable : SimpleLongIdTable("t1") {
@@ -65,7 +66,11 @@ class AdditionalSchemaUtilsTester {
         }
 
         val columns = jdbcClient.getColumns(BeforeTable.tableName).toTypedArray()
-        Assertions.assertArrayEquals(arrayOf(BeforeTable.id.name, BeforeTable.name1.name, BeforeTable.name2.name), columns)
+        Assertions.assertArrayEquals(arrayOf(
+            BeforeTable.id.name,
+            BeforeTable.name1.name,
+            BeforeTable.name2.name,
+            BeforeTable.delete.name), columns)
 
 
         this.transactionTemplate.execute {
@@ -75,6 +80,7 @@ class AdditionalSchemaUtilsTester {
                 this.execInBatch(sql.map { it.sql })
                 commit()
                 currentDialect.resetCaches()
+                println(sql.joinToString(System.lineSeparator()) { it.sql })
             }
         }
 
