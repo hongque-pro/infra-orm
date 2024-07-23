@@ -6,8 +6,19 @@ package com.labijie.infra.orm
 
 
 fun <T: Any> withoutSqlLog(action: ()->T?): T? {
-    SqlLoggerSettings.apply {
-        allowSqlLogger = false
+    SqlLoggerSettings.apply(false)
+    try {
+        return action()
+    }finally {
+        SqlLoggerSettings.reset()
     }
-    return action()
+}
+
+fun <T: Any> withSqlLog(action: ()->T?): T? {
+    SqlLoggerSettings.apply(true)
+    try {
+        return action()
+    }finally {
+        SqlLoggerSettings.reset()
+    }
 }

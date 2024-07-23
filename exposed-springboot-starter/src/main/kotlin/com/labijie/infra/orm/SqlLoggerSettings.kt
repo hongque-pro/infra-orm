@@ -4,31 +4,38 @@
  */
 package com.labijie.infra.orm
 
+import java.util.Stack
+
 
 internal class SqlLoggerSettings private constructor() {
     companion object {
         private val localSettings = ThreadLocal<SqlLoggerSettings>()
 
         @JvmStatic
-        fun apply(action: ((SqlLoggerSettings).()->Unit)? = null): SqlLoggerSettings {
+        fun apply(enabled: Boolean): SqlLoggerSettings {
             val value = localSettings.get() ?: SqlLoggerSettings().apply {
                 localSettings.set(this)
             }
-            action?.invoke(value)
+            value.enableStack.push(enabled)
             return value
         }
 
         @JvmStatic
-        fun isLogEnabled(): Boolean {
-            val v = localSettings.get()
-            return v == null || v.allowSqlLogger
+        fun isLogEnabled(): Boolean? {
+            return localSettings.get()?.enableStack?.peek()
         }
 
         @JvmStatic
         fun reset() {
-            localSettings.remove()
+            val v = localSettings.get()
+            if(v != null) {
+                v.enableStack.pop()
+                if(v.enableStack.isEmpty()) {
+                    localSettings.remove()
+                }
+            }
         }
     }
 
-    var allowSqlLogger: Boolean = true
+    var enableStack: Stack<Boolean> = Stack()
 }

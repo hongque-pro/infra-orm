@@ -22,6 +22,7 @@ import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Import
 import org.springframework.context.annotation.ImportBeanDefinitionRegistrar
+import org.springframework.core.env.Environment
 import org.springframework.core.type.AnnotationMetadata
 import org.springframework.transaction.annotation.EnableTransactionManagement
 import org.springframework.transaction.support.TransactionTemplate
@@ -52,9 +53,11 @@ class InfraExposedAutoConfiguration : ApplicationContextAware  {
 
     @Bean
     @ConditionalOnMissingBean(SpringTransactionManager::class)
-    fun exposedSpringTransactionManager(properties: InfraExposedProperties, databaseConfig: DatabaseConfig, dataSource: DataSource): SpringTransactionManager {
+    fun exposedSpringTransactionManager(
+        environment: Environment,
+        properties: InfraExposedProperties, databaseConfig: DatabaseConfig, dataSource: DataSource): SpringTransactionManager {
         val txm = SpringTransactionManager(dataSource, databaseConfig, false)
-        txm.addListener(ExposedTransactionListener(properties))
+        txm.addListener(ExposedTransactionListener(environment, properties))
         return txm
     }
 
