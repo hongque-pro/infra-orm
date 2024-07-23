@@ -17,13 +17,13 @@ object ExposedUtils {
         val column: String
     )
 
-    fun checkExcessiveColumns(vararg tables: Table, withLogs: Boolean = true): List<DropColumnCommand> {
+    fun checkExcessiveColumns(vararg tables: Table): List<DropColumnCommand> {
         val statements = ArrayList<DropColumnCommand>()
 
         val dbSupportsAlterTableWithAddColumn = TransactionManager.current().db.supportsAlterTableWithAddColumn
         if (dbSupportsAlterTableWithAddColumn) {
             val existingTablesColumns = currentDialect.tableColumns(*tables)
-            val existingIndices = currentDialect.existingIndices(*tables)
+ //           val existingIndices = currentDialect.existingIndices(*tables)
 
             for (table in tables) {
                 // create columns
