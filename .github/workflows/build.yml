@@ -2,6 +2,28 @@
 # For more information see: https://help.github.com/actions/language-and-framework-guides/building-and-testing-java-with-gradle
 
 name: Gradle Build And Release
+on:
+  workflow_dispatch:
+    inputs:
+      maven_pub:
+        default: "Yes"
+        description: "Publish To Maven"
+        required: true
+        type: choice
+        options:
+          - "Yes"
+          - "No"
+      github_pub:
+        default: "No"
+        description: "Publish To Github"
+        required: true
+        type: choice
+        options:
+          - "Yes"
+          - "No"
+  release:
+    types: [published]
+
 env:
   GPG_KEY_ID: ${{ secrets.MAVEN_SIGN_KEY_ID }}
   GPG_KEY: ${{ secrets.MAVEN_SIGN_KEY }}
@@ -9,10 +31,8 @@ env:
   MAVEN_USER: ${{ secrets.MAVEN_USER_NAME }}
   MAVEN_KEY: ${{ secrets.MAVEN_USER_PWD }}
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-on:
-  workflow_dispatch:
-  release:
-    types: [published]
+  PUB_MAVEN: ${{ github.event.inputs.maven_pub }}
+  PUB_GITHUB: ${{ github.event.inputs.github_pub }}
 
 jobs:
   build:
@@ -37,7 +57,17 @@ jobs:
           cat gradle.properties
       - name: Build with Gradle
         run: gradle build -x test -x kspKotlin -x compileJava
-      - name: Publish to GitHub Packages
-        run: gradle publishToGitHubPackages
-      - name: Publish to Maven Central
-        run: gradle publishToSonatype closeAndReleaseSonatypeStagingRepository
+      - name: Publish To GitHub Packages
+        run: |
+          if [ "$PUB_GITHUB" == "Yes" ]; then
+            gradle publishToGitHubPackages
+          else
+            echo "Skip github packages publish"
+          fi
+      - name: Publish To Maven Central
+        run: |
+          if [ "PUB_MAVEN" == "No" ]; then
+            echo "Skip maven publish"
+          else
+            gradle publishToSonatype closeAndReleaseSonatypeStagingRepository
+          fi
