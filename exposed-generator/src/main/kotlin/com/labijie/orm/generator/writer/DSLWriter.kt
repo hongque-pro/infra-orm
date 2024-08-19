@@ -8,6 +8,7 @@ import com.labijie.orm.generator.writer.AbstractDSLMethodBuilder.Companion.kotli
 import com.labijie.orm.generator.writer.dsl.*
 import com.squareup.kotlinpoet.*
 import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
+import com.squareup.kotlinpoet.ksp.toClassName
 import com.squareup.kotlinpoet.ksp.toTypeName
 import org.jetbrains.exposed.sql.Column
 import org.jetbrains.exposed.sql.Query
@@ -193,8 +194,8 @@ object DSLWriter {
 //                                .toTypeName()
 //                        this.addStatement("${it.name}->%T::class", t)
 //                    }
-                    val t = if (!it.type.isMarkedNullable) it.type.toTypeName() else it.type.makeNotNullable().toTypeName()
-                    this.addStatement("${it.name}->%T::class", t)
+                    val t = if (!it.type.isMarkedNullable) it.type else it.type.makeNotNullable()
+                    this.addStatement("${it.name}->%T::class", t.toClassName())
                 }
                 val errorMessage = "Unknown column <\${column.name}> for '${context.pojoClass.simpleName}'"
                 this.addStatement("else->throw %T(%P)", IllegalArgumentException::class, errorMessage)

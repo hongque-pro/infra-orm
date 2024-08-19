@@ -161,7 +161,7 @@ public object PostDSL {
     status->TestEnum::class
     description->String::class
     status2->NestedInterface.StatusEnum::class
-    array->List<String>::class
+    array->List::class
     dateTime->LocalDateTime::class
     duration->Duration::class
     time->LocalTime::class
