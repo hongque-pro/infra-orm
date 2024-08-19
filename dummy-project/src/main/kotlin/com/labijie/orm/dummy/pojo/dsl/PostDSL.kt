@@ -6,13 +6,26 @@ import com.labijie.infra.orm.OffsetList
 import com.labijie.infra.orm.OffsetList.Companion.decodeToken
 import com.labijie.infra.orm.OffsetList.Companion.encodeToken
 import com.labijie.orm.dummy.PostTable
+import com.labijie.orm.dummy.PostTable.array
+import com.labijie.orm.dummy.PostTable.date
+import com.labijie.orm.dummy.PostTable.dateTime
 import com.labijie.orm.dummy.PostTable.description
+import com.labijie.orm.dummy.PostTable.duration
 import com.labijie.orm.dummy.PostTable.id
 import com.labijie.orm.dummy.PostTable.status
+import com.labijie.orm.dummy.PostTable.status2
+import com.labijie.orm.dummy.PostTable.time
+import com.labijie.orm.dummy.PostTable.timestamp
 import com.labijie.orm.dummy.PostTable.title
 import com.labijie.orm.dummy.TestEnum
+import com.labijie.orm.dummy.otherpackage.NestedInterface
 import com.labijie.orm.dummy.pojo.Post
 import java.lang.IllegalArgumentException
+import java.time.Duration
+import java.time.Instant
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.LocalTime
 import java.util.Base64
 import kotlin.Array
 import kotlin.Boolean
@@ -78,6 +91,13 @@ public object PostDSL {
     title,
     status,
     description,
+    status2,
+    array,
+    dateTime,
+    duration,
+    time,
+    date,
+    timestamp,
     id,
     )
   }
@@ -87,6 +107,13 @@ public object PostDSL {
     plain.title = raw[title]
     plain.status = raw[status]
     plain.description = raw[description]
+    plain.status2 = raw[status2]
+    plain.array = raw[array]
+    plain.dateTime = raw[dateTime]
+    plain.duration = raw[duration]
+    plain.time = raw[time]
+    plain.date = raw[date]
+    plain.timestamp = raw[timestamp]
     plain.id = raw[id]
     return plain
   }
@@ -102,6 +129,27 @@ public object PostDSL {
     if(row.hasValue(description)) {
       plain.description = row[description]
     }
+    if(row.hasValue(status2)) {
+      plain.status2 = row[status2]
+    }
+    if(row.hasValue(array)) {
+      plain.array = row[array]
+    }
+    if(row.hasValue(dateTime)) {
+      plain.dateTime = row[dateTime]
+    }
+    if(row.hasValue(duration)) {
+      plain.duration = row[duration]
+    }
+    if(row.hasValue(time)) {
+      plain.time = row[time]
+    }
+    if(row.hasValue(date)) {
+      plain.date = row[date]
+    }
+    if(row.hasValue(timestamp)) {
+      plain.timestamp = row[timestamp]
+    }
     if(row.hasValue(id)) {
       plain.id = row[id]
     }
@@ -112,6 +160,13 @@ public object PostDSL {
     title->String::class
     status->TestEnum::class
     description->String::class
+    status2->NestedInterface.StatusEnum::class
+    array->List<String>::class
+    dateTime->LocalDateTime::class
+    duration->Duration::class
+    time->LocalTime::class
+    date->LocalDate::class
+    timestamp->Instant::class
     id->Long::class
     else->throw IllegalArgumentException("""Unknown column <${column.name}> for 'Post'""")
   }
@@ -121,6 +176,13 @@ public object PostDSL {
     PostTable.title->this.title as T
     PostTable.status->this.status as T
     PostTable.description->this.description as T
+    PostTable.status2->this.status2 as T
+    PostTable.array->this.array as T
+    PostTable.dateTime->this.dateTime as T
+    PostTable.duration->this.duration as T
+    PostTable.time->this.time as T
+    PostTable.date->this.date as T
+    PostTable.timestamp->this.timestamp as T
     PostTable.id->this.id as T
     else->throw IllegalArgumentException("""Unknown column <${column.name}> for 'Post'""")
   }
@@ -138,6 +200,20 @@ public object PostDSL {
       builder[status] = raw.status
     if((list == null || list.contains(description)) && !ignore.contains(description))
       builder[description] = raw.description
+    if((list == null || list.contains(status2)) && !ignore.contains(status2))
+      builder[status2] = raw.status2
+    if((list == null || list.contains(array)) && !ignore.contains(array))
+      builder[array] = raw.array
+    if((list == null || list.contains(dateTime)) && !ignore.contains(dateTime))
+      builder[dateTime] = raw.dateTime
+    if((list == null || list.contains(duration)) && !ignore.contains(duration))
+      builder[duration] = raw.duration
+    if((list == null || list.contains(time)) && !ignore.contains(time))
+      builder[time] = raw.time
+    if((list == null || list.contains(date)) && !ignore.contains(date))
+      builder[date] = raw.date
+    if((list == null || list.contains(timestamp)) && !ignore.contains(timestamp))
+      builder[timestamp] = raw.timestamp
     if((list == null || list.contains(id)) && !ignore.contains(id))
       builder[id] = raw.id
   }

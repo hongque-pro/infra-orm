@@ -6,8 +6,10 @@ import com.labijie.infra.orm.SimpleLongIdTable
 import com.labijie.infra.orm.SimpleStringIdTable
 import com.labijie.infra.orm.compile.KspPrimaryKey
 import com.labijie.infra.orm.compile.KspTableIgnore
+import com.labijie.orm.dummy.otherpackage.NestedInterface
 import org.jetbrains.exposed.sql.Column
 import org.jetbrains.exposed.sql.Table
+import org.jetbrains.exposed.sql.javatime.*
 
 
 enum class TestEnum {
@@ -18,9 +20,17 @@ object PostTable : SimpleLongIdTable("posts", "id") {
     var title: Column<String> = varchar("name", 50)
     var status = enumeration("status", TestEnum::class)
     var description = varchar("desc", 255)
+    var status2 = enumeration("status", NestedInterface.StatusEnum::class)
+    var array = array<String>("array")
+    var dateTime = datetime("dateTime")
+    var duration = duration("duration")
+    var time = time("time")
+    var date = date("date")
+    var timestamp = timestamp("timestamp")
 }
 
 object ShopTable : SimpleLongIdTable("my", "id") {
+
     var name: Column<String> = varchar("name", 50)
     var status = enumeration("status", TestEnum::class)
     var count = integer("count")

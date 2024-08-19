@@ -19,6 +19,7 @@ class FolderPathTester {
         assertEquals(result, find.toString())
     }
 
+
     @OptIn(ExperimentalCompilerApi::class)
     @Test
     fun testCompile(){
@@ -31,17 +32,28 @@ import org.jetbrains.exposed.sql.Column
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.Table
 import com.labijie.infra.orm.compile.*
+import org.jetbrains.exposed.sql.javatime.datetime
 
 enum class Status {
     OK,
     Failed
 }
 
+interface NestedInterface {
+    enum class NestedEnum {
+        Default,
+        Failed
+    }
+}
+
 @KspPojoGeneration(true)
 object TestTable : Table("my") {
+    var array = array<String>("array")
     var name: Column<String> = varchar("name", 50)
     var count = integer("count")
     val status = enumeration("status", Status::class)
+    val status2 = enumeration("status2", NestedInterface.NestedEnum::class)
+    val dt = datetime("dt")
 }
     """
         )

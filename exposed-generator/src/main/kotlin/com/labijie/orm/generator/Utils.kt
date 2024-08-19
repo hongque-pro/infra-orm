@@ -6,14 +6,13 @@ import com.squareup.kotlinpoet.*
 import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
 import org.jetbrains.exposed.dao.id.EntityID
 import org.jetbrains.exposed.sql.Column
-import org.jetbrains.exposed.sql.Table
 import java.io.File
 import java.nio.file.Files
 import java.nio.file.Path
-import java.nio.file.Paths
 import kotlin.io.path.Path
 import kotlin.io.path.createDirectories
 import kotlin.io.path.isDirectory
+import kotlin.reflect.KClass
 
 fun KSPLogger.println(message: String, symbol: KSNode? = null) {
     this.info("[expose gen] $message", symbol)
@@ -82,6 +81,24 @@ fun KSPropertyDeclaration.getColumnType(): ColumnType? {
 fun KSType.isEnum(): Boolean {
     val classDeclaration = this.declaration as? KSClassDeclaration
     return classDeclaration != null && classDeclaration.classKind == ClassKind.ENUM_CLASS
+}
+
+fun <T> KSType.isJavaType(javaClass: Class<T>): Boolean {
+    val classDeclaration = this.declaration.qualifiedName?.asString()
+    val className = "${javaClass.packageName}.${javaClass.simpleName}"
+    return className == classDeclaration
+}
+
+fun KSType.isJavaType(qualifiedClassName: String): Boolean {
+    val classDeclaration = this.declaration.qualifiedName?.asString()
+    return qualifiedClassName == classDeclaration
+}
+
+
+inline fun <reified T> KSType.isJavaType(): Boolean {
+    val classDeclaration = this.declaration.qualifiedName?.asString()
+    val kotlinClass = T::class.qualifiedName
+    return kotlinClass.equals(classDeclaration)
 }
 
 

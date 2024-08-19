@@ -1,13 +1,19 @@
 package com.labijie.orm.generator
 
 import com.google.devtools.ksp.symbol.KSClassDeclaration
+import com.google.devtools.ksp.symbol.KSDeclaration
 import com.google.devtools.ksp.symbol.KSType
 import com.squareup.kotlinpoet.MemberName
 import java.math.BigDecimal
+import java.time.Duration
+import java.time.Instant
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.LocalTime
 import java.util.*
 
 object DefaultValues {
-    //exposed types: https://github.com/JetBrains/Exposed/wiki/DataTypes
+    //exposed types: https://jetbrains.github.io/Exposed/data-types.html
 
     private val values = mutableMapOf(
         String::class.qualifiedName to "\"\"",
@@ -22,6 +28,7 @@ object DefaultValues {
         UUID::class.qualifiedName to "UUID.randomUUID()",
         Boolean::class.qualifiedName to "false",
         Byte::class.qualifiedName to "0",
+        Array::class.qualifiedName to "arrayOf<{type}>()"
     )
 
     private fun kotlinTextExtensionMethod(methodName: String): MemberName {
@@ -50,12 +57,54 @@ object DefaultValues {
         return name;
     }
 
+    private fun getFullClassNameForNested(declaration: KSDeclaration): String {
+        val list = mutableListOf<String>()
+        var d: KSDeclaration? = declaration
+        list.add(declaration.simpleName.getShortName())
+        while (d?.parentDeclaration != null) {
+           val name = (d.parentDeclaration?.simpleName?.getShortName()).orEmpty()
+            list.add(0, name)
+            d = d.parentDeclaration
+        }
+
+        return StringBuilder().apply {
+            list.forEach {
+                this.append("${it}.")
+            }
+        }.toString()
+    }
+
     fun getValue(type: KSType): String {
         if(type.isEnum()){
             val enumDeclaration = type.declaration as KSClassDeclaration
             val firstEnumEntry = enumDeclaration.declarations.filter { it is KSClassDeclaration }.firstOrNull() ?: throw java.lang.IllegalArgumentException("enum type '${type.declaration.simpleName.asString()}' value missed")
             val filedName = firstEnumEntry.simpleName.asString()
-            return "${type.declaration.simpleName.getShortName()}.${filedName}"
+            val className = getFullClassNameForNested(type.declaration)
+            return "${className}${filedName}"
+        }
+
+        if(type.isJavaType<List<*>>()) {
+            return "listOf()"
+        }
+
+        if(type.isJavaType<LocalDateTime>()) {
+            return "LocalDateTime.of(0, 1, 1, 0, 0,0, 0)"
+        }
+
+        if(type.isJavaType<LocalDate>()) {
+            return "LocalDate.of(0, 1, 1)"
+        }
+
+        if(type.isJavaType<Duration>()) {
+            return "Duration.ZERO"
+        }
+
+        if(type.isJavaType<LocalTime>()) {
+            return "LocalTime.MIN"
+        }
+
+        if(type.isJavaType<Instant>()) {
+            return "Instant.EPOCH"
         }
 
         val typeName = type.declaration.qualifiedName!!.asString()
