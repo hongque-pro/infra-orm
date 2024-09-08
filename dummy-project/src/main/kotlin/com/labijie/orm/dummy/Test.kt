@@ -5,6 +5,7 @@
 package com.labijie.orm.dummy
 
 import com.labijie.orm.dummy.pojo.Post
+import com.labijie.orm.dummy.pojo.dsl.IntIdDSL.selectForwardByPrimaryKey
 import com.labijie.orm.dummy.pojo.dsl.PostDSL.deleteByPrimaryKey
 import com.labijie.orm.dummy.pojo.dsl.PostDSL.insert
 import com.labijie.orm.dummy.pojo.dsl.PostDSL.replace
@@ -25,6 +26,8 @@ class Test {
             this.title = "Test"
             this.description = "Just a test."
         }
+
+        IntIdTable.selectForwardByPrimaryKey()
 
         //select by primary key
         val selectedPost: Post? = PostTable.selectByPrimaryKey(123)

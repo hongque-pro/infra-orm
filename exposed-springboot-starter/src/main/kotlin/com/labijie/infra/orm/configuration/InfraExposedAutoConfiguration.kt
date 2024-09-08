@@ -1,6 +1,7 @@
 package com.labijie.infra.orm.configuration
 
 import com.labijie.infra.orm.ExposedTransactionListener
+import com.labijie.infra.orm.interceptor.InfraStatementInterceptor
 import org.jetbrains.exposed.spring.SpringTransactionManager
 import org.jetbrains.exposed.sql.DatabaseConfig
 import org.jetbrains.exposed.sql.SchemaUtils
@@ -35,7 +36,7 @@ import javax.sql.DataSource
 @AutoConfigureAfter(DataSourceAutoConfiguration::class)
 @EnableConfigurationProperties(InfraExposedProperties::class)
 @EnableTransactionManagement
-class InfraExposedAutoConfiguration : ApplicationContextAware  {
+class InfraExposedAutoConfiguration : ApplicationContextAware {
 
     private lateinit var applicationContext: ApplicationContext
 
@@ -48,20 +49,24 @@ class InfraExposedAutoConfiguration : ApplicationContextAware  {
     @Bean
     @ConditionalOnMissingBean(DatabaseConfig::class)
     open fun databaseConfig(): DatabaseConfig {
-        return DatabaseConfig.invoke {  }
+        return DatabaseConfig.invoke { }
     }
 
     @Bean
     @ConditionalOnMissingBean(SpringTransactionManager::class)
     fun exposedSpringTransactionManager(
         environment: Environment,
-        properties: InfraExposedProperties, databaseConfig: DatabaseConfig, dataSource: DataSource): SpringTransactionManager {
+        properties: InfraExposedProperties,
+        databaseConfig: DatabaseConfig,
+        dataSource: DataSource
+    ): SpringTransactionManager {
+
         val txm = SpringTransactionManager(dataSource, databaseConfig, false)
         txm.addListener(ExposedTransactionListener(environment, properties))
         return txm
     }
 
-    class ExposedTableRegistrar : BeanFactoryAware, ImportBeanDefinitionRegistrar  {
+    class ExposedTableRegistrar : BeanFactoryAware, ImportBeanDefinitionRegistrar {
 
         private var beanFactory: BeanFactory? = null
 
@@ -89,9 +94,13 @@ class InfraExposedAutoConfiguration : ApplicationContextAware  {
                 })
             }
 
-            val builder: BeanDefinitionBuilder = BeanDefinitionBuilder.genericBeanDefinition(TableDefinitionPostProcessor::class.java)
+            val builder: BeanDefinitionBuilder =
+                BeanDefinitionBuilder.genericBeanDefinition(TableDefinitionPostProcessor::class.java)
 
-            builder.addPropertyValue(TableDefinitionPostProcessor::packages.name, StringUtils.collectionToCommaDelimitedString(packages))
+            builder.addPropertyValue(
+                TableDefinitionPostProcessor::packages.name,
+                StringUtils.collectionToCommaDelimitedString(packages)
+            )
 
             registry.registerBeanDefinition(TableDefinitionPostProcessor::class.java.name, builder.beanDefinition)
         }
@@ -116,12 +125,22 @@ class InfraExposedAutoConfiguration : ApplicationContextAware  {
     fun exposedConfigurationOverride() = ExposedConfigurationOverride()
 
     @Bean
-    @ConditionalOnProperty(prefix = "infra.exposed", name = ["generate-schema.enabled"], havingValue = "true", matchIfMissing = false)
-    fun schemaCreationProcessor(transactionTemplate: TransactionTemplate, properties: InfraExposedProperties): SchemaChangesProcessor {
+    @ConditionalOnProperty(
+        prefix = "infra.exposed",
+        name = ["generate-schema.enabled"],
+        havingValue = "true",
+        matchIfMissing = false
+    )
+    fun schemaCreationProcessor(
+        transactionTemplate: TransactionTemplate,
+        properties: InfraExposedProperties
+    ): SchemaChangesProcessor {
         return SchemaChangesProcessor(transactionTemplate, properties)
     }
 
     override fun setApplicationContext(applicationContext: ApplicationContext) {
         this.applicationContext = applicationContext
+        InfraStatementInterceptor.springContext = applicationContext
     }
+
 }

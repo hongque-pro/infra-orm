@@ -56,4 +56,19 @@ open class Tester {
         assertNotNull(entity)
     }
 
+    @Test
+    @Transactional
+    open fun testException(){
+
+        TestEntityTable.insert {
+            it[id] = 123
+            it[name] = "ccc"
+        }
+
+        TestEntityTable.insert {
+            it[id] = 123
+            it[name] = "ccc"
+        }
+    }
+
 }

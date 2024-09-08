@@ -5,6 +5,7 @@
 package com.labijie.infra.orm
 
 import com.labijie.infra.orm.configuration.InfraExposedProperties
+import com.labijie.infra.orm.interceptor.InfraStatementInterceptor
 import org.jetbrains.exposed.sql.SqlLogger
 import org.jetbrains.exposed.sql.Transaction
 import org.jetbrains.exposed.sql.addLogger
@@ -19,8 +20,8 @@ import org.springframework.transaction.TransactionExecutionListener
 
 
 class ExposedTransactionListener(
-    private val environment: Environment,
-    private val properties: InfraExposedProperties
+    environment: Environment,
+    properties: InfraExposedProperties
 ) : TransactionExecutionListener {
 
 
@@ -86,6 +87,7 @@ class ExposedTransactionListener(
     override fun afterBegin(transaction: TransactionExecution, beginFailure: Throwable?) {
         super.afterBegin(transaction, beginFailure)
         val tr = TransactionManager.current()
+        //tr.registerInterceptor(InfraStatementInterceptor)
         tr.addLogger(sqlLogger)
     }
 }

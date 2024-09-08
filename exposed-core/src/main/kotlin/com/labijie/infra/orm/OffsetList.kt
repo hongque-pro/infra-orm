@@ -1,6 +1,7 @@
 package com.labijie.infra.orm
 
 import java.util.*
+import kotlin.collections.map
 
 /**
  *
@@ -57,4 +58,12 @@ class OffsetList<T>(var list: List<T> = emptyList(), var forwardToken: String? =
             return Pair(offset, keys)
         }
     }
+
+
+    fun <R> map(transform: (T) -> R): OffsetList<R> {
+        val ll = this.list
+        val rr = ll.map(transform)
+        return OffsetList(rr, this.forwardToken)
+    }
+
 }

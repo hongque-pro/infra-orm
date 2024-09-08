@@ -6,4 +6,6 @@ object Versions {
 
     const val kotlinPoetVersion = "1.18.1"
     const val kotlinCompileTesting = "0.5.1"
+
+    const val cglib = "3.3.0"
 }

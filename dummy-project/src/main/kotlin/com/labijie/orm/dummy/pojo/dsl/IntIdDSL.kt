@@ -307,14 +307,14 @@ public object IntIdDSL {
     return query.toIntIdList(*selective)
   }
 
-  public fun IntIdTable.selectMany(vararg selective: Column<*>, `where`: Query.() -> Unit):
+  public fun IntIdTable.selectMany(vararg selective: Column<*>, `where`: Query.() -> Query):
       List<IntId> {
     val query = selectSlice(*selective)
     `where`.invoke(query)
     return query.toIntIdList(*selective)
   }
 
-  public fun IntIdTable.selectOne(vararg selective: Column<*>, `where`: Query.() -> Unit): IntId? {
+  public fun IntIdTable.selectOne(vararg selective: Column<*>, `where`: Query.() -> Query): IntId? {
     val query = selectSlice(*selective)
     `where`.invoke(query)
     return query.firstOrNull()?.toIntId(*selective)
@@ -325,7 +325,7 @@ public object IntIdDSL {
     order: SortOrder = SortOrder.DESC,
     pageSize: Int = 50,
     selective: Collection<Column<*>> = listOf(),
-    `where`: (Query.() -> Unit)? = null,
+    `where`: (Query.() -> Query)? = null,
   ): OffsetList<IntId> {
     if(pageSize < 1) {
       return OffsetList.empty()
@@ -358,7 +358,7 @@ public object IntIdDSL {
     order: SortOrder = SortOrder.DESC,
     pageSize: Int = 50,
     selective: Collection<Column<*>> = listOf(),
-    `where`: (Query.() -> Unit)? = null,
+    `where`: (Query.() -> Query)? = null,
   ): OffsetList<IntId> {
     if(pageSize < 1) {
       return OffsetList.empty()

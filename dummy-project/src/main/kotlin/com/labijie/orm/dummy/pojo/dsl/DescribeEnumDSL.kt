@@ -212,14 +212,14 @@ public object DescribeEnumDSL {
     return query.firstOrNull()?.toDescribeEnum(*selective)
   }
 
-  public fun DescribeEnumTable.selectMany(vararg selective: Column<*>, `where`: Query.() -> Unit):
+  public fun DescribeEnumTable.selectMany(vararg selective: Column<*>, `where`: Query.() -> Query):
       List<DescribeEnum> {
     val query = selectSlice(*selective)
     `where`.invoke(query)
     return query.toDescribeEnumList(*selective)
   }
 
-  public fun DescribeEnumTable.selectOne(vararg selective: Column<*>, `where`: Query.() -> Unit):
+  public fun DescribeEnumTable.selectOne(vararg selective: Column<*>, `where`: Query.() -> Query):
       DescribeEnum? {
     val query = selectSlice(*selective)
     `where`.invoke(query)

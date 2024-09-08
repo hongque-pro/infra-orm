@@ -32,7 +32,7 @@ abstract class AbstractDSLMethodBuilder : IDSLMethodBuilder {
             defaultValue: String? = null
         ): ParameterSpec {
             val rec = Query::class.asTypeName()
-            val where = LambdaTypeName.get(rec, returnType = Unit::class.asTypeName()).let {
+            val where = LambdaTypeName.get(rec, returnType = rec).let {
                 if (nullable) {
                     it.copy(nullable = true)
                 } else {

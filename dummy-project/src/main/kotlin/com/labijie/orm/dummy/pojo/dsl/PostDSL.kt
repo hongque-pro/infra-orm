@@ -308,14 +308,14 @@ public object PostDSL {
     return query.toPostList(*selective)
   }
 
-  public fun PostTable.selectMany(vararg selective: Column<*>, `where`: Query.() -> Unit):
+  public fun PostTable.selectMany(vararg selective: Column<*>, `where`: Query.() -> Query):
       List<Post> {
     val query = selectSlice(*selective)
     `where`.invoke(query)
     return query.toPostList(*selective)
   }
 
-  public fun PostTable.selectOne(vararg selective: Column<*>, `where`: Query.() -> Unit): Post? {
+  public fun PostTable.selectOne(vararg selective: Column<*>, `where`: Query.() -> Query): Post? {
     val query = selectSlice(*selective)
     `where`.invoke(query)
     return query.firstOrNull()?.toPost(*selective)
@@ -326,7 +326,7 @@ public object PostDSL {
     order: SortOrder = SortOrder.DESC,
     pageSize: Int = 50,
     selective: Collection<Column<*>> = listOf(),
-    `where`: (Query.() -> Unit)? = null,
+    `where`: (Query.() -> Query)? = null,
   ): OffsetList<Post> {
     if(pageSize < 1) {
       return OffsetList.empty()
@@ -359,7 +359,7 @@ public object PostDSL {
     order: SortOrder = SortOrder.DESC,
     pageSize: Int = 50,
     selective: Collection<Column<*>> = listOf(),
-    `where`: (Query.() -> Unit)? = null,
+    `where`: (Query.() -> Query)? = null,
   ): OffsetList<Post> {
     if(pageSize < 1) {
       return OffsetList.empty()

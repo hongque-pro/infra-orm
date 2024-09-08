@@ -308,14 +308,14 @@ public object TestSimpleDSL {
     return query.toTestSimpleList(*selective)
   }
 
-  public fun TestSimpleTable.selectMany(vararg selective: Column<*>, `where`: Query.() -> Unit):
+  public fun TestSimpleTable.selectMany(vararg selective: Column<*>, `where`: Query.() -> Query):
       List<TestSimple> {
     val query = selectSlice(*selective)
     `where`.invoke(query)
     return query.toTestSimpleList(*selective)
   }
 
-  public fun TestSimpleTable.selectOne(vararg selective: Column<*>, `where`: Query.() -> Unit):
+  public fun TestSimpleTable.selectOne(vararg selective: Column<*>, `where`: Query.() -> Query):
       TestSimple? {
     val query = selectSlice(*selective)
     `where`.invoke(query)
@@ -327,7 +327,7 @@ public object TestSimpleDSL {
     order: SortOrder = SortOrder.DESC,
     pageSize: Int = 50,
     selective: Collection<Column<*>> = listOf(),
-    `where`: (Query.() -> Unit)? = null,
+    `where`: (Query.() -> Query)? = null,
   ): OffsetList<TestSimple> {
     if(pageSize < 1) {
       return OffsetList.empty()
@@ -360,7 +360,7 @@ public object TestSimpleDSL {
     order: SortOrder = SortOrder.DESC,
     pageSize: Int = 50,
     selective: Collection<Column<*>> = listOf(),
-    `where`: (Query.() -> Unit)? = null,
+    `where`: (Query.() -> Query)? = null,
   ): OffsetList<TestSimple> {
     if(pageSize < 1) {
       return OffsetList.empty()
