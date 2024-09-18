@@ -51,6 +51,7 @@ class ExposedTransactionListener(
                     !c.startsWith("kotlin.") &&
                     !c.endsWith("DSL") &&
                     !c.contains(".pojo.dsl.") &&
+                    !c.startsWith("com.labijie.application.ExtensionMethodsKt") &&
                     !m.contains("\$lambda")
                 ) {
                     return current
