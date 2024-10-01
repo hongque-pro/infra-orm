@@ -1,7 +1,6 @@
 package com.labijie.infra.orm.configuration
 
 import com.labijie.infra.orm.ExposedTransactionListener
-import com.labijie.infra.orm.interceptor.InfraStatementInterceptor
 import org.jetbrains.exposed.spring.SpringTransactionManager
 import org.jetbrains.exposed.sql.DatabaseConfig
 import org.jetbrains.exposed.sql.SchemaUtils
@@ -53,15 +52,15 @@ class InfraExposedAutoConfiguration : ApplicationContextAware {
     }
 
     @Bean
-    @ConditionalOnMissingBean(SpringTransactionManager::class)
+    @ConditionalOnMissingBean(JdbcExposedTransactionManager::class)
     fun exposedSpringTransactionManager(
         environment: Environment,
         properties: InfraExposedProperties,
         databaseConfig: DatabaseConfig,
         dataSource: DataSource
-    ): SpringTransactionManager {
+    ): JdbcExposedTransactionManager {
 
-        val txm = SpringTransactionManager(dataSource, databaseConfig, false)
+        val txm = JdbcExposedTransactionManager(dataSource, databaseConfig, false)
         txm.addListener(ExposedTransactionListener(environment, properties))
         return txm
     }
@@ -140,7 +139,6 @@ class InfraExposedAutoConfiguration : ApplicationContextAware {
 
     override fun setApplicationContext(applicationContext: ApplicationContext) {
         this.applicationContext = applicationContext
-        InfraStatementInterceptor.springContext = applicationContext
     }
 
 }
