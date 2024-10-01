@@ -16,6 +16,8 @@ import org.jetbrains.exposed.sql.Column
 import org.jetbrains.exposed.sql.Expression
 import org.jetbrains.exposed.sql.Op
 import org.jetbrains.exposed.sql.SqlExpressionBuilder
+import org.jetbrains.exposed.sql.statements.UpdateStatement
+import org.jetbrains.exposed.sql.statements.UpsertBuilder
 import org.jetbrains.exposed.sql.statements.UpsertStatement
 
 
@@ -29,8 +31,11 @@ object UpsertMethod : AbstractDSLMethodBuilder() {
         val colType = Column::class.asTypeName().parameterizedWildcard()
         val expressionType = Expression::class.asTypeName().parameterizedWildcard()
 
-        val pairType = Pair::class.asTypeName().parameterizedBy(colType, expressionType)
-        val onUpdate = ParameterSpec.builder("onUpdate", List::class.asTypeName().parameterizedBy(pairType).copy(nullable = true))
+        //(UpsertBuilder.(UpdateStatement) -> Unit)? = null,
+        val onUpdateRec = UpsertBuilder::class.asTypeName()
+        val onUpdateParam = UpdateStatement::class.asTypeName()
+        val onUpdateLambda = LambdaTypeName.get(onUpdateRec, parameters = arrayOf(onUpdateParam), returnType = Unit::class.asTypeName()).copy(nullable = true)
+        val onUpdate = ParameterSpec.builder("onUpdate", onUpdateLambda)
             .defaultValue("null")
             .build()
 
@@ -49,8 +54,8 @@ object UpsertMethod : AbstractDSLMethodBuilder() {
         return FunSpec.builder("upsert")
             .receiver(context.base.tableClass)
             .addParameter(context.entityParamName, context.base.pojoClass)
-            .addParameter(onUpdate)
             .addParameter(onUpdateExclude)
+            .addParameter(onUpdate)
             .addParameter(where)
             .returns(resultType)
             .beginControlFlow("return %M(where = where, onUpdate = onUpdate, onUpdateExclude = onUpdateExclude)", getSqlExtendMethod("upsert"))

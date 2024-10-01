@@ -20,7 +20,6 @@ import kotlin.Comparable
 import kotlin.Int
 import kotlin.Long
 import kotlin.Number
-import kotlin.Pair
 import kotlin.String
 import kotlin.Unit
 import kotlin.collections.Collection
@@ -35,7 +34,6 @@ import kotlin.text.Charsets
 import kotlin.text.toByteArray
 import kotlin.text.toLong
 import org.jetbrains.exposed.sql.Column
-import org.jetbrains.exposed.sql.Expression
 import org.jetbrains.exposed.sql.Op
 import org.jetbrains.exposed.sql.Query
 import org.jetbrains.exposed.sql.ResultRow
@@ -52,6 +50,7 @@ import org.jetbrains.exposed.sql.statements.InsertStatement
 import org.jetbrains.exposed.sql.statements.ReplaceStatement
 import org.jetbrains.exposed.sql.statements.UpdateBuilder
 import org.jetbrains.exposed.sql.statements.UpdateStatement
+import org.jetbrains.exposed.sql.statements.UpsertBuilder
 import org.jetbrains.exposed.sql.statements.UpsertStatement
 import org.jetbrains.exposed.sql.update
 import org.jetbrains.exposed.sql.upsert
@@ -175,8 +174,8 @@ public object ShopDSL {
 
   public fun ShopTable.upsert(
     raw: Shop,
-    onUpdate: List<Pair<Column<*>, Expression<*>>>? = null,
     onUpdateExclude: List<Column<*>>? = null,
+    onUpdate: (UpsertBuilder.(UpdateStatement) -> Unit)? = null,
     `where`: (SqlExpressionBuilder.() -> Op<Boolean>)? = null,
   ): UpsertStatement<Long> = upsert(where = where, onUpdate = onUpdate, onUpdateExclude =
       onUpdateExclude) {
