@@ -6,14 +6,17 @@ package com.labijie.infra.orm.testing
 
 import com.labijie.infra.orm.ExposedUtils.checkExcessiveColumns
 import com.labijie.infra.orm.SimpleLongIdTable
+import com.labijie.infra.orm.annotation.TableScan
 import com.labijie.infra.orm.test.ExposedTest
 import org.jetbrains.exposed.sql.SchemaUtils
+import org.jetbrains.exposed.sql.insert
 import org.jetbrains.exposed.sql.transactions.TransactionManager
 import org.jetbrains.exposed.sql.vendors.currentDialect
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration
+import org.springframework.dao.DuplicateKeyException
 import org.springframework.jdbc.core.simple.JdbcClient
 import org.springframework.test.context.ContextConfiguration
 import org.springframework.test.context.junit.jupiter.SpringExtension
@@ -22,10 +25,10 @@ import kotlin.test.Test
 
 
 @Suppress("SqlDialectInspection", "SqlNoDataSourceInspection", "SqlSourceToSinkFlow")
-@ExposedTest
 @EnableAutoConfiguration
 @ExtendWith(SpringExtension::class)
 @ContextConfiguration(classes = [TestingContext::class])
+@TableScan
 class SchemaChangesProcessorTester {
 
     object BeforeTable : SimpleLongIdTable("t1") {
@@ -88,4 +91,5 @@ class SchemaChangesProcessorTester {
         Assertions.assertArrayEquals(arrayOf(BeforeTable.id.name, BeforeTable.name2.name), columnsAfter)
 
     }
+
 }

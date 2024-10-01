@@ -30,6 +30,13 @@
       "sourceType": "com.labijie.infra.orm.configuration.InfraExposedProperties",
       "description": "show sql for exposed",
       "defaultValue": false
+    },
+    {
+      "name": "infra.exposed.translate-sql-exception",
+      "type": "java.lang.Boolean",
+      "sourceType": "com.labijie.infra.orm.configuration.InfraExposedProperties",
+      "description": "Translate sql exception to DataAccessException",
+      "defaultValue": true
     }
   ]
 }

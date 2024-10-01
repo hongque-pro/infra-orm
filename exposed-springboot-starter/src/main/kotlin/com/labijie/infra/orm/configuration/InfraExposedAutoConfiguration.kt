@@ -60,9 +60,9 @@ class InfraExposedAutoConfiguration : ApplicationContextAware {
         dataSource: DataSource
     ): JdbcExposedTransactionManager {
 
-        val txm = JdbcExposedTransactionManager(dataSource, databaseConfig, false)
+        val txm = SpringTransactionManager(dataSource, databaseConfig, false)
         txm.addListener(ExposedTransactionListener(environment, properties))
-        return txm
+        return JdbcExposedTransactionManager(properties, txm)
     }
 
     class ExposedTableRegistrar : BeanFactoryAware, ImportBeanDefinitionRegistrar {

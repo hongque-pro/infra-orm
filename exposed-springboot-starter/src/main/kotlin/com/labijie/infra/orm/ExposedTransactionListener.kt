@@ -5,7 +5,6 @@
 package com.labijie.infra.orm
 
 import com.labijie.infra.orm.configuration.InfraExposedProperties
-import com.labijie.infra.orm.interceptor.InfraStatementInterceptor
 import org.jetbrains.exposed.sql.SqlLogger
 import org.jetbrains.exposed.sql.Transaction
 import org.jetbrains.exposed.sql.addLogger

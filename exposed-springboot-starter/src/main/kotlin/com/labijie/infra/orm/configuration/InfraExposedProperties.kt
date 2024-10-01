@@ -7,6 +7,8 @@ import org.springframework.boot.context.properties.NestedConfigurationProperty
 data class InfraExposedProperties(
     var showSql: Boolean = false,
 
+    val translateSqlException: Boolean = true,
+
     @NestedConfigurationProperty
     val generateSchema: SchemaGenerationSettings = SchemaGenerationSettings(),
 )

@@ -1,0 +1,4 @@
+infra:
+  exposed:
+    generate-schema:
+      enabled: true
