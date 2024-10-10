@@ -46,7 +46,9 @@ interface NestedInterface {
     }
 }
 
-@KspPojoGeneration(true)
+interface TestInterface {}
+
+@KspTablePojo(interfaces=[TestInterface::class])
 object TestTable : Table("my") {
     var array = array<String>("array")
     var name: Column<String> = varchar("name", 50)

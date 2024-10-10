@@ -2,6 +2,8 @@
 
 package com.labijie.orm.dummy.pojo
 
+import com.labijie.orm.dummy.SimpleBaseClass
+import com.labijie.orm.dummy.SimpleInterface
 import com.labijie.orm.dummy.TestEnum
 import java.util.UUID
 import kotlin.Boolean
@@ -22,10 +24,8 @@ import kotlin.String
  * Origin Exposed Table:
  * @see com.labijie.orm.dummy.IntIdTable
  */
-public open class IntId {
-  public var name: String = ""
-
-  public var memo: String? = null
+public open class IntId : SimpleBaseClass(), SimpleInterface {
+  public override var name: String = ""
 
   public var charCol: Char = '\u0000'
 

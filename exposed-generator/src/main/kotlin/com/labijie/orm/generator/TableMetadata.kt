@@ -1,12 +1,24 @@
 package com.labijie.orm.generator
 
 import com.google.devtools.ksp.getAllSuperTypes
+import com.google.devtools.ksp.getConstructors
+import com.google.devtools.ksp.isAbstract
+import com.google.devtools.ksp.isOpen
+import com.google.devtools.ksp.processing.KSPLogger
 import com.google.devtools.ksp.symbol.KSClassDeclaration
+import com.google.devtools.ksp.symbol.KSType
+import com.google.devtools.ksp.symbol.Origin
 import com.labijie.infra.orm.SimpleIdTable
 import com.labijie.infra.orm.compile.KspTablePojo
+import com.labijie.infra.orm.compile.KspTablePojoSuper
+import com.squareup.kotlinpoet.ksp.toTypeName
 import org.jetbrains.exposed.dao.id.IdTable
 
-class TableMetadata(declaration: KSClassDeclaration, val sourceFile: String) {
+class TableMetadata(declaration: KSClassDeclaration, val sourceFile: String, private val logger: KSPLogger) {
+
+
+    class PojoSuper(val type: KSType, val isInterface: Boolean)
+
     val columns: MutableList<ColumnMetadata> = mutableListOf()
 
     val packageName = declaration.packageName.asString()
@@ -18,6 +30,8 @@ class TableMetadata(declaration: KSClassDeclaration, val sourceFile: String) {
 
     val isSerializable: Boolean
     val isOpen: Boolean
+    val implements: MutableList<PojoSuper> = mutableListOf()
+
 
     init {
 
@@ -39,27 +53,46 @@ class TableMetadata(declaration: KSClassDeclaration, val sourceFile: String) {
             it.annotationType.resolve().declaration.qualifiedName?.asString() == KspTablePojo::class.qualifiedName
         }
 
-        val defaultArgs = pojoAnnotation?.defaultArguments
-        val defaultParams = mutableMapOf<Int, String>()
-        defaultArgs?.forEachIndexed { index, item ->
-            val name = item.name?.getShortName()
-            if (!name.isNullOrBlank()) {
-                defaultParams[index] = name
-            }
-        }
-
-        val args = pojoAnnotation?.arguments
-        val parameterValues = mutableMapOf<String, Any?>()
-        args?.forEachIndexed { index, item ->
-            val name = item.name?.getShortName() ?: defaultParams[index]
-            if (!name.isNullOrBlank()) {
-                parameterValues[name] = item.value
-            }
+        val interfaceAnnotations = declaration.annotations.filter {
+            it.annotationType.resolve().declaration.qualifiedName?.asString() == KspTablePojoSuper::class.qualifiedName
         }
 
 
-        isSerializable = parameterValues.getOrDefault(KspTablePojo::kotlinSerializable.name, false) as? Boolean ?: false
-        isOpen = parameterValues.getOrDefault(KspTablePojo::isOpen.name, true) as? Boolean ?: true
+        val pojoAnnoValues = pojoAnnotation?.getProperties()
+
+
+        isSerializable = pojoAnnoValues?.getOrDefault(KspTablePojo::kotlinSerializable.name, false) as? Boolean ?: false
+        isOpen = pojoAnnoValues?.getOrDefault(KspTablePojo::isOpen.name, true) as? Boolean ?: true
+
+        interfaceAnnotations.forEach {
+            anno->
+            val interfaceAnnoValues = anno.getProperties()
+            val type = interfaceAnnoValues.getOrDefault(KspTablePojoSuper::type.name, null)
+            //val by = interfaceAnnoValues.getOrDefault(KspTablePojoInterface::by.name, null)
+
+            if(type is KSType){
+                val classDeclaration = type.declaration as? KSClassDeclaration
+                val isKotlin = classDeclaration != null && (classDeclaration.origin == Origin.KOTLIN || classDeclaration.origin == Origin.KOTLIN_LIB)
+                val isInterface = classDeclaration?.classKind == com.google.devtools.ksp.symbol.ClassKind.INTERFACE
+                val isOpen = classDeclaration?.isOpen() ?: false
+                val isAbstract = classDeclaration?.isAbstract() ?: false
+                //val byType = if(by != null && by is KSType && by.declaration.simpleName.getShortName() != "Unit") by else null
+                if(isKotlin && (isInterface || (isOpen || isAbstract))) {
+                    val i = PojoSuper(type, isInterface)
+                    if(isInterface) {
+                        implements.add(i)
+                    }else {
+                        if(!implements.any { !it.isInterface }) {
+                            implements.add(0, i)
+                        }else {
+                            logger.warn("Table pojo has more than one super class, super class '${type.toTypeName()}' discarded.")
+                        }
+                    }
+                }else {
+                    logger.warn("Table pojo super class/interface is invalid, class '${type.toTypeName()}' is not interface or opened class)")
+                }
+            }
+        }
     }
 
     fun hasPrimaryKey() = primaryKeys.size > 0

@@ -137,7 +137,7 @@ class ExposedSymbolProcessor(
 
 
         private fun acceptTable(tableDeclaration: KSClassDeclaration, context: VisitContext) {
-            val table = TableMetadata(tableDeclaration, this.currentFile)
+            val table = TableMetadata(tableDeclaration, this.currentFile, logger)
             context.addTable(table)
             TablePropertiesResolver.getAllProperties(tableDeclaration).forEach {
                 it.accept(this, context)

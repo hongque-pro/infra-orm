@@ -8,8 +8,6 @@ import com.google.devtools.ksp.symbol.KSPropertySetter
 import org.jetbrains.exposed.sql.Table
 
 object TablePropertiesResolver {
-
-
     private fun resolveProperties(
         isTop: Boolean,
         dc: KSClassDeclaration,
@@ -35,7 +33,6 @@ object TablePropertiesResolver {
     fun getAllProperties(dc: KSClassDeclaration): Collection<KSPropertyDeclaration> {
         val agg = mutableMapOf<String, KSPropertyDeclaration>()
         resolveProperties(true, dc, agg) {
-
             val matched = (it.qualifiedName!!.asString() != Table::class.qualifiedName)
             matched
         }

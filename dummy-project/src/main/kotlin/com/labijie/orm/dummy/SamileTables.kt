@@ -6,6 +6,7 @@ import com.labijie.infra.orm.SimpleLongIdTable
 import com.labijie.infra.orm.SimpleStringIdTable
 import com.labijie.infra.orm.compile.KspPrimaryKey
 import com.labijie.infra.orm.compile.KspTableIgnore
+import com.labijie.infra.orm.compile.KspTablePojoSuper
 import com.labijie.orm.dummy.otherpackage.NestedInterface
 import org.jetbrains.exposed.sql.Column
 import org.jetbrains.exposed.sql.Table
@@ -36,6 +37,9 @@ object ShopTable : SimpleLongIdTable("my", "id") {
     var count = integer("count")
 }
 
+
+@KspTablePojoSuper(type = SimpleInterface::class)
+@KspTablePojoSuper(type = SimpleBaseClass::class)
 object IntIdTable : SimpleIntIdTable("exposed_test_entities") {
     var name: Column<String> = varchar("name", 50)
     var memo = varchar("name", 50).nullable()
@@ -48,7 +52,6 @@ object IntIdTable : SimpleIntIdTable("exposed_test_entities") {
     val booleanCol = bool("sht")
     val byteCol = byte("dddd")
 }
-
 
 
 object TestSimpleTable : SimpleStringIdTable("exposed_test_entities") {

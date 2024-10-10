@@ -47,6 +47,27 @@ private fun KSType.isExposedColumn(): Boolean {
 }
 
 
+fun KSAnnotation.getProperties(): Map<String, Any?> {
+    val defaultArgs = this.defaultArguments
+    val defaultParams = mutableMapOf<Int, String>()
+    defaultArgs.forEachIndexed { index, item ->
+        val name = item.name?.getShortName()
+        if (!name.isNullOrBlank()) {
+            defaultParams[index] = name
+        }
+    }
+
+    val args = this.arguments
+    val parameterValues = mutableMapOf<String, Any?>()
+    args.forEachIndexed { index, item ->
+        val name = item.name?.getShortName() ?: defaultParams[index]
+        if (!name.isNullOrBlank()) {
+            parameterValues[name] = item.value
+        }
+    }
+    return parameterValues
+}
+
 private fun KSType.getIDTypeFromEntityID(): KSType? {
     if (this.arguments.size != 1) {
         return null
