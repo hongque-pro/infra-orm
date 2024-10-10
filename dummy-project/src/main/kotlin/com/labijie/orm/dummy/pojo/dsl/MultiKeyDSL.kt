@@ -199,14 +199,14 @@ public object MultiKeyDSL {
     return query.firstOrNull()?.toMultiKey(*selective)
   }
 
-  public fun MultiKeyTable.selectMany(vararg selective: Column<*>, `where`: Query.() -> Query):
+  public fun MultiKeyTable.selectMany(vararg selective: Column<*>, `where`: Query.() -> Query?):
       List<MultiKey> {
     val query = selectSlice(*selective)
     `where`.invoke(query)
     return query.toMultiKeyList(*selective)
   }
 
-  public fun MultiKeyTable.selectOne(vararg selective: Column<*>, `where`: Query.() -> Query):
+  public fun MultiKeyTable.selectOne(vararg selective: Column<*>, `where`: Query.() -> Query?):
       MultiKey? {
     val query = selectSlice(*selective)
     `where`.invoke(query)

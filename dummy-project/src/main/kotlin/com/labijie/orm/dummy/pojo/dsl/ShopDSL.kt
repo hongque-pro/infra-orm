@@ -231,14 +231,14 @@ public object ShopDSL {
     return query.toShopList(*selective)
   }
 
-  public fun ShopTable.selectMany(vararg selective: Column<*>, `where`: Query.() -> Query):
+  public fun ShopTable.selectMany(vararg selective: Column<*>, `where`: Query.() -> Query?):
       List<Shop> {
     val query = selectSlice(*selective)
     `where`.invoke(query)
     return query.toShopList(*selective)
   }
 
-  public fun ShopTable.selectOne(vararg selective: Column<*>, `where`: Query.() -> Query): Shop? {
+  public fun ShopTable.selectOne(vararg selective: Column<*>, `where`: Query.() -> Query?): Shop? {
     val query = selectSlice(*selective)
     `where`.invoke(query)
     return query.firstOrNull()?.toShop(*selective)
@@ -249,7 +249,7 @@ public object ShopDSL {
     order: SortOrder = SortOrder.DESC,
     pageSize: Int = 50,
     selective: Collection<Column<*>> = listOf(),
-    `where`: (Query.() -> Query)? = null,
+    `where`: (Query.() -> Query?)? = null,
   ): OffsetList<Shop> {
     if(pageSize < 1) {
       return OffsetList.empty()
@@ -282,7 +282,7 @@ public object ShopDSL {
     order: SortOrder = SortOrder.DESC,
     pageSize: Int = 50,
     selective: Collection<Column<*>> = listOf(),
-    `where`: (Query.() -> Query)? = null,
+    `where`: (Query.() -> Query?)? = null,
   ): OffsetList<Shop> {
     if(pageSize < 1) {
       return OffsetList.empty()
