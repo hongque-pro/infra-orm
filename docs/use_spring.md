@@ -84,7 +84,7 @@ dependencies {
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit5:<version>")
     testImplementation("org.junit.jupiter:junit-jupiter-api:<version>")
     testImplementation("org.junit.jupiter:junit-jupiter-engine:<version>")
-    testImplementation("com.labijie.orm:exposed-test-starter:<version>")
+    testImplementation("com.labijie.orm:exposed-springboot-test-starter:<version>")
 }
 ```
 

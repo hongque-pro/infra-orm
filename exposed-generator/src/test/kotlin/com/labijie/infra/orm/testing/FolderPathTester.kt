@@ -48,7 +48,7 @@ interface NestedInterface {
 
 interface TestInterface {}
 
-@KspTablePojo(interfaces=[TestInterface::class])
+@KspTablePojoSuper(type=[TestInterface::class])
 object TestTable : Table("my") {
     var array = array<String>("array")
     var name: Column<String> = varchar("name", 50)
