@@ -57,17 +57,20 @@ open class Tester {
     }
 
     @Test
-    @Transactional
-    open fun testException(){
+    open fun testDuplexKeyException(){
 
-        TestEntityTable.insert {
-            it[id] = 123
-            it[name] = "ccc"
-        }
+        Assertions.assertThrowsExactly(DuplicateKeyException::class.java) {
+            this.transactionTemplate.execute {
+                TestEntityTable.insert {
+                    it[id] = 123
+                    it[name] = "ccc"
+                }
 
-        TestEntityTable.insert {
-            it[id] = 123
-            it[name] = "ccc"
+                TestEntityTable.insert {
+                    it[id] = 123
+                    it[name] = "ccc"
+                }
+            }
         }
     }
 
