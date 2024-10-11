@@ -8,10 +8,12 @@ import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.BeanFactory
 import org.springframework.beans.factory.BeanFactoryAware
 import org.springframework.beans.factory.InitializingBean
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.support.BeanDefinitionBuilder
 import org.springframework.beans.factory.support.BeanDefinitionRegistry
 import org.springframework.boot.autoconfigure.AutoConfigurationPackages
 import org.springframework.boot.autoconfigure.AutoConfigureAfter
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration
@@ -24,6 +26,7 @@ import org.springframework.context.annotation.Import
 import org.springframework.context.annotation.ImportBeanDefinitionRegistrar
 import org.springframework.core.env.Environment
 import org.springframework.core.type.AnnotationMetadata
+import org.springframework.jdbc.support.SQLExceptionTranslator
 import org.springframework.transaction.annotation.EnableTransactionManagement
 import org.springframework.transaction.support.TransactionTemplate
 import org.springframework.util.StringUtils
@@ -52,17 +55,23 @@ class InfraExposedAutoConfiguration : ApplicationContextAware {
     }
 
     @Bean
+    @ConditionalOnBean(DataSource::class)
     @ConditionalOnMissingBean(JdbcExposedTransactionManager::class)
     fun exposedSpringTransactionManager(
         environment: Environment,
         properties: InfraExposedProperties,
         databaseConfig: DatabaseConfig,
-        dataSource: DataSource
+        dataSource: DataSource,
+        @Autowired(required = false) sqlExceptionTranslator: SQLExceptionTranslator?
     ): JdbcExposedTransactionManager {
 
         val txm = SpringTransactionManager(dataSource, databaseConfig, false)
         txm.addListener(ExposedTransactionListener(environment, properties))
-        return JdbcExposedTransactionManager(properties, txm)
+        return JdbcExposedTransactionManager(properties, txm).apply {
+            sqlExceptionTranslator?.let {
+                this.setExceptionTranslator(sqlExceptionTranslator)
+            }
+        }
     }
 
     class ExposedTableRegistrar : BeanFactoryAware, ImportBeanDefinitionRegistrar {
