@@ -26,7 +26,7 @@ class ExposedTransactionListener(
 
     companion object {
         private val logger by lazy {
-            LoggerFactory.getLogger("com.labijie.infra.orm.SQLLogger").apply {
+            LoggerFactory.getLogger("SQLLogger").apply {
                 this.atLevel(Level.INFO)
             }
         }
@@ -47,10 +47,11 @@ class ExposedTransactionListener(
                 val m = current.methodName
                 while (!c.startsWith("org.jetbrains.exposed") &&
                     !c.startsWith("org.springframework.") &&
+                    !c.startsWith("com.labijie.infra.orm.") &&
+                    !c.startsWith("com.labijie.application.ExtensionMethodsKt") &&
                     !c.startsWith("kotlin.") &&
                     !c.endsWith("DSL") &&
                     !c.contains(".pojo.dsl.") &&
-                    !c.startsWith("com.labijie.application.ExtensionMethodsKt") &&
                     !m.contains("\$lambda")
                 ) {
                     return current
@@ -69,13 +70,21 @@ class ExposedTransactionListener(
             if ((SqlLoggerSettings.isLogEnabled() ?: properties.showSql) && logger.isInfoEnabled) {
                 if (!isProduction) {
                     val prefix = findStack()?.let {
-                        "[${it.className}::${it.methodName}] "
+                        "[${simpleClassName(it.className)}::${it.methodName}] "
                     } ?: ""
                     logger.info("$prefix${context.expandArgs(TransactionManager.current())}")
                 } else {
                     logger.info(context.expandArgs(TransactionManager.current()))
                 }
             }
+        }
+
+        private fun simpleClassName(className: String): String {
+            val dotIndex = className.lastIndexOf('.')
+            if(dotIndex >= 0) {
+                return className.substring(dotIndex + 1)
+            }
+            return className
         }
     }
 
