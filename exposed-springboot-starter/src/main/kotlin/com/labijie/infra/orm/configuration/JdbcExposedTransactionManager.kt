@@ -29,6 +29,9 @@ open class JdbcExposedTransactionManager(
                 return dae
             }
         }
+        if(ex is RuntimeException) {
+            return ex
+        }
         return TransactionSystemException(ex.message.orEmpty(), ex)
     }
 
