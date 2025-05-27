@@ -1,9 +1,12 @@
 package com.labijie.orm.generator
 
+import com.google.devtools.ksp.closestClassDeclaration
 import com.google.devtools.ksp.processing.KSPLogger
 import com.google.devtools.ksp.symbol.*
+import com.labijie.orm.generator.DefaultValues.isConverterMethod
 import com.squareup.kotlinpoet.*
 import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
+import com.squareup.kotlinpoet.ksp.toClassName
 import org.jetbrains.exposed.dao.id.EntityID
 import org.jetbrains.exposed.sql.Column
 import java.io.File
@@ -90,7 +93,7 @@ fun KSPropertyDeclaration.getColumnType(): ColumnType? {
         if (columnType != null) {
             val idType = columnType.getIDTypeFromEntityID()
             if (idType != null) {
-                return ColumnType(columnType, idType, columnType.isMarkedNullable)
+                return ColumnType(columnType, idType, idType.isMarkedNullable)
             }
             return ColumnType(columnType, columnType, columnType.isMarkedNullable)
         }
@@ -108,6 +111,43 @@ fun <T> KSType.isJavaType(javaClass: Class<T>): Boolean {
     val classDeclaration = this.declaration.qualifiedName?.asString()
     val className = "${javaClass.packageName}.${javaClass.simpleName}"
     return className == classDeclaration
+}
+
+fun KSType.isKotlinType(kclass: KClass<*>): Boolean {
+    val kType = kclass.asTypeName()
+    val cls = this.declaration.closestClassDeclaration()?.asStarProjectedType()?.toClassName()
+    if(cls == null) {
+        return false
+    }
+    return kType.compareTo(cls) == 0
+}
+
+fun generateParsedValueCodeBlock(valueVarName: String, parseMethod: MemberName?): CodeBlock {
+    return CodeBlock.builder()
+    .apply {
+        parseMethod?.let {
+            if (parseMethod.isConverterMethod()) {
+                addStatement("%T.%N(${valueVarName})", parseMethod.enclosingClassName!!, parseMethod)
+            } else {
+                addStatement("${valueVarName}.%N()", parseMethod.simpleName)
+            }
+        } ?: addStatement(valueVarName)
+    }
+    .build()
+}
+
+fun generateToStringCodeBlock(valueVarName: String, toStringMethod: MemberName?): CodeBlock {
+    return CodeBlock.builder()
+        .apply {
+            toStringMethod?.let {
+                if (toStringMethod.isConverterMethod()) {
+                    addStatement("%T.%N(${valueVarName})", toStringMethod.enclosingClassName!!, toStringMethod.simpleName)
+                } else {
+                    addStatement("${valueVarName}.%N()", toStringMethod.simpleName)
+                }
+            } ?: addStatement(valueVarName)
+        }
+        .build()
 }
 
 fun KSType.isJavaType(qualifiedClassName: String): Boolean {

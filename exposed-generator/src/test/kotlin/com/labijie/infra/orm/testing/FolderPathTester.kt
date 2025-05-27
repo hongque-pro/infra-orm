@@ -50,6 +50,7 @@ interface TestInterface {}
 
 @KspTablePojoSuper(type=[TestInterface::class])
 object TestTable : Table("my") {
+    var nullableString = varchar("null_str").nullable()
     var array = array<String>("array")
     var name: Column<String> = varchar("name", 50)
     var count = integer("count")

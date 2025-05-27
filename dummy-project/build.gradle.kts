@@ -6,6 +6,5 @@ dependencies {
 }
 infra {
     useKspPlugin(project(":exposed-generator"))
-
 }
 

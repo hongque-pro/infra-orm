@@ -2,6 +2,9 @@ package com.labijie.orm.generator.writer.dsl
 
 import com.labijie.infra.orm.OffsetList
 import com.labijie.orm.generator.DefaultValues
+import com.labijie.orm.generator.DefaultValues.isConverterMethod
+import com.labijie.orm.generator.generateParsedValueCodeBlock
+import com.labijie.orm.generator.generateToStringCodeBlock
 import com.labijie.orm.generator.writer.AbstractDSLMethodBuilder
 import com.labijie.orm.generator.writer.DSLCodeContext
 import com.squareup.kotlinpoet.*
@@ -58,10 +61,6 @@ object SelectMethod : AbstractDSLMethodBuilder() {
 
     private fun buildSelectForward(context: DSLCodeContext, selectForwardByPrimary: FunSpec): FunSpec {
 
-        val offsetListType = OffsetList::class.companionObject!!.asTypeName()
-        val encodeTokenMethod = MemberName(offsetListType, "encodeToken")
-        val decodeTokenMethod = MemberName(offsetListType, "decodeToken")
-
         val t = TypeVariableName("T")
         val typeVar = TypeVariableName("T", Comparable::class.asClassName().parameterizedBy(t))
 
@@ -85,7 +84,7 @@ object SelectMethod : AbstractDSLMethodBuilder() {
         val primary = context.base.table.primaryKeys.first()
         val primaryKey = MemberName(context.base.tableClass, primary.name)
 
-        val parseMethod = DefaultValues.getParseMethod(primary.type)
+        val splitChars = ":::"
 
         return FunSpec.builder("selectForward")
             .receiver(context.base.tableClass)
@@ -113,24 +112,25 @@ object SelectMethod : AbstractDSLMethodBuilder() {
                 whereParam,
             )
             .endControlFlow()
-
             .addStatement(
-                "val kp = %N?.let { %M(it) }",
+                "val sortColAndId = %N?.%N { if(it.isNotBlank()) %T.getUrlDecoder().decode(it).toString(Charsets.UTF_8) else null }",
                 forwardToken,
-                decodeTokenMethod
+                kotlinLetMethod,
+                Base64::class.java.asTypeName()
             )
-            .addStatement("val offsetKey = kp?.first")
-            .apply {
-                if (parseMethod != null) {
-                    addStatement(
-                        "val excludeKeys = kp?.second?.%M { it.%M() }",
-                        kotlinCollectionExtensionMethod("map"),
-                        parseMethod
-                    )
-                } else {
-                    addStatement("val excludeKeys = kp?.second")
-                }
-            }
+            .addStatement("val kp = sortColAndId?.%N(%S)", kotlinTextExtensionMethod("split"), splitChars)
+            .addStatement("val offsetKey = if(!kp.%N()) %N(kp.%N(), %N) else null",
+                kotlinCollectionExtensionMethod("isNullOrEmpty"),
+                context.parseColumnValueFunc,
+                kotlinCollectionExtensionMethod("first"),
+                sortColumn)
+
+            .addStatement("val lastId = if(kp != null && kp.size > 1 && kp[1].%N()) %N(kp[1], %N) else null",
+                kotlinTextExtensionMethod("isNotBlank"),
+                context.parseColumnValueFunc,
+                primaryKey
+                )
+
             .addStatement(
                 "val query = %N(*%N.%N())",
                 context.selectSliceFunc,
@@ -160,14 +160,23 @@ object SelectMethod : AbstractDSLMethodBuilder() {
             //end when
             .endControlFlow()
 
-            .beginControlFlow("excludeKeys?.let")
-            //if
-            .beginControlFlow(
-                "if(it.%M())",
-                kotlinCollectionExtensionMethod("isNotEmpty")
+            .beginControlFlow("lastId?.let")
+
+            //when
+            .beginControlFlow("when(order)")
+            .addStatement(
+                "%T.DESC, %T.DESC_NULLS_FIRST, %T.DESC_NULLS_LAST->",
+                SortOrder::class,
+                SortOrder::class,
+                SortOrder::class
             )
             .addStatement(
-                "query.%M { %M notInList it }",
+                "query.%M { %M less it }",
+                andWhereMethod,
+                primaryKey
+            )
+            .addStatement(
+                "else-> query.%M { %M greater it }",
                 andWhereMethod,
                 primaryKey
             )
@@ -180,20 +189,23 @@ object SelectMethod : AbstractDSLMethodBuilder() {
             .addStatement("val sorted = query.orderBy(Pair(%N, order), Pair(%M, order))", sortColumn, primaryKey)
 
             .addStatement(
-                "val list = sorted.limit(pageSize).%N(*%N.%N())",
+                "val list = sorted.limit(pageSize + 1).%N(*%N.%N()).%N()",
                 context.rowListMapFunc,
                 columnSelectiveCollectionParameter,
-                kotlinToTypedArray
+                kotlinToTypedArray,
+                kotlinToMutableList
             )
+            .addStatement("val dataCount = list.size")
 
-            .addStatement(
-                "val token = if(list.size < pageSize) null else %M(list, { %N(%N) }, %T::%N)",
-                encodeTokenMethod,
-                context.getColumnValueFunc,
-                sortColumn,
-                context.base.pojoClass,
-                primaryKey
-            )
+            .beginControlFlow("val token = if(dataCount > pageSize)")
+            .addStatement("list.%N()", kotlinRemoveLast)
+            .addStatement("val idToEncode = list.last().%N(%M)", context.getColumnValueStringFunc, primaryKey)
+            .addStatement("val sortKey = list.last().%N(%N)", context.getColumnValueStringFunc, sortColumn)
+            .addStatement("val tokenValue = %P.toByteArray(Charsets.UTF_8)", "\${idToEncode}$splitChars\${sortKey}")
+            .addStatement("%T.getUrlEncoder().encodeToString(tokenValue)", Base64::class.java.asTypeName(),)
+            .endControlFlow()
+            .addStatement("else null")
+
             .addStatement("return %T(list, token)", OffsetList::class.asTypeName())
             .build()
     }
@@ -217,8 +229,6 @@ object SelectMethod : AbstractDSLMethodBuilder() {
 
         val primaryKeyPropertyName = primaryColumn.name
         val primaryKey = MemberName(context.base.tableClass, primaryKeyPropertyName)
-
-        val parseMethod = DefaultValues.getParseMethod(primaryColumn.type)
 
 //        if (parseMethod == null) {
 //            context.base.logger.error(
@@ -255,6 +265,9 @@ object SelectMethod : AbstractDSLMethodBuilder() {
             )
 
             .beginControlFlow("offsetKey?.%N", kotlinLetMethod)
+
+            .addStatement("val keyValue = %N(it, %N)", context.parseColumnValueFunc, primaryKey)
+
             //when
             .beginControlFlow("when(order)")
             .addStatement(
@@ -264,31 +277,16 @@ object SelectMethod : AbstractDSLMethodBuilder() {
                 SortOrder::class
             )
             .apply {
-                if (parseMethod != null) {
-                    addStatement(
-                        "query.%M { %M less it.%M() }",
-                        andWhereMethod,
-                        primaryKey,
-                        parseMethod
-                    )
-                    .addStatement(
-                        "else-> query.%M { %N greater it.%M() }",
-                        andWhereMethod,
-                        primaryKey,
-                        parseMethod
-                    )
-                } else {
-                    addStatement(
-                        "query.%M { %M less it }",
-                        andWhereMethod,
-                        primaryKey
-                    )
-                    .addStatement(
-                        "else-> query.%M { %N greater it }",
-                        andWhereMethod,
-                        primaryKey
-                    )
-                }
+                addStatement(
+                    "query.%M { %M less keyValue }",
+                    andWhereMethod,
+                    primaryKey
+                )
+                .addStatement(
+                    "else-> query.%M { %N greater keyValue }",
+                    andWhereMethod,
+                    primaryKey
+                )
             }
 
             .endControlFlow()
@@ -299,21 +297,23 @@ object SelectMethod : AbstractDSLMethodBuilder() {
 
             .addStatement("val sorted = query.orderBy(%M, order)", primaryKey)
             .addStatement(
-                "val list = sorted.limit(pageSize).%N(*%N.%N())",
+                "val list = sorted.limit(pageSize + 1).%N(*%N.%N()).%N()",
                 context.rowListMapFunc,
                 columnSelectiveCollectionParameter,
-                kotlinToTypedArray
+                kotlinToTypedArray,
+                kotlinToMutableList
             )
+            .addStatement("val dataCount = list.size")
 
-
-            .beginControlFlow("val token = if(list.size >= pageSize)")
+            .beginControlFlow("val token = if(dataCount > pageSize)")
+            .addStatement("list.%N()", kotlinRemoveLast)
+            .addStatement("val idString = list.%M().%N(%N)", kotlinCollectionExtensionMethod("last"), context.getColumnValueStringFunc, primaryKey)
             .addStatement(
-                "val lastId = list.%M().${primaryKeyPropertyName}.toString().%M(%T.UTF_8)",
-                kotlinCollectionExtensionMethod("last"),
+                "val idArray = idString.%M(%T.UTF_8)",
                 kotlinTextExtensionMethod("toByteArray"),
                 Charsets::class.asTypeName()
             )
-            .addStatement("%T.getUrlEncoder().encodeToString(lastId)", Base64::class.java.asTypeName())
+            .addStatement("%T.getUrlEncoder().encodeToString(idArray)", Base64::class.java.asTypeName())
             .endControlFlow()
             .beginControlFlow("else")
             .addStatement("null")

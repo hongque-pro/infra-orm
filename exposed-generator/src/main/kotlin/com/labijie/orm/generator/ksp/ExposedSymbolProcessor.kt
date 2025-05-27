@@ -80,7 +80,7 @@ class ExposedSymbolProcessor(
 
                     val isPrimaryKey = isSimplePrimary || isAnnotatedPrimary
 
-                    val col = collectColumn(property, columnType, isPrimaryKey, table)
+                    val col = collectColumn(property, columnType, isPrimaryKey, table, isNullableProperty = false)
 
                     if (isPrimaryKey) {
                         table.primaryKeys.add(col)
@@ -95,14 +95,16 @@ class ExposedSymbolProcessor(
             property: KSPropertyDeclaration,
             columnType: ColumnType,
             isPrimary: Boolean,
-            table: TableMetadata
+            table: TableMetadata,
+            isNullableProperty: Boolean,
         ): ColumnMetadata {
             logger.info("column: ${property.simpleName.getShortName()}")
             val col = ColumnMetadata(
                 name = property.simpleName.getShortName(),
                 type = columnType.type,
                 rawType = columnType.rawType,
-                isNull = columnType.isNullable,
+                isNullableColumn = columnType.isNullable,
+                isNullableProperty = isNullableProperty,
                 isPrimary = isPrimary,
                 isEntityId = isPrimary && table.kind == TableKind.ExposedIdTable
             )

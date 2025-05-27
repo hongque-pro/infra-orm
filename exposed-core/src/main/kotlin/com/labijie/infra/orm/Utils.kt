@@ -2,6 +2,11 @@ package com.labijie.infra.orm
 
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.transactions.TransactionManager
+import java.time.Duration
+import java.time.Instant
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.LocalTime
 import java.util.*
 
 /**
@@ -10,10 +15,59 @@ import java.util.*
  * @Date: 2021/12/28
  * @Description:
  */
-fun String.toUUID(): UUID {
-    return UUID.fromString(this)
-}
+object ExposedConverter {
+    @JvmStatic
+    fun stringToUUID(value: String): UUID {
+        return UUID.fromString(value)
+    }
 
+    @JvmStatic
+    fun instantToString(value: Instant): String {
+        return value.toEpochMilli().toString()
+    }
+
+    @JvmStatic
+    fun stringToInstant(value: String): Instant {
+        return Instant.ofEpochMilli(value.toLong())
+    }
+
+    @JvmStatic
+    fun byteArrayToString(array: ByteArray): String {
+        return array.toString(Charsets.UTF_8)
+    }
+
+    @JvmStatic
+    fun stringToByteArray(value: String): ByteArray {
+        return value.toByteArray(Charsets.UTF_8)
+    }
+
+    @JvmStatic
+    fun durationToString(duration: Duration): String {
+        return duration.toMillis().toString()
+    }
+
+    @JvmStatic
+    fun stringToDuration(value: String): Duration {
+        return Duration.ofMillis(value.toLong())
+    }
+
+    @JvmStatic
+    fun stringToLocalDate(date: String): LocalDate {
+        return LocalDate.parse(date)
+    }
+
+    @JvmStatic
+    fun stringToLocalTime(time: String): LocalTime {
+        return LocalTime.parse(time)
+    }
+
+    @JvmStatic
+    fun stringToLocalDateTime(dateTime: String): LocalDateTime {
+        return LocalDateTime.parse(dateTime)
+    }
+
+
+}
 
 fun Table.dropColumn(column: String): String {
     val tr = TransactionManager.current()

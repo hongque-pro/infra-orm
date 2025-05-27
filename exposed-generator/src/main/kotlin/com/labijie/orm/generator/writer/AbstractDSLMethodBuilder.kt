@@ -4,6 +4,8 @@ import com.labijie.orm.generator.parameterizedWildcard
 import com.squareup.kotlinpoet.*
 import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
 import org.jetbrains.exposed.sql.*
+import kotlin.collections.toMutableList
+import kotlin.text.split
 
 abstract class AbstractDSLMethodBuilder : IDSLMethodBuilder {
 
@@ -67,6 +69,11 @@ abstract class AbstractDSLMethodBuilder : IDSLMethodBuilder {
             MemberName("kotlin", "let", true)
         }
 
+        val kotlinArrayOfMethod: MemberName by lazy {
+            MemberName("kotlin", "arrayOf", false)
+        }
+
+
 
         fun kotlinCollectionExtensionMethod(methodName: String): MemberName {
             return MemberName("kotlin.collections", methodName, isExtension = true)
@@ -80,7 +87,8 @@ abstract class AbstractDSLMethodBuilder : IDSLMethodBuilder {
         val kotlinIsNotEmpty = kotlinCollectionExtensionMethod("isNotEmpty")
         val kotlinToList = kotlinCollectionExtensionMethod("toList")
         val kotlinToTypedArray = kotlinCollectionExtensionMethod("toTypedArray")
-
+        val kotlinToMutableList = kotlinCollectionExtensionMethod("toMutableList")
+        val kotlinRemoveLast = kotlinCollectionExtensionMethod("removeLast")
 
 
         val eqMethod = getExposedSqlExpressionBuilderMember("eq")

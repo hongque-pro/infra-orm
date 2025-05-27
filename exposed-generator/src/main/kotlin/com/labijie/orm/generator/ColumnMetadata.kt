@@ -6,7 +6,8 @@ data class ColumnMetadata(
     val name: String,
     val type: KSType,
     val rawType: KSType,
-    val isNull: Boolean,
+    val isNullableColumn: Boolean,
+    val isNullableProperty: Boolean,
     val isPrimary: Boolean,
     val isEntityId: Boolean,
 ) {
@@ -18,12 +19,17 @@ data class ColumnMetadata(
         get() = this.type.declaration.typeParameters.isNotEmpty()
 
     override fun toString(): String {
-        return "ColumnMetadata(name='$name', type=${type.declaration.qualifiedName.toString()}, rawType=${rawType.declaration.qualifiedName.toString()}, isNull=$isNull, isPrimary=$isPrimary, isEntityId=$isEntityId, isEnum=$isEnum)"
+        return "ColumnMetadata(name='$name', type=${type.declaration.qualifiedName.toString()}, rawType=${rawType.declaration.qualifiedName.toString()}, isNull=$isNullableColumn, isPrimary=$isPrimary, isEntityId=$isEntityId, isEnum=$isEnum)"
     }
 
     val isEnum by lazy {
         this.type.isEnum()
     }
+
+    val isString by lazy {
+        this.type.isKotlinType(String::class)
+    }
+
 
 
 }

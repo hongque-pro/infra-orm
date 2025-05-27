@@ -1,5 +1,6 @@
 package com.labijie.orm.generator.writer
 
+import com.labijie.infra.orm.ExposedConverter
 import com.labijie.orm.generator.*
 import com.labijie.orm.generator.writer.AbstractDSLMethodBuilder.Companion.columnSelectiveParameter
 import com.labijie.orm.generator.writer.AbstractDSLMethodBuilder.Companion.getSqlExtendMethod
@@ -9,12 +10,13 @@ import com.labijie.orm.generator.writer.dsl.*
 import com.squareup.kotlinpoet.*
 import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
 import com.squareup.kotlinpoet.ksp.toClassName
-import com.squareup.kotlinpoet.ksp.toTypeName
 import org.jetbrains.exposed.sql.Column
 import org.jetbrains.exposed.sql.Query
 import org.jetbrains.exposed.sql.ResultRow
 import org.jetbrains.exposed.sql.statements.UpdateBuilder
 import kotlin.reflect.KClass
+import kotlin.reflect.KVisibility
+import kotlin.reflect.full.declaredMembers
 
 object DSLWriter {
 
@@ -25,8 +27,10 @@ object DSLWriter {
         methodBuilders.add(SetValueExtensionMethod)
         methodBuilders.add(InsertMethod)
         methodBuilders.add(InsertAndGetIdMethod)
+        methodBuilders.add(InsertIgnoreMethod)
         methodBuilders.add(UpsertMethod)
         methodBuilders.add(BatchInsertMethod)
+        methodBuilders.add(BatchUpsertMethod)
         methodBuilders.add(UpdateMethod)
         methodBuilders.add(DeleteByPrimaryKeyMethod)
         methodBuilders.add(SelectByPrimaryMethod)
@@ -62,6 +66,8 @@ object DSLWriter {
 
         val applyInsert = generateAssignMethod(context)
         val getColumnValue = generateGetColumnValueMethod(context)
+        val getColumnValueString = generateGetColumnValueStringMethod(context)
+        val parseColumnValue = generateParseColumnValueMethod(context)
         val getColumnType = generateGetColumnTypeMethod(context)
         val selectSlice = generateSelectSliceMethod(context)
 
@@ -69,6 +75,10 @@ object DSLWriter {
         val fileBuilder = FileSpec
             .builder(context.dslPackageName, fileName = context.dslClass.simpleName)
             .suppressRedundantVisibilityModifierWarning()
+
+        val convertMethods = ExposedConverter::class.declaredMembers.filter {
+            it.visibility == KVisibility.PUBLIC
+        }.map { it.name }
 
         val file = fileBuilder
             .addImport(context.tableClass, context.table.columns.map { it.name })
@@ -80,6 +90,8 @@ object DSLWriter {
                     .addFunction(parseRow)
                     .addFunction(parseRowSelective)
                     .addFunction(getColumnType)
+                    .addFunction(getColumnValueString)
+                    .addFunction(parseColumnValue)
                     .addFunction(getColumnValue)
                     .addFunction(applyInsert)
                     //exposed methods
@@ -94,6 +106,8 @@ object DSLWriter {
                             parseRow,
                             parseRowSelective,
                             getColumnValue,
+                            getColumnValueString,
+                            parseColumnValue,
                             getColumnType,
                             applyInsert,
                             rowMap,
@@ -166,6 +180,82 @@ object DSLWriter {
                     this.addStatement("${context.table.className}.${it.name}->this.${it.name} as T")
                 }
                 val errorMessage = "Unknown column <\${column.name}> for '${context.pojoClass.simpleName}'"
+                this.addStatement("else->throw %T(%P)", IllegalArgumentException::class, errorMessage)
+            }
+            .endControlFlow()
+            .build()
+    }
+
+    private fun generateParseColumnValueMethod(context: GenerationContext): FunSpec {
+
+        val typeVar = TypeVariableName("T")
+
+        //@Suppress("UNCHECKED_CAST")
+        return FunSpec.builder("parseColumnValue")
+            .addModifiers(KModifier.PRIVATE)
+            .addTypeVariable(typeVar)
+            .addAnnotation(suppressUncheckedCastAnnotation)
+            .addParameter("valueString", String::class.asTypeName())
+            .addParameter("column", Column::class.asTypeName().parameterizedBy(typeVar))
+            .returns(typeVar)
+            .beginControlFlow("val value = when(column)")
+            .apply {
+                context.table.columns.forEach {
+                    if(it.isString) {
+                        this.addStatement("${context.table.className}.${it.name} -> valueString")
+                    }else {
+                        val parseMethod = DefaultValues.getParseMethod(it.type)
+                        parseMethod?.let { _ ->
+                            addCode("${context.table.className}.${it.name} ->")
+                            addCode(generateParsedValueCodeBlock("valueString", parseMethod).toString())
+                        }
+                    }
+                }
+                val errorMessage = "Can ot converter value of ${context.pojoClass.simpleName}::\${column.name} to string."
+                this.addStatement("else->throw %T(%P)", IllegalArgumentException::class, errorMessage)
+            }
+            .endControlFlow()
+            .addStatement("return value as T")
+            .build()
+    }
+
+    private fun generateGetColumnValueStringMethod(context: GenerationContext): FunSpec {
+
+        val typeVar = TypeVariableName("T")
+        val returnType = String::class.asTypeName()
+
+        //@Suppress("UNCHECKED_CAST")
+        return FunSpec.builder("getColumnValueString")
+            .addModifiers(KModifier.PRIVATE)
+            .addTypeVariable(typeVar)
+            .receiver(context.pojoClass)
+            .addParameter("column", Column::class.asTypeName().parameterizedBy(typeVar))
+            .returns(returnType)
+            .beginControlFlow("return when(column)")
+            .apply {
+                context.table.columns.forEach {
+                    if(it.isString) {
+                        if(it.isNullableColumn) {
+                            this.addStatement(
+                                "${context.table.className}.${it.name}->this.${it.name}.orEmpty()",
+                            )
+                        }else {
+                            this.addStatement(
+                                "${context.table.className}.${it.name}->this.${it.name}",
+                            )
+                        }
+                    }
+                    else {
+                        val toStringMethod = DefaultValues.getToStringMethod(it.type)
+                        toStringMethod?.let { _ ->
+                            this.addStatement(
+                                "${context.table.className}.${it.name}->%L",
+                                generateToStringCodeBlock("this.${it.name}", toStringMethod).toString()
+                            )
+                        }
+                    }
+                }
+                val errorMessage = "Can ot converter value of ${context.pojoClass.simpleName}::\${column.name} to string."
                 this.addStatement("else->throw %T(%P)", IllegalArgumentException::class, errorMessage)
             }
             .endControlFlow()

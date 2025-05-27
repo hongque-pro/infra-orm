@@ -59,7 +59,6 @@ object PojoWriter {
                 } ?: false
             }
 
-
 //            val hasPropertyOnDelegate = content.table.interfaces.any { interfaceType ->
 //                val declaration = interfaceType.by?.declaration as? KSClassDeclaration
 //                declaration?.getDeclaredProperties()?.any { property ->
@@ -72,14 +71,14 @@ object PojoWriter {
                 addProperty(
                     PropertySpec.builder(
                         it.name,
-                        it.type.toTypeName().copy(nullable = it.isNull)
+                        it.type.toTypeName().copy(nullable = it.isNullableColumn)
                     ).mutable().let { self ->
                         if (propertyOnInterface) self.addModifiers(
                             KModifier.PUBLIC,
                             KModifier.OVERRIDE
                         ) else self.addModifiers(KModifier.PUBLIC)
                     }
-                        .initializer(if (it.isNull) "null" else DefaultValues.getValue(it.type))
+                        .initializer(if (it.isNullableColumn) "null" else DefaultValues.getValue(propertyName ="${content.table.className}.${it.name}"  ,it.type))
                         .build()
                 )
             }

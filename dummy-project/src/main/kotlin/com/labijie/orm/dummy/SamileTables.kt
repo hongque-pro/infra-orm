@@ -11,6 +11,8 @@ import com.labijie.orm.dummy.otherpackage.NestedInterface
 import org.jetbrains.exposed.sql.Column
 import org.jetbrains.exposed.sql.Table
 import org.jetbrains.exposed.sql.javatime.*
+import java.time.Instant
+import kotlin.time.Duration
 
 
 enum class TestEnum {
@@ -18,7 +20,7 @@ enum class TestEnum {
 }
 
 object PostTable : SimpleLongIdTable("posts", "id") {
-    var title: Column<String> = varchar("name", 50)
+    var title = varchar("name", 50).nullable()
     var status = enumeration("status", TestEnum::class)
     var description = varchar("desc", 255)
     var status2 = enumeration("status", NestedInterface.StatusEnum::class)
@@ -51,6 +53,16 @@ object IntIdTable : SimpleIntIdTable("exposed_test_entities") {
     val shortCol = short("sht")
     val booleanCol = bool("sht")
     val byteCol = byte("dddd")
+}
+
+object DurationIdEntityTable : Table("duration_id_entities") {
+    var name: Column<String> = varchar("name", 50)
+
+    @KspPrimaryKey
+    val id = duration("id")
+
+    override val primaryKey: PrimaryKey
+        get() = PrimaryKey(id)
 }
 
 

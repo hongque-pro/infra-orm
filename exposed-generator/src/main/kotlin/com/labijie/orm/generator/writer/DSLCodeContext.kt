@@ -12,6 +12,8 @@ data class DSLCodeContext(
     val parseRowFunc: FunSpec,
     val parseRowSelectiveFunc: FunSpec,
     val getColumnValueFunc: FunSpec,
+    val getColumnValueStringFunc: FunSpec,
+    val parseColumnValueFunc: FunSpec,
     val getColumnTypeFunc: FunSpec,
     val assignFunc: FunSpec,
     val rowMapFunc: FunSpec,
