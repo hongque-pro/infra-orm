@@ -211,7 +211,7 @@ object DSLWriter {
                         }
                     }
                 }
-                val errorMessage = "Can ot converter value of ${context.pojoClass.simpleName}::\${column.name} to string."
+                val errorMessage = "Can't converter value of ${context.pojoClass.simpleName}::\${column.name} to string."
                 this.addStatement("else->throw %T(%P)", IllegalArgumentException::class, errorMessage)
             }
             .endControlFlow()
@@ -255,7 +255,7 @@ object DSLWriter {
                         }
                     }
                 }
-                val errorMessage = "Can ot converter value of ${context.pojoClass.simpleName}::\${column.name} to string."
+                val errorMessage = "Can't converter value of ${context.pojoClass.simpleName}::\${column.name} to string."
                 this.addStatement("else->throw %T(%P)", IllegalArgumentException::class, errorMessage)
             }
             .endControlFlow()

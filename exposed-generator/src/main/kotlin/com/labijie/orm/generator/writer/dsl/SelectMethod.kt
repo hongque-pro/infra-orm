@@ -228,14 +228,6 @@ object SelectMethod : AbstractDSLMethodBuilder() {
         val primaryKeyPropertyName = primaryColumn.name
         val primaryKey = MemberName(context.base.tableClass, primaryKeyPropertyName)
 
-//        if (parseMethod == null) {
-//            context.base.logger.error(
-//                "Primary type is not an supported type: " +
-//                        "${context.base.table.className}:${primaryColumn.name}" +
-//                        "type: ${primaryColumn.type.toClassName()}"
-//            )
-//        }
-
         return FunSpec.builder("selectForwardByPrimaryKey")
             .receiver(context.base.tableClass)
             .addParameter(forwardToken)
@@ -250,10 +242,12 @@ object SelectMethod : AbstractDSLMethodBuilder() {
             .endControlFlow()
 
             .addStatement(
-                "val offsetKey = forwardToken?.%N { %T.getUrlDecoder().decode(it).toString(%T.UTF_8) }",
+                "val offsetKey = forwardToken?.%N { %T.%N(it).%N()?.%N { null } }",
                 kotlinLetMethod,
-                Base64::class.java.asTypeName(),
-                Charsets::class.asTypeName()
+                OffsetList::class.java.asTypeName(),
+                decodeTokenMethod,
+                kotlinFirstOrNullMethod,
+                kotlinTextExtensionMethod("ifBlank")
             )
             .addStatement(
                 "val query = %N(*%N.%N())",
@@ -305,13 +299,11 @@ object SelectMethod : AbstractDSLMethodBuilder() {
 
             .beginControlFlow("val token = if(dataCount > pageSize)")
             .addStatement("list.%N()", kotlinRemoveLast)
-            .addStatement("val idString = list.%M().%N(%N)", kotlinCollectionExtensionMethod("last"), context.getColumnValueStringFunc, primaryKey)
-            .addStatement(
-                "val idArray = idString.%M(%T.UTF_8)",
-                kotlinTextExtensionMethod("toByteArray"),
-                Charsets::class.asTypeName()
-            )
-            .addStatement("%T.getUrlEncoder().encodeToString(idArray)", Base64::class.java.asTypeName())
+            .addStatement("val idString = list.%M().%N(%N)",
+                kotlinCollectionExtensionMethod("last"),
+                context.getColumnValueStringFunc,
+                primaryKey)
+            .addStatement("%T.%N(idString)", OffsetList::class.java.asTypeName(), encodeTokenMethod)
             .endControlFlow()
             .beginControlFlow("else")
             .addStatement("null")

@@ -20,6 +20,11 @@ class OffsetList<T>(var list: List<T> = emptyList(), var forwardToken: String? =
             return OffsetList(emptyList(), null)
         }
 
+        fun encodeToken(key: String): String {
+            if(key.isEmpty()) return ""
+            return encodeToken(arrayOf(key))
+        }
+
         fun encodeToken(values: Array<out String>): String {
             val str = values.joinToString("&") { URLEncoder.encode(it, Charsets.UTF_8.name()) }
             return Base64.getUrlEncoder().encode(str.toByteArray(Charsets.UTF_8)).toString(Charsets.UTF_8)

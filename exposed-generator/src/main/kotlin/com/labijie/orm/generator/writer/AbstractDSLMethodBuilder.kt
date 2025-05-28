@@ -72,12 +72,13 @@ abstract class AbstractDSLMethodBuilder : IDSLMethodBuilder {
             MemberName("kotlin", "let", true)
         }
 
+        val kotlinFirstOrNullMethod: MemberName by lazy {
+            kotlinCollectionExtensionMethod("firstOrNull")
+        }
+
         val kotlinArrayOfMethod: MemberName by lazy {
             MemberName("kotlin", "arrayOf", false)
         }
-
-
-
 
         fun kotlinCollectionExtensionMethod(methodName: String): MemberName {
             return MemberName("kotlin.collections", methodName, isExtension = true)

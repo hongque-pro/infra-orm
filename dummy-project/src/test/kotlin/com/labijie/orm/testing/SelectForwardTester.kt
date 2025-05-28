@@ -15,6 +15,8 @@ import com.labijie.orm.dummy.pojo.dsl.ShopDSL.selectForward
 import com.labijie.orm.dummy.pojo.dsl.ShopDSL.selectForwardByPrimaryKey
 import com.labijie.orm.testing.context.TestingAutoConfiguration
 import org.jetbrains.exposed.sql.SortOrder
+import org.jetbrains.exposed.sql.deleteAll
+import org.junit.jupiter.api.AfterEach
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.test.annotation.Rollback
 import org.springframework.test.context.ContextConfiguration
@@ -32,6 +34,13 @@ class SelectForwardTester {
     @Autowired
     private lateinit var transactionTemplate: TransactionTemplate
 
+    @AfterEach
+    @Rollback(false)
+    fun clearData() {
+        this.transactionTemplate.execute {
+            ShopTable.deleteAll()
+        }
+    }
 
     @Test
     @Rollback(false)
