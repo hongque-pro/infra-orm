@@ -23,7 +23,7 @@ object PostTable : SimpleLongIdTable("posts", "id") {
     var title = varchar("name", 50).nullable()
     var status = enumeration("status", TestEnum::class)
     var description = varchar("desc", 255)
-    var status2 = enumeration("status", NestedInterface.StatusEnum::class)
+    var status2 = enumeration("nest_status", NestedInterface.StatusEnum::class)
     var array = array<String>("array")
     var dateTime = datetime("dateTime")
     var duration = duration("duration")
@@ -32,7 +32,7 @@ object PostTable : SimpleLongIdTable("posts", "id") {
     var timestamp = timestamp("timestamp")
 }
 
-object ShopTable : SimpleLongIdTable("my", "id") {
+object ShopTable : SimpleLongIdTable("shops", "id") {
 
     var name: Column<String> = varchar("name", 50)
     var status = enumeration("status", TestEnum::class)
@@ -44,14 +44,14 @@ object ShopTable : SimpleLongIdTable("my", "id") {
 @KspTablePojoSuper(type = SimpleBaseClass::class)
 object IntIdTable : SimpleIntIdTable("exposed_test_entities") {
     var name: Column<String> = varchar("name", 50)
-    var memo = varchar("name", 50).nullable()
-    var charCol = char("cc")
-    var textCol = text("tt")
-    var enumCol = enumeration("dd", TestEnum::class)
+    var memo = varchar("memo", 50).nullable()
+    var charCol = char("char")
+    var textCol = text("text")
+    var enumCol = enumeration("enum", TestEnum::class)
     var binaryCol = binary("data")
     var uidCol = uuid("uid")
-    val shortCol = short("sht")
-    val booleanCol = bool("sht")
+    val shortCol = short("short")
+    val booleanCol = bool("boolean")
     val byteCol = byte("dddd")
 }
 
@@ -68,15 +68,15 @@ object DurationIdEntityTable : Table("duration_id_entities") {
 
 object TestSimpleTable : SimpleStringIdTable("exposed_test_entities") {
     var name: Column<String> = varchar("name", 50)
-    var memo = varchar("name", 50).nullable()
-    var charCol = char("cc")
-    var textCol = text("tt")
-    var enumCol = enumeration("dd", TestEnum::class)
+    var memo = varchar("memo", 50).nullable()
+    var charCol = char("char")
+    var textCol = text("text")
+    var enumCol = enumeration("enum", TestEnum::class)
     var binaryCol = binary("data")
     var uidCol = uuid("uid")
-    val shortCol = short("sht")
-    val booleanCol = bool("sht")
-    val byteCol = byte("dddd")
+    val shortCol = short("short")
+    val booleanCol = bool("boolean")
+    val byteCol = byte("byte")
 }
 
 @KspTableIgnore

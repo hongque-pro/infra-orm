@@ -1,14 +1,15 @@
 package com.labijie.infra.orm.test
 
+import com.labijie.infra.orm.test.configuration.ExposedTestAutoConfiguration
+import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration
 import org.springframework.boot.autoconfigure.ImportAutoConfiguration
 import org.springframework.boot.autoconfigure.SpringBootApplication
-import org.springframework.boot.test.autoconfigure.OverrideAutoConfiguration
 import org.springframework.boot.test.autoconfigure.filter.TypeExcludeFilters
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase
-import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.context.annotation.ComponentScan.Filter
 import org.springframework.test.context.BootstrapWith
+import org.springframework.test.context.junit.jupiter.SpringExtension
 import org.springframework.transaction.annotation.EnableTransactionManagement
 import java.lang.annotation.Inherited
 
@@ -18,12 +19,13 @@ import java.lang.annotation.Inherited
 @MustBeDocumented
 @Inherited
 @BootstrapWith(ExposedTestContextBootstrapper::class)
-//@OverrideAutoConfiguration(enabled = false)
 @TypeExcludeFilters(ExposedTypeExcludeFilter::class)
 @EnableTransactionManagement
 @AutoConfigureTestDatabase
-@ImportAutoConfiguration
+@ImportAutoConfiguration(ExposedTestAutoConfiguration::class)
 @EnableAutoConfiguration
+//spring boot
+@ExtendWith(SpringExtension::class)
 annotation class ExposedTest(
     /**
      * Properties in form key=value that should be added to the Spring [Environment] before the test

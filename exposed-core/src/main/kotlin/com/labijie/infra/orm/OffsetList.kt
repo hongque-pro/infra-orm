@@ -1,5 +1,7 @@
 package com.labijie.infra.orm
 
+import java.net.URLDecoder
+import java.net.URLEncoder
 import java.util.*
 import kotlin.collections.map
 
@@ -18,44 +20,25 @@ class OffsetList<T>(var list: List<T> = emptyList(), var forwardToken: String? =
             return OffsetList(emptyList(), null)
         }
 
-        @JvmStatic
-        fun <TElement> encodeToken(
-            queryResult: List<TElement>,
-            offsetField: TElement.() -> Any,
-            keyField: TElement.() -> Any
-        ): String? {
+        fun encodeToken(values: Array<out String>): String {
+            val str = values.joinToString("&") { URLEncoder.encode(it, Charsets.UTF_8.name()) }
+            return Base64.getUrlEncoder().encode(str.toByteArray(Charsets.UTF_8)).toString(Charsets.UTF_8)
+        }
 
-            if (queryResult.isEmpty()) {
-                return null
-            }
-            val keys = mutableSetOf<String>()
-            val last = queryResult.last()
-            var lastIndex = queryResult.size - 1
-            val lastOffset = offsetField(last)
-            val lastKey = keyField.invoke(last)
-            keys.add(lastKey.toString())
-            while (lastIndex > 0) {
-                lastIndex--
-                val nextEntry = queryResult[lastIndex]
-                val nextOffset = offsetField.invoke(nextEntry)
-                if (lastOffset == nextOffset) {
-                    val nextKey = keyField.invoke(nextEntry)
-                    keys.add(nextKey.toString())
-                } else {
-                    break
-                }
-            }
-            val token = "${lastOffset}:${keys.joinToString(":")}"
-            return Base64.getUrlEncoder().encodeToString(token.toByteArray(Charsets.UTF_8))
+        fun encodeToken(values: Iterable<String>): String {
+            val str = values.joinToString("&") { URLEncoder.encode(it, Charsets.UTF_8.name()) }
+            return Base64.getUrlEncoder().encode(str.toByteArray(Charsets.UTF_8)).toString(Charsets.UTF_8)
         }
 
         @JvmStatic
-        fun decodeToken(forwardToken: String): Pair<String, List<String>> {
-            val tokenString = Base64.getUrlDecoder().decode(forwardToken).toString(Charsets.UTF_8)
-            val elements = tokenString.split(":")
-            val offset = elements.first()
-            val keys = elements.subList(1, elements.size)
-            return Pair(offset, keys)
+        fun decodeToken(token: String): List<String> {
+            if(token.isBlank()) return listOf()
+
+            val data =token.toByteArray(Charsets.UTF_8)
+            val decodedBase64 = Base64.getUrlDecoder().decode(data).toString(Charsets.UTF_8)
+
+            val list =decodedBase64.split("&")
+            return list.map { URLDecoder.decode(it, Charsets.UTF_8.name()) }
         }
     }
 

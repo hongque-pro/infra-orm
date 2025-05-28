@@ -84,7 +84,6 @@ object SelectMethod : AbstractDSLMethodBuilder() {
         val primary = context.base.table.primaryKeys.first()
         val primaryKey = MemberName(context.base.tableClass, primary.name)
 
-        val splitChars = ":::"
 
         return FunSpec.builder("selectForward")
             .receiver(context.base.tableClass)
@@ -113,12 +112,12 @@ object SelectMethod : AbstractDSLMethodBuilder() {
             )
             .endControlFlow()
             .addStatement(
-                "val sortColAndId = %N?.%N { if(it.isNotBlank()) %T.getUrlDecoder().decode(it).toString(Charsets.UTF_8) else null }",
+                "val kp = %N?.%N { if(it.isNotBlank()) %T.%N(it) else null }",
                 forwardToken,
                 kotlinLetMethod,
-                Base64::class.java.asTypeName()
+                OffsetList::class.asTypeName(),
+                decodeTokenMethod
             )
-            .addStatement("val kp = sortColAndId?.%N(%S)", kotlinTextExtensionMethod("split"), splitChars)
             .addStatement("val offsetKey = if(!kp.%N()) %N(kp.%N(), %N) else null",
                 kotlinCollectionExtensionMethod("isNullOrEmpty"),
                 context.parseColumnValueFunc,
@@ -201,8 +200,7 @@ object SelectMethod : AbstractDSLMethodBuilder() {
             .addStatement("list.%N()", kotlinRemoveLast)
             .addStatement("val idToEncode = list.last().%N(%M)", context.getColumnValueStringFunc, primaryKey)
             .addStatement("val sortKey = list.last().%N(%N)", context.getColumnValueStringFunc, sortColumn)
-            .addStatement("val tokenValue = %P.toByteArray(Charsets.UTF_8)", "\${idToEncode}$splitChars\${sortKey}")
-            .addStatement("%T.getUrlEncoder().encodeToString(tokenValue)", Base64::class.java.asTypeName(),)
+            .addStatement("%T.%N(%N(sortKey, idToEncode))", OffsetList::class.asTypeName(), encodeTokenMethod, kotlinArrayOfMethod)
             .endControlFlow()
             .addStatement("else null")
 

@@ -1,10 +1,12 @@
 package com.labijie.orm.generator.writer
 
+import com.labijie.infra.orm.OffsetList
 import com.labijie.orm.generator.parameterizedWildcard
 import com.squareup.kotlinpoet.*
 import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
 import org.jetbrains.exposed.sql.*
 import kotlin.collections.toMutableList
+import kotlin.reflect.full.companionObject
 import kotlin.text.split
 
 abstract class AbstractDSLMethodBuilder : IDSLMethodBuilder {
@@ -65,6 +67,7 @@ abstract class AbstractDSLMethodBuilder : IDSLMethodBuilder {
             return MemberName("org.jetbrains.exposed.sql", member, isExtension)
         }
 
+
         val kotlinLetMethod: MemberName by lazy {
             MemberName("kotlin", "let", true)
         }
@@ -72,6 +75,7 @@ abstract class AbstractDSLMethodBuilder : IDSLMethodBuilder {
         val kotlinArrayOfMethod: MemberName by lazy {
             MemberName("kotlin", "arrayOf", false)
         }
+
 
 
 
@@ -94,6 +98,16 @@ abstract class AbstractDSLMethodBuilder : IDSLMethodBuilder {
         val eqMethod = getExposedSqlExpressionBuilderMember("eq")
         val andMethod = getSqlExtendMethod("and")
         val andWhereMethod = getSqlExtendMethod("andWhere")
+
+        val encodeTokenMethod by lazy {
+            val offsetListType = OffsetList::class.companionObject!!.asTypeName()
+            MemberName(offsetListType, "encodeToken")
+        }
+
+        val decodeTokenMethod by lazy {
+            val offsetListType = OffsetList::class.companionObject!!.asTypeName()
+            MemberName(offsetListType, "decodeToken")
+        }
     }
 
 

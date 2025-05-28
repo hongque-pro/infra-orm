@@ -1,0 +1,3 @@
+
+org.springframework.boot.env.EnvironmentPostProcessor=\
+  com.labijie.infra.orm.test.configuration.ExposedTestEnvProcessor

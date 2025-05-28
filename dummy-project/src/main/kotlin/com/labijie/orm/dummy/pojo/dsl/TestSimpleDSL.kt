@@ -430,9 +430,7 @@ public object TestSimpleDSL {
     if(sortColumn == id) {
       return this.selectForwardByPrimaryKey(forwardToken, order, pageSize, selective, `where`)
     }
-    val sortColAndId = forwardToken?.let { if(it.isNotBlank())
-        Base64.getUrlDecoder().decode(it).toString(Charsets.UTF_8) else null }
-    val kp = sortColAndId?.split(":::")
+    val kp = forwardToken?.let { if(it.isNotBlank()) OffsetList.decodeToken(it) else null }
     val offsetKey = if(!kp.isNullOrEmpty()) parseColumnValue(kp.first(), sortColumn) else null
     val lastId = if(kp != null && kp.size > 1 && kp[1].isNotBlank()) parseColumnValue(kp[1], id)
         else null
@@ -460,8 +458,7 @@ public object TestSimpleDSL {
       list.removeLast()
       val idToEncode = list.last().getColumnValueString(id)
       val sortKey = list.last().getColumnValueString(sortColumn)
-      val tokenValue = """${idToEncode}:::${sortKey}""".toByteArray(Charsets.UTF_8)
-      Base64.getUrlEncoder().encodeToString(tokenValue)
+      OffsetList.encodeToken(arrayOf(sortKey, idToEncode))
     }
     else null
     return OffsetList(list, token)
