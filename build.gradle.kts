@@ -7,13 +7,14 @@ plugins {
 
 allprojects {
     group = "com.labijie.orm"
-    version = "2.0.10"
+    version = "2.1.0"
 
     infra {
         useDefault {
             includeSource = true
             includeDocument = true
             useMavenProxy = false
+            kotlinVersion = Versions.kotlinVersion
         }
     }
 }
