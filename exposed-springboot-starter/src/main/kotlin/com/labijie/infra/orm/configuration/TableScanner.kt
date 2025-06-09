@@ -1,6 +1,5 @@
 package com.labijie.infra.orm.configuration
 
-import ch.qos.logback.core.util.StringCollectionUtil
 import org.jetbrains.exposed.sql.Table
 import org.springframework.beans.factory.support.AbstractBeanDefinition
 import org.springframework.beans.factory.support.BeanDefinitionRegistry
@@ -15,7 +14,7 @@ import java.util.function.Supplier
 class TableScanner(registry: BeanDefinitionRegistry, private val excludeClasses: String? = null) :
     ClassPathBeanDefinitionScanner(registry) {
 
-    val excludeClassNames = if(excludeClasses.isNullOrBlank()) setOf<String>() else StringUtils.commaDelimitedListToSet(excludeClasses)
+    val excludeClassNames: Set<String> = if(excludeClasses.isNullOrBlank()) setOf() else StringUtils.commaDelimitedListToSet(excludeClasses)
 
     init {
         this.addIncludeFilter(AssignableTypeFilter(Table::class.java))
@@ -28,7 +27,7 @@ class TableScanner(registry: BeanDefinitionRegistry, private val excludeClasses:
 
     override fun postProcessBeanDefinition(beanDefinition: AbstractBeanDefinition, beanName: String) {
         beanDefinition.instanceSupplier = Supplier<Any> {
-           Class.forName(beanDefinition.beanClassName).kotlin.objectInstance
+            Class.forName(beanDefinition.beanClassName).kotlin.objectInstance!!
        }
     }
 

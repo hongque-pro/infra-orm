@@ -12,7 +12,6 @@ import org.springframework.context.ApplicationContext
 import org.springframework.context.ApplicationContextAware
 import org.springframework.context.ConfigurableApplicationContext
 import org.springframework.util.StringUtils
-import kotlin.reflect.KClass
 
 
 class TableDefinitionPostProcessor : BeanDefinitionRegistryPostProcessor, ApplicationContextAware, BeanNameAware {
@@ -34,13 +33,13 @@ class TableDefinitionPostProcessor : BeanDefinitionRegistryPostProcessor, Applic
             processPropertyPlaceHolders()
         }
 
-        val scaner = TableScanner(registry, excludeClasses)
-        scaner.resourceLoader = context
+        val scanner = TableScanner(registry, excludeClasses)
+        scanner.resourceLoader = context
 
         if(packages.isNotBlank()) {
             val packages =
                 StringUtils.tokenizeToStringArray(packages, ConfigurableApplicationContext.CONFIG_LOCATION_DELIMITERS)
-            scaner.scan(*packages)
+            scanner.scan(*packages)
         }
     }
 

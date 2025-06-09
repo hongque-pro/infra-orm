@@ -6,6 +6,6 @@ dependencies {
     testImplementation(project(":exposed-springboot-test-starter"))
 }
 infra {
-    useKspPlugin(project(":exposed-generator"))
+    useKspPlugin(project(":exposed-generator"), "org.jetbrains.kotlin:kotlin-reflect")
 }
 

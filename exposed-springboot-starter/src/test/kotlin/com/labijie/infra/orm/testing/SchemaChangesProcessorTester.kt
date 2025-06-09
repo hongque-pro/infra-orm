@@ -60,6 +60,7 @@ class SchemaChangesProcessorTester {
     fun testColumnDrop() {
         this.transactionTemplate.execute {
             with(TransactionManager.current()) {
+
                 val sql = SchemaUtils.statementsRequiredToActualizeScheme(BeforeTable)
                 this.queryTimeout = 30
                 this.execInBatch(sql)

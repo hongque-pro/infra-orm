@@ -156,7 +156,9 @@ fun <T> KSType.isJavaType(javaClass: Class<T>): Boolean {
 
 fun KSType.isKotlinType(kclass: KClass<*>): Boolean {
     val kType = kclass.asTypeName()
-    val cls = this.declaration.closestClassDeclaration()?.asStarProjectedType()?.toClassName()
+    val projectedType = this.declaration.closestClassDeclaration()?.asStarProjectedType()
+    if(projectedType != null && !projectedType.arguments.isEmpty()) return false
+    val cls = projectedType?.toClassName()
     if(cls == null) {
         return false
     }

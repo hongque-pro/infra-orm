@@ -1,5 +1,6 @@
 package com.labijie.orm.generator.writer
 
+import com.google.devtools.ksp.closestClassDeclaration
 import com.labijie.infra.orm.ExposedConverter
 import com.labijie.orm.generator.*
 import com.labijie.orm.generator.writer.AbstractDSLMethodBuilder.Companion.columnSelectiveParameter
@@ -76,9 +77,9 @@ object DSLWriter {
             .builder(context.dslPackageName, fileName = context.dslClass.simpleName)
             .suppressRedundantVisibilityModifierWarning()
 
-        val convertMethods = ExposedConverter::class.declaredMembers.filter {
-            it.visibility == KVisibility.PUBLIC
-        }.map { it.name }
+//        val convertMethods = ExposedConverter::class.declaredMembers.filter {
+//            it.visibility == KVisibility.PUBLIC
+//        }.map { it.name }
 
         val file = fileBuilder
             .addImport(context.tableClass, context.table.columns.map { it.name })
@@ -285,7 +286,13 @@ object DSLWriter {
 //                        this.addStatement("${it.name}->%T::class", t)
 //                    }
                     val t = if (!it.type.isMarkedNullable) it.type else it.type.makeNotNullable()
-                    this.addStatement("${it.name}->%T::class", t.toClassName())
+
+                    if(t.arguments.isNotEmpty()) {
+                        val projectedType = it.type.declaration.closestClassDeclaration()
+                        this.addStatement("${it.name}->%T::class", projectedType!!.toClassName())
+                    }else {
+                        this.addStatement("${it.name}->%T::class", t.toClassName())
+                    }
                 }
                 val errorMessage = "Unknown column <\${column.name}> for '${context.pojoClass.simpleName}'"
                 this.addStatement("else->throw %T(%P)", IllegalArgumentException::class, errorMessage)

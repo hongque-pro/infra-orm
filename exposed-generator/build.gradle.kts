@@ -1,10 +1,12 @@
 
 infra {
     useKspApi()
+    useKspApi("testImplementation")
 }
 
 dependencies {
     implementation(project(":exposed-core"))
+    implementation("org.jetbrains.kotlin:kotlin-reflect")
     implementation("org.jetbrains.exposed:exposed-java-time")
     implementation("org.jetbrains.exposed:exposed-json")
     implementation("com.squareup:kotlinpoet-ksp:${Versions.kotlinPoetVersion}")
@@ -13,4 +15,6 @@ dependencies {
 
     //https://github.com/zacsweers/kotlin-compile-testing
     testImplementation("dev.zacsweers.kctfork:ksp:${Versions.kotlinCompileTesting}")
+    //testImplementation("org.jetbrains.kotlin:kotlin-compiler-embeddable")
+    //testRuntimeOnly(files("${System.getProperty("java.home")}/../lib/tools.jar"))
 }

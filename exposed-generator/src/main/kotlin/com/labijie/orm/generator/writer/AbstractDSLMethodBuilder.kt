@@ -101,12 +101,12 @@ abstract class AbstractDSLMethodBuilder : IDSLMethodBuilder {
         val andWhereMethod = getSqlExtendMethod("andWhere")
 
         val encodeTokenMethod by lazy {
-            val offsetListType = OffsetList::class.companionObject!!.asTypeName()
+            val offsetListType = OffsetList::class.asTypeName()
             MemberName(offsetListType, "encodeToken")
         }
 
         val decodeTokenMethod by lazy {
-            val offsetListType = OffsetList::class.companionObject!!.asTypeName()
+            val offsetListType = OffsetList::class.asTypeName()
             MemberName(offsetListType, "decodeToken")
         }
     }
