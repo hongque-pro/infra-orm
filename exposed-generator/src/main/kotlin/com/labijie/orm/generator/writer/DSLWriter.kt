@@ -1,7 +1,6 @@
 package com.labijie.orm.generator.writer
 
 import com.google.devtools.ksp.closestClassDeclaration
-import com.labijie.infra.orm.ExposedConverter
 import com.labijie.orm.generator.*
 import com.labijie.orm.generator.writer.AbstractDSLMethodBuilder.Companion.columnSelectiveParameter
 import com.labijie.orm.generator.writer.AbstractDSLMethodBuilder.Companion.getSqlExtendMethod
@@ -16,8 +15,6 @@ import org.jetbrains.exposed.sql.Query
 import org.jetbrains.exposed.sql.ResultRow
 import org.jetbrains.exposed.sql.statements.UpdateBuilder
 import kotlin.reflect.KClass
-import kotlin.reflect.KVisibility
-import kotlin.reflect.full.declaredMembers
 
 object DSLWriter {
 
@@ -121,7 +118,7 @@ object DSLWriter {
                     .build()
             )
             .build()
-        val folder = context.options.getSourceFolder(context.table)
+        val folder = context.options.getFolder(context.table).pojoSourceDir
         file.writeTo(folder)
     }
 

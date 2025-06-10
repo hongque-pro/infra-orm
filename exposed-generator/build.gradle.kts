@@ -6,6 +6,7 @@ infra {
 
 dependencies {
     implementation(project(":exposed-core"))
+    implementation("com.fasterxml.jackson.core:jackson-databind")
     implementation("org.jetbrains.kotlin:kotlin-reflect")
     implementation("org.jetbrains.exposed:exposed-java-time")
     implementation("org.jetbrains.exposed:exposed-json")

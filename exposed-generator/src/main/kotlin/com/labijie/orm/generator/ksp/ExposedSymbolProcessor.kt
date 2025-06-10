@@ -10,6 +10,7 @@ import com.labijie.infra.orm.compile.KspPrimaryKey
 import com.labijie.infra.orm.compile.KspTableIgnore
 import com.labijie.orm.generator.*
 import com.labijie.orm.generator.writer.DSLWriter
+import com.labijie.orm.generator.writer.NativeReflectConfigWriter
 import com.labijie.orm.generator.writer.PojoWriter
 import org.jetbrains.exposed.sql.Table
 
@@ -43,7 +44,11 @@ class ExposedSymbolProcessor(
             val context = GenerationContext(it, writerOptions)
             PojoWriter.write(context)
             DSLWriter.write(context)
+            context
         }
+
+        NativeReflectConfigWriter.write(tables, writerOptions, logger)
+
         invoked = true
         return emptyList()
     }

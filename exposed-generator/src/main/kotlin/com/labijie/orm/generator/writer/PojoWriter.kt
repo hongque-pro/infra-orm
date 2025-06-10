@@ -35,7 +35,7 @@ object PojoWriter {
             )
             .build()
 
-        file.writeTo(context.options.getSourceFolder(context.table))
+        file.writeTo(context.options.getFolder(context.table).pojoSourceDir)
     }
 
     private fun TypeSpec.Builder.executeIf(

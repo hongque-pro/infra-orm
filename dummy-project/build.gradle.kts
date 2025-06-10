@@ -6,6 +6,12 @@ dependencies {
     testImplementation(project(":exposed-springboot-test-starter"))
 }
 infra {
-    useKspPlugin(project(":exposed-generator"), "org.jetbrains.kotlin:kotlin-reflect")
+    useKspPlugin(project(":exposed-generator"))
+}
+
+ksp {
+    arg("orm.native_build", "true")
+    arg("orm.table_group_id", project.group.toString())
+    arg("orm.table_artifact_id", project.name)
 }
 
