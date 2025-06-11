@@ -28,7 +28,7 @@ class TableScanner(registry: BeanDefinitionRegistry, private val excludeClasses:
 
     override fun postProcessBeanDefinition(beanDefinition: AbstractBeanDefinition, beanName: String) {
         beanDefinition.instanceSupplier = Supplier<Any> {
-           Class.forName(beanDefinition.beanClassName).kotlin.objectInstance
+            Class.forName(beanDefinition.beanClassName).kotlin.objectInstance!!
        }
     }
 
