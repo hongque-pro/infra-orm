@@ -9,7 +9,9 @@ import java.nio.file.Path
 
 
 data class GenerationPaths(
+    val tableSourceDir: Path,
     val pojoSourceDir: Path,
     val tableResourceDir: Path,
+    val springResourceDir: Path,
     val nativeImageResourceDir: Path
 )

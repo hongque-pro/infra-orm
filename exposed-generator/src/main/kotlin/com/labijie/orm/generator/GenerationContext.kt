@@ -5,6 +5,9 @@ import com.squareup.kotlinpoet.ClassName
 class GenerationContext(val table: TableMetadata, val options: WriterOptions) {
     val pojoPackageName = (options.pojoPackageName ?: "").ifBlank { "${table.packageName}.pojo" }
     val dslPackageName = "${pojoPackageName}.dsl"
+    val aotPackageName = "${table.packageName}.aot"
+
+    val runtimeHintsRegistrarClass  = ClassName(aotPackageName, "OrmRuntimeHintsRegistrar")
 
     val pojoClass = ClassName(pojoPackageName, table.normalizeClassName())
     val dslClass = ClassName(dslPackageName, "${table.normalizeClassName()}DSL")

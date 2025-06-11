@@ -228,26 +228,35 @@ fun buildWriterOptions(env: Map<String, String>): WriterOptions {
         this.pojoProjectRootDir = env.getOrDefault(EnvVariables.POJO_DIR, null)
         this.tableGroupId = env.getOrDefault(EnvVariables.TABLE_GROUP_ID, "com.example")
         this.tableArtifactId = env.getOrDefault(EnvVariables.TABLE_ARTIFACT_ID, "")
-        this.graalvmEnabled = env.getOrDefault(EnvVariables.ENABLE_GRAALVM_BUILD, "false").toBooleanStrictOrNull() ?: false
+        this.springbootAot = env.getOrDefault(EnvVariables.SPRINGBOOT_AOT, "false").toBooleanStrictOrNull() ?: false
     }
 }
 
 fun WriterOptions.getFolder(table: TableMetadata): GenerationPaths {
     val root = this.pojoProjectRootDir
-    val src = if (root != null) {
+    val pojoSrc = if (root != null) {
         Path(root, "src", "main", "kotlin")
     } else {
         findProjectSourceDir(File(table.sourceFile).parentFile.absolutePath)
     }
-    createFolderIfNotExisted(src)
+    createFolderIfNotExisted(pojoSrc)
+    val tableDir = findProjectSourceDir(File(table.sourceFile).parentFile.absolutePath)
 
-    val mainDir = src.parent.absolutePathString()
-    val resource = Path(mainDir, "resources")
+    val resource = findProjectResourceDir(File(table.sourceFile).parentFile.absolutePath)
+
     createFolderIfNotExisted(resource)
-    val nativeResource = Path(mainDir, "resources", "META-INF", "native-image")
-    createFolderIfNotExisted(nativeResource)
 
-    return GenerationPaths(src, resource, nativeResource)
+    val springResourceDir = Path(resource.absolutePathString(), "META-INF", "spring")
+
+    val nativeResource = Path(resource.absolutePathString(), "META-INF", "native-image")
+
+    return GenerationPaths(
+        tableSourceDir = tableDir,
+        pojoSourceDir =  pojoSrc,
+        tableResourceDir = resource,
+        springResourceDir = springResourceDir,
+        nativeImageResourceDir = nativeResource
+    )
 }
 
 
@@ -258,22 +267,36 @@ fun ClassName.parameterizedWildcard(): ParameterizedTypeName {
 }
 
 private val srcPath = "/src/main/kotlin/".replace("/", File.separator)
-private val folders = mutableMapOf<String, Path>()
+private val resourcesPath = "/src/main/resources/".replace("/", File.separator)
+
+fun findProjectRootDir(sourceFile: String): Path {
+    val index = sourceFile.indexOf(srcPath)
+    return if (index > 0) {
+        val folder = sourceFile.substring(0, index).trimEnd(File.separatorChar)
+        Path(folder)
+    } else {
+        throw ExposedGenerationException("Unable to get project root folder from file '${sourceFile}'")
+    }
+}
+
+fun findProjectResourceDir(sourceFile: String): Path {
+    val index = sourceFile.indexOf(srcPath)
+    return if (index > 0) {
+        val folder = sourceFile.substring(0, index)
+        Path("${folder}${resourcesPath}".trimEnd(File.separatorChar))
+    } else {
+        throw ExposedGenerationException("Unable to get resources folder from file '${sourceFile}'")
+    }
+}
 
 fun findProjectSourceDir(sourceFile: String): Path {
-    val existed = folders[sourceFile]
-    if (existed != null) {
-        return existed
-    }
     val index = sourceFile.indexOf(srcPath)
-    if (index > 0) {
+    return if (index > 0) {
         val folder = sourceFile.substring(0, index)
-        folders[sourceFile] = Path("${folder}${srcPath}".trimEnd(File.separatorChar))
+        Path("${folder}${srcPath}".trimEnd(File.separatorChar))
     } else {
-        folders[sourceFile] = Path(File(sourceFile).parentFile.absolutePath)
+        throw ExposedGenerationException("Unable to get src folder from file '${sourceFile}'")
     }
-    return folders[sourceFile]
-        ?: throw ExposedGenerationException("Unable to get project folder from file '${sourceFile}'")
 }
 
 val suppressUncheckedCastAnnotation = AnnotationSpec.builder(Suppress::class)
@@ -305,4 +328,58 @@ fun FileSpec.Builder.suppressWarningTypes(vararg types: String): FileSpec.Builde
 
 fun FileSpec.Builder.suppressRedundantVisibilityModifierWarning(): FileSpec.Builder {
     return this.suppressWarningTypes("RedundantVisibilityModifier")
+}
+
+fun convertToSpringConfig(values:  Map<String, Set<String>>): String {
+    return StringBuilder().apply {
+        values.forEach {
+            kv->
+            this.appendLine("${kv.key}=\\")
+            this.appendLine(kv.value.joinToString(",\\\n"))
+            this.appendLine()
+        }
+    }.toString()
+}
+
+fun parseSpringConfig(config: String): MutableMap<String, MutableSet<String>> {
+    val result = mutableMapOf<String, MutableSet<String>>()
+    val builder = StringBuilder()
+    val completeLines = mutableListOf<String>()
+
+    // 处理续行并构建完整行
+    for (line in config.lineSequence()) {
+        val trimmedLine = line.trim()
+        if (trimmedLine.isEmpty()) continue  // 跳过空行
+
+        if (trimmedLine.endsWith("\\")) {
+            // 续行：移除反斜杠并添加到构建器
+            builder.append(trimmedLine.substring(0, trimmedLine.length - 1).trim())
+        } else {
+            // 完整行：添加到构建器并完成
+            builder.append(trimmedLine)
+            completeLines.add(builder.toString())
+            builder.clear()
+        }
+    }
+
+    // 处理最后一行（如果以续行符结束）
+    if (builder.isNotEmpty()) {
+        completeLines.add(builder.toString())
+    }
+
+    // 解析每行配置
+    for (line in completeLines) {
+        val parts = line.split('=', limit = 2)
+        if (parts.size == 2) {
+            val key = parts[0].trim()
+            val values = parts[1].split(',')
+                .map { it.trim() }
+                .filter { it.isNotEmpty() }
+                .toSet()
+
+            result.getOrPut(key) { mutableSetOf() }.addAll(values)
+        }
+    }
+
+    return result
 }

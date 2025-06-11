@@ -9,7 +9,6 @@ import com.squareup.kotlinpoet.ksp.toTypeName
 object PojoWriter {
 
     fun write(context: GenerationContext) {
-        context.table
         val file = FileSpec.builder(context.pojoPackageName, fileName = context.pojoClass.simpleName)
             .suppressRedundantVisibilityModifierWarning()
             .addType(

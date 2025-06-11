@@ -5,5 +5,5 @@ class WriterOptions {
     var pojoProjectRootDir: String? = null
     var tableGroupId: String = ""
     var tableArtifactId: String = ""
-    var graalvmEnabled: Boolean = true
+    var springbootAot: Boolean = false
 }

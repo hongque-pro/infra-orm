@@ -11,6 +11,7 @@ import com.google.devtools.ksp.symbol.Origin
 import com.labijie.infra.orm.SimpleIdTable
 import com.labijie.infra.orm.compile.KspTablePojo
 import com.labijie.infra.orm.compile.KspTablePojoSuper
+import com.squareup.kotlinpoet.ClassName
 import com.squareup.kotlinpoet.ksp.toTypeName
 import org.jetbrains.exposed.dao.id.IdTable
 
@@ -31,6 +32,10 @@ class TableMetadata(declaration: KSClassDeclaration, val sourceFile: String, pri
     val isSerializable: Boolean
     val isOpen: Boolean
     val implements: MutableList<PojoSuper> = mutableListOf()
+
+    val tableClass by lazy {
+        ClassName(packageName, className)
+    }
 
 
     init {

@@ -42,7 +42,7 @@ object NativeReflectConfigWriter {
 
     fun write(tables: List<TableMetadata>, writerOptions: WriterOptions, logger: KSPLogger) {
 
-        if (writerOptions.graalvmEnabled && tables.isNotEmpty()) {
+        if (writerOptions.springbootAot && tables.isNotEmpty()) {
 
             if (writerOptions.tableArtifactId.isBlank()) {
                 logger.warn("Project artifact id of orm table is blank, unable to generate graalvm metadata.")

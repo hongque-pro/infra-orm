@@ -6,12 +6,9 @@ dependencies {
     testImplementation(project(":exposed-springboot-test-starter"))
 }
 infra {
-    useKspPlugin(project(":exposed-generator"))
+    useKspPlugin(project(":exposed-generator")) {
+        arg("orm.springboot_aot", "true")
+        arg("orm.table_group_id", project.group.toString())
+        arg("orm.table_artifact_id", project.name)
+    }
 }
-
-ksp {
-    arg("orm.native_build", "true")
-    arg("orm.table_group_id", project.group.toString())
-    arg("orm.table_artifact_id", project.name)
-}
-

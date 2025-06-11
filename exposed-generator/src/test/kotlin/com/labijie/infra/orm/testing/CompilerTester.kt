@@ -4,6 +4,8 @@ import com.labijie.orm.generator.findProjectSourceDir
 import com.labijie.orm.generator.ksp.ExposedSymbolProcessorProvider
 import com.tschuchort.compiletesting.KotlinCompilation
 import com.tschuchort.compiletesting.SourceFile
+import com.tschuchort.compiletesting.kspArgs
+import com.tschuchort.compiletesting.kspProcessorOptions
 import com.tschuchort.compiletesting.kspSourcesDir
 import com.tschuchort.compiletesting.symbolProcessorProviders
 import com.tschuchort.compiletesting.useKsp2
@@ -80,6 +82,9 @@ object TestTable : SimpleLongIdTable("my") {
             symbolProcessorProviders = mutableListOf(ExposedSymbolProcessorProvider())
             inheritClassPath = true
             messageOutputStream = System.out
+            kspProcessorOptions = mutableMapOf(
+                "orm.springboot_aot" to "true"
+            )
         }
         val result = compilation.compile()
         assertEquals(result.exitCode, KotlinCompilation.ExitCode.OK, result.messages)

@@ -277,13 +277,13 @@ public open class MultiKey {
 > 为了降低学习成本，**Infra-ORM** 提供的配置不多，约定大于配置是不变的真理.
 
 
-| 参数名                   | 默认值          | 说明                                                                           |
-|-----------------------|--------------|------------------------------------------------------------------------------|
-| orm.pojo_package      |              | 生成代码的包名，如果不配置，默认会在你的 Table 类的包下创建 pojo 子包，代码文件将放入其中                          |
-| orm.pojo_project_dir  |              | 生成代码的目录，必须是**绝对路径**，如果不配置，默认生成到你的 Table 类所在的项目根目录                            |
-| orm.table_group_id    | com.example  | Table 类文件所在的包 group id, 必须和 gradle.build 中配置一致，这是 GraalVM 进行 native 编译必须的    |
-| orm.table_artifact_id |              | Table 类文件所在的包 artifact id, 必须和 gradle.build 中配置一致，这是 GraalVM 进行 native 编译必须的 |
-| orm.graalvm_build     | false        | 是否支持 graalvm native build, 为 graalvm 提供反射元数据, 如果你使用 graalvm 进行 native 编译, 请开启该选项    |    
+| 参数名                   | 默认值         | 说明                                                                           |
+|-----------------------|-------------|------------------------------------------------------------------------------|
+| orm.pojo_package      |             | 生成代码的包名，如果不配置，默认会在你的 Table 类的包下创建 pojo 子包，代码文件将放入其中                          |
+| orm.pojo_project_dir  |             | 生成代码的目录，必须是**绝对路径**，如果不配置，默认生成到你的 Table 类所在的项目根目录                            |
+| orm.table_group_id    | com.example | Table 类文件所在的包 group id, 必须和 gradle.build 中配置一致，这是 GraalVM 进行 native 编译必须的    |
+| orm.table_artifact_id |             | Table 类文件所在的包 artifact id, 必须和 gradle.build 中配置一致，这是 GraalVM 进行 native 编译必须的 |
+| orm.orm.springboot_aot     | false       | 是否生成 springboot hint 类 (RuntimeHintsRegistrar)                                                    |    
 
 > `orm.pojo_dir` 虽然要求**绝对路径**，但是你可以通过 gradle.build 中提供的变量得到项目目录,以达到相对路径的效果
 
