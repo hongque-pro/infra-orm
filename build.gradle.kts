@@ -14,6 +14,7 @@ allprojects {
             includeSource = true
             includeDocument = true
             useMavenProxy = false
+            infraBomVersion = Versions.infraBomVersion
             kotlinVersion = Versions.kotlinVersion
         }
     }
