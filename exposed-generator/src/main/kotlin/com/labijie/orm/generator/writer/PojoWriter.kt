@@ -9,7 +9,6 @@ import com.squareup.kotlinpoet.ksp.toTypeName
 object PojoWriter {
 
     fun write(context: GenerationContext) {
-        context.table
         val file = FileSpec.builder(context.pojoPackageName, fileName = context.pojoClass.simpleName)
             .suppressRedundantVisibilityModifierWarning()
             .addType(
@@ -35,7 +34,7 @@ object PojoWriter {
             )
             .build()
 
-        file.writeTo(context.options.getSourceFolder(context.table))
+        file.writeTo(context.options.getFolder(context.table).pojoSourceDir)
     }
 
     private fun TypeSpec.Builder.executeIf(

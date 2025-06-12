@@ -24,6 +24,12 @@
 的 ORM 框架，可以和 Spring Boot 集成良好，如果你是 Kotlin 开发者，推荐你试试 Exposed, 
 配合 Infra-ORM 可以给你带来最佳的开发体验。
 
+## What news in 2.1.x
+
+- Spring Boot AOT support, got a consistent experience in GraalVM native enviroment.
+- JDK **21** is used by default .
+- Upgrade to Spring Boot **3.5** .
+
 ## 基于表结构的 Code First 开发模式
 
 ### 1. 引入插件

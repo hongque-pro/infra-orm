@@ -4,13 +4,18 @@ import com.labijie.orm.generator.findProjectSourceDir
 import com.labijie.orm.generator.ksp.ExposedSymbolProcessorProvider
 import com.tschuchort.compiletesting.KotlinCompilation
 import com.tschuchort.compiletesting.SourceFile
+import com.tschuchort.compiletesting.kspArgs
+import com.tschuchort.compiletesting.kspProcessorOptions
+import com.tschuchort.compiletesting.kspSourcesDir
 import com.tschuchort.compiletesting.symbolProcessorProviders
+import com.tschuchort.compiletesting.useKsp2
 import org.jetbrains.kotlin.compiler.plugin.ExperimentalCompilerApi
+import org.jetbrains.kotlin.kapt4.Kapt4CompilerPluginRegistrar
 import java.io.File
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-class FolderPathTester {
+class CompilerTester {
     @Test
     fun testPath(){
         val path = "E:\\Work\\infra-orm\\dummy-project\\src\\main\\kotlin\\com\\labijie\\orm\\dummy".replace("\\", File.separator)
@@ -48,9 +53,10 @@ interface NestedInterface {
 
 interface TestInterface {}
 
-@KspTablePojoSuper(type=[TestInterface::class])
-object TestTable : Table("my") {
-    var nullableString = varchar("null_str").nullable()
+
+@KspTablePojoSuper(type=TestInterface::class)
+object TestTable : SimpleLongIdTable("my") {
+    var nullableString = varchar("null_str", 32).nullable()
     var array = array<String>("array")
     var name: Column<String> = varchar("name", 50)
     var count = integer("count")
@@ -60,15 +66,29 @@ object TestTable : Table("my") {
 }
     """
         )
+
+        //https://github.com/ZacSweers/kotlin-compile-testing
         val compilation = KotlinCompilation().apply {
-            //TODO: upgrade kotlin 2.0
-            languageVersion = "1.9"
+
+            useKsp2()
+            languageVersion = "2.1"
+
+            useKapt4 = true
+            //useKapt4 = true
+
+            jvmTarget = "21"
             sources = listOf(kotlinSource)
+            compilerPluginRegistrars = listOf()
             symbolProcessorProviders = mutableListOf(ExposedSymbolProcessorProvider())
             inheritClassPath = true
             messageOutputStream = System.out
+            kspProcessorOptions = mutableMapOf(
+                "orm.springboot_aot" to "true"
+            )
         }
         val result = compilation.compile()
         assertEquals(result.exitCode, KotlinCompilation.ExitCode.OK, result.messages)
+        val generatedSourcesDir = compilation.kspSourcesDir
+        println("ksp dir: $generatedSourcesDir")
     }
 }

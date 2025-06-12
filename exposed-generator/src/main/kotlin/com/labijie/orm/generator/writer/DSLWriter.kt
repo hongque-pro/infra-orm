@@ -1,6 +1,6 @@
 package com.labijie.orm.generator.writer
 
-import com.labijie.infra.orm.ExposedConverter
+import com.google.devtools.ksp.closestClassDeclaration
 import com.labijie.orm.generator.*
 import com.labijie.orm.generator.writer.AbstractDSLMethodBuilder.Companion.columnSelectiveParameter
 import com.labijie.orm.generator.writer.AbstractDSLMethodBuilder.Companion.getSqlExtendMethod
@@ -15,8 +15,6 @@ import org.jetbrains.exposed.sql.Query
 import org.jetbrains.exposed.sql.ResultRow
 import org.jetbrains.exposed.sql.statements.UpdateBuilder
 import kotlin.reflect.KClass
-import kotlin.reflect.KVisibility
-import kotlin.reflect.full.declaredMembers
 
 object DSLWriter {
 
@@ -76,9 +74,9 @@ object DSLWriter {
             .builder(context.dslPackageName, fileName = context.dslClass.simpleName)
             .suppressRedundantVisibilityModifierWarning()
 
-        val convertMethods = ExposedConverter::class.declaredMembers.filter {
-            it.visibility == KVisibility.PUBLIC
-        }.map { it.name }
+//        val convertMethods = ExposedConverter::class.declaredMembers.filter {
+//            it.visibility == KVisibility.PUBLIC
+//        }.map { it.name }
 
         val file = fileBuilder
             .addImport(context.tableClass, context.table.columns.map { it.name })
@@ -120,7 +118,7 @@ object DSLWriter {
                     .build()
             )
             .build()
-        val folder = context.options.getSourceFolder(context.table)
+        val folder = context.options.getFolder(context.table).pojoSourceDir
         file.writeTo(folder)
     }
 
@@ -285,7 +283,13 @@ object DSLWriter {
 //                        this.addStatement("${it.name}->%T::class", t)
 //                    }
                     val t = if (!it.type.isMarkedNullable) it.type else it.type.makeNotNullable()
-                    this.addStatement("${it.name}->%T::class", t.toClassName())
+
+                    if(t.arguments.isNotEmpty()) {
+                        val projectedType = it.type.declaration.closestClassDeclaration()
+                        this.addStatement("${it.name}->%T::class", projectedType!!.toClassName())
+                    }else {
+                        this.addStatement("${it.name}->%T::class", t.toClassName())
+                    }
                 }
                 val errorMessage = "Unknown column <\${column.name}> for '${context.pojoClass.simpleName}'"
                 this.addStatement("else->throw %T(%P)", IllegalArgumentException::class, errorMessage)

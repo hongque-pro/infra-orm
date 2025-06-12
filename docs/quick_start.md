@@ -277,22 +277,31 @@ public open class MultiKey {
 > 为了降低学习成本，**Infra-ORM** 提供的配置不多，约定大于配置是不变的真理.
 
 
-| 参数名          |说明|
-|--------------|-------|
-| orm.gen.package | 生成代码的包名，如果不配置，默认会在你的 Table 类的包下创建 pojo 子包，代码文件将放入其中 |
-| orm.gen.dir  | 生成代码的目录，必须是**绝对路径**，如果不配置，默认生成到你的 Table 类所在的项目 kotlin 代码文件目录
+| 参数名                   | 默认值         | 说明                                                                           |
+|-----------------------|-------------|------------------------------------------------------------------------------|
+| orm.pojo_package      |             | 生成代码的包名，如果不配置，默认会在你的 Table 类的包下创建 pojo 子包，代码文件将放入其中                          |
+| orm.pojo_project_dir  |             | 生成代码的目录，必须是**绝对路径**，如果不配置，默认生成到你的 Table 类所在的项目根目录                            |
+| orm.table_group_id    | com.example | Table 类文件所在的包 group id, 必须和 gradle.build 中配置一致，这是 GraalVM 进行 native 编译必须的    |
+| orm.table_artifact_id |             | Table 类文件所在的包 artifact id, 必须和 gradle.build 中配置一致，这是 GraalVM 进行 native 编译必须的 |
+| orm.orm.springboot_aot     | false       | 是否生成 springboot hint 类 (RuntimeHintsRegistrar)                                                    |    
 
-> **exg_out_dir** 虽然要求**绝对路径**，但是你可以通过 gradle.build 中提供的变量得到项目目录,以达到相对路径的效果
+> `orm.pojo_dir` 虽然要求**绝对路径**，但是你可以通过 gradle.build 中提供的变量得到项目目录,以达到相对路径的效果
 
-:lips: 注意：**exg_out_dir** 要配置到 **XXX/src/main/kotlin** 这个层级，生成器会自动创建包目录
+:lips: 注意：
+- `orm.pojo_project_dir` 要配置到项目**根目录**，即 `gradle.build` 文件所在目录.   
+- 如果配置了`orm.pojo_project_dir`生成器会拼接子目录:    `<pojo_project_dir>/src/main/kotlin/<pojo_package>`
+- 拖过没有配置 `table_artifact_id` 即使启用了 native build, 也无法生成反射配置
 
 配置使用示例，在 gradle.build.kts 中添加如下代码:
 
 ```kotlin
 
 ksp {
-    arg("orm.gen.package", "com.github.my.orm")
-    arg("orm.gen.dir", project.rootProject.childProjects["other"]!!.projectDir.absolutePath)
+    arg("orm.out_package", "com.github.my.orm")
+    arg("orm.pojo_dir", project.rootProject.childProjects["other"]!!.projectDir.absolutePath)
+    arg("orm.native_build", "true")
+    arg("orm.table_group_id", project.group.toString())
+    arg("orm.table_artifact_id", project.name)
 }
 
 ```

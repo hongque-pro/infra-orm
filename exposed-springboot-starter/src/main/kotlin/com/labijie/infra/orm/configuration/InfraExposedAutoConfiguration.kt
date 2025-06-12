@@ -74,52 +74,52 @@ class InfraExposedAutoConfiguration : ApplicationContextAware {
         }
     }
 
-    class ExposedTableRegistrar : BeanFactoryAware, ImportBeanDefinitionRegistrar {
-
-        private var beanFactory: BeanFactory? = null
-
-        override fun setBeanFactory(beanFactory: BeanFactory) {
-            this.beanFactory = beanFactory
-
-            SchemaUtils.createStatements()
-        }
-
-        override fun registerBeanDefinitions(
-            importingClassMetadata: AnnotationMetadata,
-            registry: BeanDefinitionRegistry
-        ) {
-            if (!AutoConfigurationPackages.has(this.beanFactory)) {
-                logger.debug("Could not determine auto-configuration package, automatic table scanning disabled.")
-                return
-            }
-
-            logger.debug("Searching for mappers annotated with @Table")
-
-            val packages = AutoConfigurationPackages.get(beanFactory)
-            if (logger.isDebugEnabled) {
-                packages.forEach(Consumer { pkg: String? ->
-                    logger.debug("Using auto-configuration base package '${pkg}'.")
-                })
-            }
-
-            val builder: BeanDefinitionBuilder =
-                BeanDefinitionBuilder.genericBeanDefinition(TableDefinitionPostProcessor::class.java)
-
-            builder.addPropertyValue(
-                TableDefinitionPostProcessor::packages.name,
-                StringUtils.collectionToCommaDelimitedString(packages)
-            )
-
-            registry.registerBeanDefinition(TableDefinitionPostProcessor::class.java.name, builder.beanDefinition)
-        }
-    }
+//    class ExposedTableRegistrar : BeanFactoryAware, ImportBeanDefinitionRegistrar {
+//
+//        private var beanFactory: BeanFactory? = null
+//
+//        override fun setBeanFactory(beanFactory: BeanFactory) {
+//            this.beanFactory = beanFactory
+//
+//            SchemaUtils.createStatements()
+//        }
+//
+//        override fun registerBeanDefinitions(
+//            importingClassMetadata: AnnotationMetadata,
+//            registry: BeanDefinitionRegistry
+//        ) {
+//            if (!AutoConfigurationPackages.has(this.beanFactory)) {
+//                logger.debug("Could not determine auto-configuration package, automatic table scanning disabled.")
+//                return
+//            }
+//
+//            logger.debug("Searching for mappers annotated with @Table")
+//
+//            val packages = AutoConfigurationPackages.get(beanFactory)
+//            if (logger.isDebugEnabled) {
+//                packages.forEach(Consumer { pkg: String? ->
+//                    logger.debug("Using auto-configuration base package '${pkg}'.")
+//                })
+//            }
+//
+//            val builder: BeanDefinitionBuilder =
+//                BeanDefinitionBuilder.genericBeanDefinition(TableDefinitionPostProcessor::class.java)
+//
+//            builder.addPropertyValue(
+//                TableDefinitionPostProcessor::packages.name,
+//                StringUtils.collectionToCommaDelimitedString(packages)
+//            )
+//
+//            registry.registerBeanDefinition(TableDefinitionPostProcessor::class.java.name, builder.beanDefinition)
+//        }
+//    }
 
     /**
      * If mapper registering configuration or mapper scanning configuration not present, this configuration allow to scan
      * mappers based on the same component-scanning path as Spring Boot itself.
      */
     @Configuration(proxyBeanMethods = false)
-    @Import(ExposedTableRegistrar::class)
+    //@Import(ExposedTableRegistrar::class)
     @ConditionalOnMissingBean(TableDefinitionPostProcessor::class)
     class TableScannerRegistrarNotFoundConfiguration : InitializingBean {
         override fun afterPropertiesSet() {

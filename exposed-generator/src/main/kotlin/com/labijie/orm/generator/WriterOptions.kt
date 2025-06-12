@@ -1,6 +1,9 @@
 package com.labijie.orm.generator
 
 class WriterOptions {
-    var packageName: String? = null
-    var projectDir: String? = null
+    var pojoPackageName: String? = null
+    var pojoProjectRootDir: String? = null
+    var tableGroupId: String = ""
+    var tableArtifactId: String = ""
+    var springbootAot: Boolean = false
 }

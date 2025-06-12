@@ -1,7 +1,6 @@
 /**
- * THIS FILE IS PART OF HuanJing (huanjing.art) PROJECT
- * Copyright (c) 2023 huanjing.art
- * @author Huanjing Team
+ * @author Anders Xiao
+ * @date 2025-06-11
  */
 package com.labijie.infra.orm.test.configuration
 

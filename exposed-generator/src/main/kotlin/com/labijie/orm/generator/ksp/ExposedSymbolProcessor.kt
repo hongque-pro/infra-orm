@@ -6,11 +6,12 @@ import com.google.devtools.ksp.processing.Resolver
 import com.google.devtools.ksp.processing.SymbolProcessor
 import com.google.devtools.ksp.symbol.*
 import com.google.devtools.ksp.visitor.KSDefaultVisitor
-import com.labijie.infra.orm.compile.KspTableIgnore
 import com.labijie.infra.orm.compile.KspPrimaryKey
+import com.labijie.infra.orm.compile.KspTableIgnore
 import com.labijie.orm.generator.*
 import com.labijie.orm.generator.writer.DSLWriter
 import com.labijie.orm.generator.writer.PojoWriter
+import com.labijie.orm.generator.writer.SpringRuntimeHintWriter
 import org.jetbrains.exposed.sql.Table
 
 
@@ -19,15 +20,11 @@ class ExposedSymbolProcessor(
     options: Map<String, String> = mapOf()
 ) : SymbolProcessor {
 
-    private var invoked = false
-
     private val writerOptions = buildWriterOptions(options)
 
 
     override fun process(resolver: Resolver): List<KSAnnotated> {
-        if (invoked) {
-            return emptyList()
-        }
+
 
         val visitContext = VisitContext()
 
@@ -43,8 +40,12 @@ class ExposedSymbolProcessor(
             val context = GenerationContext(it, writerOptions)
             PojoWriter.write(context)
             DSLWriter.write(context)
+            context
         }
-        invoked = true
+
+        //SpringRuntimeHintWriter.write(tables, writerOptions, logger)
+        //NativeReflectConfigWriter.write(tables, writerOptions, logger)
+
         return emptyList()
     }
 

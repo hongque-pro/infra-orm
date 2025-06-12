@@ -4,7 +4,7 @@
  */
 package com.labijie.infra.orm
 
-import org.jetbrains.exposed.sql.SchemaUtils
+import MigrationUtils
 import org.jetbrains.exposed.sql.Table
 import org.jetbrains.exposed.sql.transactions.TransactionManager
 import org.jetbrains.exposed.sql.vendors.currentDialect
@@ -24,7 +24,8 @@ object DatabaseMigration {
             sb.appendLine()
 
             val executedSql = transactionTemplate.execute {
-                val sql = SchemaUtils.statementsRequiredToActualizeScheme(*tables)
+
+                val sql = MigrationUtils.statementsRequiredForDatabaseMigration(tables = tables, withLogs =  logger.isInfoEnabled)
 
                 if (sql.isNotEmpty()) {
                     with(TransactionManager.current()) {
@@ -39,29 +40,29 @@ object DatabaseMigration {
             hasSql = hasSql || executedSql.isNotEmpty()
             sb.appendLine(executedSql.joinToString(System.lineSeparator()))
 
-            if (allowDropColumns) {
-
-                try {
-                    val commands = transactionTemplate.execute {
-                        val sql2 = ExposedUtils.checkExcessiveColumns(*tables)
-                        if (sql2.isNotEmpty()) {
-                            with(TransactionManager.current()) {
-                                this.queryTimeout = 30
-                                this.execInBatch(sql2.map { it.sql })
-                                commit()
-                                currentDialect.resetCaches()
-                            }
-                        }
-                        sql2
-                    }!!
-                    hasSql = hasSql || commands.isNotEmpty()
-                    sb.appendLine(commands.joinToString(System.lineSeparator()) { it.sql })
-
-                } catch (e: Throwable) {
-                    logger.warn("Drop excessive columns failed, columns patch has been skipped.", e)
-                }
-
-            }
+//            if (allowDropColumns) {
+//
+//                try {
+//                    val commands = transactionTemplate.execute {
+//                        val sql2 = ExposedUtils.checkExcessiveColumns(*tables)
+//                        if (sql2.isNotEmpty()) {
+//                            with(TransactionManager.current()) {
+//                                this.queryTimeout = 30
+//                                this.execInBatch(sql2.map { it.sql })
+//                                commit()
+//                                currentDialect.resetCaches()
+//                            }
+//                        }
+//                        sql2
+//                    }!!
+//                    hasSql = hasSql || commands.isNotEmpty()
+//                    sb.appendLine(commands.joinToString(System.lineSeparator()) { it.sql })
+//
+//                } catch (e: Throwable) {
+//                    logger.warn("Drop excessive columns failed, columns patch has been skipped.", e)
+//                }
+//
+//            }
             sb.appendLine("--------------End Migrate Schema---------------")
 
 

@@ -2,6 +2,7 @@ package com.labijie.infra.orm.configuration
 
 import org.springframework.beans.PropertyValues
 import org.springframework.beans.factory.BeanNameAware
+import org.springframework.beans.factory.config.BeanDefinition
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory
 import org.springframework.beans.factory.config.PropertyResourceConfigurer
 import org.springframework.beans.factory.config.TypedStringValue
@@ -12,7 +13,6 @@ import org.springframework.context.ApplicationContext
 import org.springframework.context.ApplicationContextAware
 import org.springframework.context.ConfigurableApplicationContext
 import org.springframework.util.StringUtils
-import kotlin.reflect.KClass
 
 
 class TableDefinitionPostProcessor : BeanDefinitionRegistryPostProcessor, ApplicationContextAware, BeanNameAware {
@@ -30,17 +30,20 @@ class TableDefinitionPostProcessor : BeanDefinitionRegistryPostProcessor, Applic
 
     override fun postProcessBeanDefinitionRegistry(registry: BeanDefinitionRegistry) {
 
-        if (this.processPropertyPlaceHolders) {
+        val definition = if (this.processPropertyPlaceHolders) {
             processPropertyPlaceHolders()
-        }
+        } else null
 
-        val scaner = TableScanner(registry, excludeClasses)
-        scaner.resourceLoader = context
+
+
+        val beanFactory = (context as ConfigurableApplicationContext).beanFactory
+
+        val scanner = TableScanner(beanFactory, excludeClasses)
+        scanner.resourceLoader = context
 
         if(packages.isNotBlank()) {
-            val packages =
-                StringUtils.tokenizeToStringArray(packages, ConfigurableApplicationContext.CONFIG_LOCATION_DELIMITERS)
-            scaner.scan(*packages)
+            val packagesArray = StringUtils.tokenizeToStringArray(packages, ConfigurableApplicationContext.CONFIG_LOCATION_DELIMITERS)
+            scanner.scanAndRegister(*packagesArray)
         }
     }
 
@@ -54,7 +57,7 @@ class TableDefinitionPostProcessor : BeanDefinitionRegistryPostProcessor, Applic
    * fail. To avoid this, find any PropertyResourceConfigurers defined in the context and run them on this class' bean
    * definition. Then update the values.
    */
-    private fun processPropertyPlaceHolders() {
+    private fun processPropertyPlaceHolders(): BeanDefinition? {
         val prcs: Map<String, PropertyResourceConfigurer> = this.context.getBeansOfType(
             PropertyResourceConfigurer::class.java,
             false, false
@@ -71,10 +74,14 @@ class TableDefinitionPostProcessor : BeanDefinitionRegistryPostProcessor, Applic
             for (prc in prcs.values) {
                 prc.postProcessBeanFactory(factory)
             }
+
+
             val values: PropertyValues = mapperScannerBean.propertyValues
             this.packages = getPropertyValue(this::packages.name, values) ?: ""
             this.excludeClasses = getPropertyValue(this::excludeClasses.name, values) ?: ""
+            return mapperScannerBean
         }
+        return null
     }
 
     private fun getPropertyValue(propertyName: String, values: PropertyValues): String? {
@@ -82,7 +89,7 @@ class TableDefinitionPostProcessor : BeanDefinitionRegistryPostProcessor, Applic
         val value = property.value
         return if (value == null) {
             null
-        } else (value as? String)?.toString()
+        } else (value as? String)
             ?: if (value is TypedStringValue) {
                 value.value
             } else {
