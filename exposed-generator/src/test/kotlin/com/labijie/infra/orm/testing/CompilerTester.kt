@@ -2,15 +2,8 @@ package com.labijie.infra.orm.testing
 
 import com.labijie.orm.generator.findProjectSourceDir
 import com.labijie.orm.generator.ksp.ExposedSymbolProcessorProvider
-import com.tschuchort.compiletesting.KotlinCompilation
-import com.tschuchort.compiletesting.SourceFile
-import com.tschuchort.compiletesting.kspArgs
-import com.tschuchort.compiletesting.kspProcessorOptions
-import com.tschuchort.compiletesting.kspSourcesDir
-import com.tschuchort.compiletesting.symbolProcessorProviders
-import com.tschuchort.compiletesting.useKsp2
+import com.tschuchort.compiletesting.*
 import org.jetbrains.kotlin.compiler.plugin.ExperimentalCompilerApi
-import org.jetbrains.kotlin.kapt4.Kapt4CompilerPluginRegistrar
 import java.io.File
 import kotlin.test.Test
 import kotlin.test.assertEquals

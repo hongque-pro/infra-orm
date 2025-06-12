@@ -56,7 +56,7 @@ private fun getGitProperties(
             }
         }
 
-    } catch (e: IOException) {
+    } catch (_: IOException) {
         return null
     }
 }

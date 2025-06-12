@@ -44,14 +44,14 @@ class TableScanAotProcessor : BeanFactoryInitializationAotProcessor {
             (beanFactory as? BeanDefinitionRegistry)?.removeBeanDefinition(define.key)
         }
 
-        val msg = StringBuilder().apply {
-            appendLine("Table scans:")
-            appendLine("  Packages:")
-            appendLine(allPackages.joinToString("\n") { it.padStart(4, ' ') })
-            appendLine("  Excludes:")
-            appendLine(allExcludes.joinToString("\n") { it.padStart(4, ' ') })
-        }
-        println(msg)
+//        val msg = StringBuilder().apply {
+//            appendLine("Table scans:")
+//            appendLine("  Packages:")
+//            appendLine(allPackages.joinToString("\n") { it.padStart(4, ' ') })
+//            appendLine("  Excludes:")
+//            appendLine(allExcludes.joinToString("\n") { it.padStart(4, ' ') })
+//        }
+//        println(msg)
 
 
         if (allPackages.isEmpty()) return null
@@ -61,10 +61,9 @@ class TableScanAotProcessor : BeanFactoryInitializationAotProcessor {
         val discoveredTableClasses = mutableSetOf<Class<*>>()
 
         val candidates = scanner.scan(*allPackages.toTypedArray())
-        println("candidates: ${candidates.size}")
 
         for (candidate in candidates) {
-            println("Scan: ${candidate.beanClassName}")
+            println("Detected orm table: ${candidate.beanClassName}")
             if(candidate.beanClassName.isNullOrBlank()) {
                 continue
             }
@@ -150,19 +149,12 @@ class TableScanAotProcessor : BeanFactoryInitializationAotProcessor {
     private fun collectTableScanAnnotations(
         beanFactory: ConfigurableListableBeanFactory
     ): Map<String, BeanDefinition> {
-
-        val msg = beanFactory.beanDefinitionNames.joinToString("\n") {
-            val d = beanFactory.getBeanDefinition(it)
-            "$it: ${d.beanClassName}"
-        }
-
         return beanFactory.beanDefinitionNames
             .mapNotNull { beanName ->
                 beanFactory.getBeanDefinition(beanName).let { bd ->
                     if(bd.beanClassName == TableDefinitionPostProcessor::class.java.name) Pair(beanName, bd) else null
                 }
             }.toMap()
-
     }
 
     data class TableScanAnnotationInfo(

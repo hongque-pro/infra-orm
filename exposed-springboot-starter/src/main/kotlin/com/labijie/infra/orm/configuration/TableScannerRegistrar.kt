@@ -25,7 +25,7 @@ class TableScannerRegistrar : ImportBeanDefinitionRegistrar {
 
             registerBeanDefinitions(
                 importingClassMetadata, tableScanAttrs, registry,
-                generateBaseBeanName(importingClassMetadata, 0)
+                generateBaseBeanName(importingClassMetadata)
             )
         }
     }
@@ -55,7 +55,7 @@ class TableScannerRegistrar : ImportBeanDefinitionRegistrar {
         val builder: BeanDefinitionBuilder =
             BeanDefinitionBuilder.genericBeanDefinition(TableDefinitionPostProcessor::class.java)
 
-        builder.addPropertyValue(TableDefinitionPostProcessor::processPropertyPlaceHolders.name, true);
+        builder.addPropertyValue(TableDefinitionPostProcessor::processPropertyPlaceHolders.name, true)
 
         val info = parseTableScanInfo(annoMeta, annoAttrs)
 
@@ -75,8 +75,8 @@ class TableScannerRegistrar : ImportBeanDefinitionRegistrar {
         }
     }
 
-    private fun generateBaseBeanName(importingClassMetadata: AnnotationMetadata, index: Int): String? {
-        return importingClassMetadata.className + "#" + TableScannerRegistrar::class.java.simpleName + "#" + index
+    private fun generateBaseBeanName(importingClassMetadata: AnnotationMetadata): String? {
+        return importingClassMetadata.className + "#" + TableScannerRegistrar::class.java.simpleName
     }
 
     private fun getDefaultBasePackage(importingClassMetadata: AnnotationMetadata): String {

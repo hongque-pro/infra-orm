@@ -3,15 +3,9 @@ package com.labijie.infra.orm.configuration
 import com.labijie.infra.orm.ExposedTransactionListener
 import org.jetbrains.exposed.spring.SpringTransactionManager
 import org.jetbrains.exposed.sql.DatabaseConfig
-import org.jetbrains.exposed.sql.SchemaUtils
 import org.slf4j.LoggerFactory
-import org.springframework.beans.factory.BeanFactory
-import org.springframework.beans.factory.BeanFactoryAware
 import org.springframework.beans.factory.InitializingBean
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.beans.factory.support.BeanDefinitionBuilder
-import org.springframework.beans.factory.support.BeanDefinitionRegistry
-import org.springframework.boot.autoconfigure.AutoConfigurationPackages
 import org.springframework.boot.autoconfigure.AutoConfigureAfter
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
@@ -22,15 +16,10 @@ import org.springframework.context.ApplicationContext
 import org.springframework.context.ApplicationContextAware
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
-import org.springframework.context.annotation.Import
-import org.springframework.context.annotation.ImportBeanDefinitionRegistrar
 import org.springframework.core.env.Environment
-import org.springframework.core.type.AnnotationMetadata
 import org.springframework.jdbc.support.SQLExceptionTranslator
 import org.springframework.transaction.annotation.EnableTransactionManagement
 import org.springframework.transaction.support.TransactionTemplate
-import org.springframework.util.StringUtils
-import java.util.function.Consumer
 import javax.sql.DataSource
 
 
@@ -50,7 +39,7 @@ class InfraExposedAutoConfiguration : ApplicationContextAware {
 
     @Bean
     @ConditionalOnMissingBean(DatabaseConfig::class)
-    open fun databaseConfig(): DatabaseConfig {
+    fun databaseConfig(): DatabaseConfig {
         return DatabaseConfig.invoke { }
     }
 
@@ -74,52 +63,11 @@ class InfraExposedAutoConfiguration : ApplicationContextAware {
         }
     }
 
-//    class ExposedTableRegistrar : BeanFactoryAware, ImportBeanDefinitionRegistrar {
-//
-//        private var beanFactory: BeanFactory? = null
-//
-//        override fun setBeanFactory(beanFactory: BeanFactory) {
-//            this.beanFactory = beanFactory
-//
-//            SchemaUtils.createStatements()
-//        }
-//
-//        override fun registerBeanDefinitions(
-//            importingClassMetadata: AnnotationMetadata,
-//            registry: BeanDefinitionRegistry
-//        ) {
-//            if (!AutoConfigurationPackages.has(this.beanFactory)) {
-//                logger.debug("Could not determine auto-configuration package, automatic table scanning disabled.")
-//                return
-//            }
-//
-//            logger.debug("Searching for mappers annotated with @Table")
-//
-//            val packages = AutoConfigurationPackages.get(beanFactory)
-//            if (logger.isDebugEnabled) {
-//                packages.forEach(Consumer { pkg: String? ->
-//                    logger.debug("Using auto-configuration base package '${pkg}'.")
-//                })
-//            }
-//
-//            val builder: BeanDefinitionBuilder =
-//                BeanDefinitionBuilder.genericBeanDefinition(TableDefinitionPostProcessor::class.java)
-//
-//            builder.addPropertyValue(
-//                TableDefinitionPostProcessor::packages.name,
-//                StringUtils.collectionToCommaDelimitedString(packages)
-//            )
-//
-//            registry.registerBeanDefinition(TableDefinitionPostProcessor::class.java.name, builder.beanDefinition)
-//        }
-//    }
-
     /**
      * If mapper registering configuration or mapper scanning configuration not present, this configuration allow to scan
      * mappers based on the same component-scanning path as Spring Boot itself.
      */
     @Configuration(proxyBeanMethods = false)
-    //@Import(ExposedTableRegistrar::class)
     @ConditionalOnMissingBean(TableDefinitionPostProcessor::class)
     class TableScannerRegistrarNotFoundConfiguration : InitializingBean {
         override fun afterPropertiesSet() {

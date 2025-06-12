@@ -8,7 +8,6 @@ import com.labijie.orm.generator.convertToSpringConfig
 import com.labijie.orm.generator.parseSpringConfig
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertTrue
 
 
 class SpringConfigParseTester {

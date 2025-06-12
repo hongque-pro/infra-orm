@@ -30,9 +30,9 @@ class TableDefinitionPostProcessor : BeanDefinitionRegistryPostProcessor, Applic
 
     override fun postProcessBeanDefinitionRegistry(registry: BeanDefinitionRegistry) {
 
-        val definition = if (this.processPropertyPlaceHolders) {
+        if (this.processPropertyPlaceHolders) {
             processPropertyPlaceHolders()
-        } else null
+        }
 
 
 

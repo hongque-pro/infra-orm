@@ -2,7 +2,6 @@ package com.labijie.infra.orm.configuration
 
 import com.labijie.infra.orm.SimpleTableScanner
 import org.slf4j.LoggerFactory
-import org.springframework.aot.AotDetector
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory
 import org.springframework.util.StringUtils
 import java.beans.Introspector
@@ -58,9 +57,9 @@ class TableScanner(
                     mutableSet.add(kClass.java.name)
                 }
 
-    override fun postProcessBeanDefinition(beanDefinition: AbstractBeanDefinition, beanName: String) {
-        beanDefinition.instanceSupplier = Supplier<Any> {
-           Class.forName(beanDefinition.beanClassName).kotlin.objectInstance
-       }
+                scannerLogger.info("Table registered: $beanName, class: ${kClass.simpleName}")
+            }
+        }
+        return mutableSet
     }
 }
