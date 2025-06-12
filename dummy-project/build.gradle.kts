@@ -12,3 +12,4 @@ infra {
         arg("orm.table_artifact_id", project.name)
     }
 }
+

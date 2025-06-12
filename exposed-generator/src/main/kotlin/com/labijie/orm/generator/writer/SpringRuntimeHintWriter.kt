@@ -1,7 +1,6 @@
 /**
- * THIS FILE IS PART OF HuanJing (huanjing.art) PROJECT
- * Copyright (c) 2023 huanjing.art
- * @author Huanjing Team
+ * @author Anders Xiao
+ * @date 2025-06-11
  */
 package com.labijie.orm.generator.writer
 
@@ -95,7 +94,8 @@ object SpringRuntimeHintWriter {
             .apply {
                 tables.forEach {
                     beginControlFlow("hints.reflection().registerType(%T::class.java)", it.tableClass)
-                    .addStatement("it.withMembers(%T.${MemberCategory.PUBLIC_FIELDS}, %T.${MemberCategory.INVOKE_PUBLIC_METHODS})",
+                    .addStatement("it.withMembers(%T.${MemberCategory.PUBLIC_FIELDS}, %T.${MemberCategory.INVOKE_DECLARED_METHODS},%T.${MemberCategory.INVOKE_DECLARED_CONSTRUCTORS})",
+                        MemberCategory::class,
                         MemberCategory::class,
                         MemberCategory::class)
                     .endControlFlow()

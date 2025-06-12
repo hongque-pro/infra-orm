@@ -10,11 +10,7 @@ import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.transaction.support.TransactionTemplate
 
-/**
- * THIS FILE IS PART OF HuanJing (huanjing.art) PROJECT
- * Copyright (c) 2023 huanjing.art
- * @author Huanjing Team
- */
+
 @Configuration(proxyBeanMethods = false)
 @AutoConfigureAfter(InfraExposedAutoConfiguration::class)
 class ExposedTestAutoConfiguration {

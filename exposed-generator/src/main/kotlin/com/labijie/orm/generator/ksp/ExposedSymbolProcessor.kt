@@ -43,7 +43,7 @@ class ExposedSymbolProcessor(
             context
         }
 
-        SpringRuntimeHintWriter.write(tables, writerOptions, logger)
+        //SpringRuntimeHintWriter.write(tables, writerOptions, logger)
         //NativeReflectConfigWriter.write(tables, writerOptions, logger)
 
         return emptyList()
