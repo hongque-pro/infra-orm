@@ -79,8 +79,10 @@ class ExposedSymbolProcessor(
                     }
 
                     val isPrimaryKey = isSimplePrimary || isAnnotatedPrimary
+                    val propertyNullable = columnType.isNullable
+                    table.superTypes
 
-                    val col = collectColumn(property, columnType, isPrimaryKey, table, isNullableProperty = false)
+                    val col = collectColumn(property, columnType, isPrimaryKey, table, isNullableProperty = propertyNullable)
 
                     if (isPrimaryKey) {
                         table.primaryKeys.add(col)
@@ -104,7 +106,6 @@ class ExposedSymbolProcessor(
                 type = columnType.type,
                 rawType = columnType.rawType,
                 isNullableColumn = columnType.isNullable,
-                isNullableProperty = isNullableProperty,
                 isPrimary = isPrimary,
                 isEntityId = isPrimary && table.kind == TableKind.ExposedIdTable
             )

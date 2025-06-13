@@ -5,9 +5,6 @@ import com.labijie.orm.generator.parameterizedWildcard
 import com.squareup.kotlinpoet.*
 import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
 import org.jetbrains.exposed.sql.*
-import kotlin.collections.toMutableList
-import kotlin.reflect.full.companionObject
-import kotlin.text.split
 
 abstract class AbstractDSLMethodBuilder : IDSLMethodBuilder {
 
@@ -128,10 +125,10 @@ abstract class AbstractDSLMethodBuilder : IDSLMethodBuilder {
 
     protected fun buildPrimaryKeyWhere(context: DSLCodeContext, objectVarName: String ? = null): CodeBlock {
 
-        val pbjectPrefix = if(objectVarName.isNullOrBlank()) "" else "${objectVarName}."
+        val objectPrefix = if(objectVarName.isNullOrBlank()) "" else "${objectVarName}."
         return CodeBlock.builder().apply {
             context.base.table.primaryKeys.forEachIndexed { i, key ->
-                add("%L.%M(${pbjectPrefix}${key.name})", "${context.base.table.className}.${key.name}", eqMethod)
+                add("%L.%M(${objectPrefix}${key.name})", "${context.base.table.className}.${key.name}", eqMethod)
                 if (i < context.base.table.primaryKeys.size - 1) {
                     add(" %M ", andMethod)
                 }

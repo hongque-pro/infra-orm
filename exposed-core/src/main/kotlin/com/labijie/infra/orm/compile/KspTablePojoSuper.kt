@@ -6,7 +6,7 @@ package com.labijie.infra.orm.compile
 
 import kotlin.reflect.KClass
 
-
+@Deprecated("Use KspTablePojo.superClasses property instead.", level = DeprecationLevel.ERROR)
 @Repeatable
 @Retention(AnnotationRetention.SOURCE)
 @Target(AnnotationTarget.CLASS)

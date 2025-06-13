@@ -7,7 +7,6 @@ data class ColumnMetadata(
     val type: KSType,
     val rawType: KSType,
     val isNullableColumn: Boolean,
-    val isNullableProperty: Boolean,
     val isPrimary: Boolean,
     val isEntityId: Boolean,
 ) {

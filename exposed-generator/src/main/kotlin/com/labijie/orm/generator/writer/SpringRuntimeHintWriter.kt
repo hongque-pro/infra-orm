@@ -12,7 +12,7 @@ import org.springframework.aot.hint.RuntimeHints
 import org.springframework.aot.hint.RuntimeHintsRegistrar
 import kotlin.io.path.*
 
-
+@Deprecated("Aot will be auto in springboot")
 object SpringRuntimeHintWriter {
 
     fun write(tables: List<TableMetadata>, writerOptions: WriterOptions, logger: KSPLogger) {

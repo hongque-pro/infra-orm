@@ -4,6 +4,15 @@ infra {
     useKspApi("testImplementation")
 }
 
+kotlin {
+    sourceSets {
+        val test by getting {
+            kotlin.srcDir("src/test/kotlin")
+            kotlin.exclude("TestSource.kt")
+        }
+    }
+}
+
 dependencies {
     implementation(project(":exposed-core"))
     implementation("com.fasterxml.jackson.core:jackson-databind")

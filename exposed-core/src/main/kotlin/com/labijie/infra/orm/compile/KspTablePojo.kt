@@ -12,4 +12,5 @@ import kotlin.reflect.KClass
 annotation class KspTablePojo(
     val kotlinSerializable: Boolean = false,
     val isOpen: Boolean = true,
+    val superClasses: Array<KClass<*>> = [],
 )

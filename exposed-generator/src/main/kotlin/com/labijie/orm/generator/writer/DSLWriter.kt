@@ -82,7 +82,14 @@ object DSLWriter {
             .addImport(context.tableClass, context.table.columns.map { it.name })
             .addType(
                 TypeSpec.objectBuilder(context.dslClass)
-                    .addAnnotation(suppressAnnotation("unused", "DuplicatedCode", "MemberVisibilityCanBePrivate", "RemoveRedundantQualifierName"))
+                    .addAnnotation(
+                        suppressAnnotation(
+                            "unused",
+                            "DuplicatedCode",
+                            "MemberVisibilityCanBePrivate",
+                            "RemoveRedundantQualifierName"
+                        )
+                    )
                     .addComments("DSL support for ${context.tableClass.simpleName}", context)
                     .addProperty(allColumns)
                     .addFunction(parseRow)
@@ -199,17 +206,18 @@ object DSLWriter {
             .beginControlFlow("val value = when(column)")
             .apply {
                 context.table.columns.forEach {
-                    if(it.isString) {
+                    if (it.isString) {
                         this.addStatement("${context.table.className}.${it.name} -> valueString")
-                    }else {
+                    } else {
                         val parseMethod = DefaultValues.getParseMethod(it.type)
                         parseMethod?.let { _ ->
                             addCode("${context.table.className}.${it.name} ->")
-                            addCode(generateParsedValueCodeBlock("valueString", parseMethod).toString())
+                            addCode(generateParsedValueCodeBlock("valueString", parseMethod, it.isNullableColumn).toString())
                         }
                     }
                 }
-                val errorMessage = "Can't converter value of ${context.pojoClass.simpleName}::\${column.name} to string."
+                val errorMessage =
+                    "Can't converter value of ${context.pojoClass.simpleName}::\${column.name} to string."
                 this.addStatement("else->throw %T(%P)", IllegalArgumentException::class, errorMessage)
             }
             .endControlFlow()
@@ -232,28 +240,30 @@ object DSLWriter {
             .beginControlFlow("return when(column)")
             .apply {
                 context.table.columns.forEach {
-                    if(it.isString) {
-                        if(it.isNullableColumn) {
+                    if (it.isString) {
+                        if (it.isNullableColumn) {
                             this.addStatement(
                                 "${context.table.className}.${it.name}->this.${it.name}.orEmpty()",
                             )
-                        }else {
+                        } else {
                             this.addStatement(
                                 "${context.table.className}.${it.name}->this.${it.name}",
                             )
                         }
-                    }
-                    else {
+                    } else {
                         val toStringMethod = DefaultValues.getToStringMethod(it.type)
+
+
                         toStringMethod?.let { _ ->
                             this.addStatement(
-                                "${context.table.className}.${it.name}->%L",
-                                generateToStringCodeBlock("this.${it.name}", toStringMethod).toString()
+                                "${context.table.className}.${it.name} -> %L",
+                                generateToStringCodeBlock("this.${it.name}", toStringMethod, isNullable = it.isNullableColumn).toString()
                             )
                         }
                     }
                 }
-                val errorMessage = "Can't converter value of ${context.pojoClass.simpleName}::\${column.name} to string."
+                val errorMessage =
+                    "Can't converter value of ${context.pojoClass.simpleName}::\${column.name} to string."
                 this.addStatement("else->throw %T(%P)", IllegalArgumentException::class, errorMessage)
             }
             .endControlFlow()
@@ -284,10 +294,10 @@ object DSLWriter {
 //                    }
                     val t = if (!it.type.isMarkedNullable) it.type else it.type.makeNotNullable()
 
-                    if(t.arguments.isNotEmpty()) {
+                    if (t.arguments.isNotEmpty()) {
                         val projectedType = it.type.declaration.closestClassDeclaration()
                         this.addStatement("${it.name}->%T::class", projectedType!!.toClassName())
-                    }else {
+                    } else {
                         this.addStatement("${it.name}->%T::class", t.toClassName())
                     }
                 }

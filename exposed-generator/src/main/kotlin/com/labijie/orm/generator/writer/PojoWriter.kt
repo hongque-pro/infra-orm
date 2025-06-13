@@ -1,7 +1,13 @@
 package com.labijie.orm.generator.writer
 
 import com.google.devtools.ksp.getDeclaredProperties
+import com.google.devtools.ksp.isAbstract
+import com.google.devtools.ksp.symbol.ClassKind
 import com.google.devtools.ksp.symbol.KSClassDeclaration
+import com.google.devtools.ksp.symbol.KSDeclaration
+import com.google.devtools.ksp.symbol.KSPropertyDeclaration
+import com.google.devtools.ksp.symbol.Modifier
+import com.google.devtools.ksp.symbol.Nullability
 import com.labijie.orm.generator.*
 import com.squareup.kotlinpoet.*
 import com.squareup.kotlinpoet.ksp.toTypeName
@@ -21,8 +27,8 @@ object PojoWriter {
                     .executeIf(context.table.isSerializable) {
                         addAnnotation(ClassName("kotlinx.serialization", "Serializable"))
                     }
-                    .executeIf(context.table.implements.isNotEmpty()) {
-                        context.table.implements.forEach {
+                    .executeIf(context.table.superTypes.isNotEmpty()) {
+                        context.table.superTypes.forEach {
                             if(it.isInterface) {
                                 addSuperinterface(it.type.toTypeName())
                             }else {
@@ -47,37 +53,36 @@ object PojoWriter {
         return this
     }
 
+
     private fun TypeSpec.Builder.addProperties(content: GenerationContext): TypeSpec.Builder {
 
-        content.table.columns.forEach {
+        content.table.columns.forEach { column ->
 
-            val superTypes = content.table.implements.filter { superType ->
-                val declaration = superType.type.declaration as? KSClassDeclaration
-                declaration?.getDeclaredProperties()?.any { property ->
-                    property.simpleName.getShortName() == it.name
-                } ?: false
+            var property: KSPropertyDeclaration? = null
+            for(superType in content.table.superTypes) {
+                property = superType.getPublicProperty(column.name)
+                if(property != null) {
+                    break
+                }
             }
 
-//            val hasPropertyOnDelegate = content.table.interfaces.any { interfaceType ->
-//                val declaration = interfaceType.by?.declaration as? KSClassDeclaration
-//                declaration?.getDeclaredProperties()?.any { property ->
-//                    property.simpleName.getShortName() == it.name && property.isPublic()
-//                } ?: false
-//            }
-            val propertyOnBaseClass = superTypes.any { t-> !t.isInterface }
-            val propertyOnInterface = superTypes.any { t-> t.isInterface }
-            if(!propertyOnBaseClass) {
+
+            val isAbstract = property?.isAbstract() == true
+
+            val isNullable = property?.type?.resolve()?.nullability == Nullability.NULLABLE || column.isNullableColumn
+
+            if(property == null || isAbstract) {
                 addProperty(
                     PropertySpec.builder(
-                        it.name,
-                        it.type.toTypeName().copy(nullable = it.isNullableColumn)
+                        column.name,
+                        column.type.toTypeName().copy(nullable = column.isNullableColumn)
                     ).mutable().let { self ->
-                        if (propertyOnInterface) self.addModifiers(
+                        if (isAbstract) self.addModifiers(
                             KModifier.PUBLIC,
                             KModifier.OVERRIDE
                         ) else self.addModifiers(KModifier.PUBLIC)
                     }
-                        .initializer(if (it.isNullableColumn) "null" else DefaultValues.getValue(propertyName ="${content.table.className}.${it.name}"  ,it.type))
+                        .initializer(if (isNullable) "null" else DefaultValues.getValue(propertyName ="${content.table.className}.${column.name}"  ,column.type))
                         .build()
                 )
             }

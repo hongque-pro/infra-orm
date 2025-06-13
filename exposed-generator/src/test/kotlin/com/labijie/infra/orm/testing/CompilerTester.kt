@@ -5,6 +5,11 @@ import com.labijie.orm.generator.ksp.ExposedSymbolProcessorProvider
 import com.tschuchort.compiletesting.*
 import org.jetbrains.kotlin.compiler.plugin.ExperimentalCompilerApi
 import java.io.File
+import java.net.URLDecoder
+import java.nio.file.Path
+import kotlin.io.path.Path
+import kotlin.io.path.absolutePathString
+import kotlin.io.path.readText
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -17,48 +22,27 @@ class CompilerTester {
         assertEquals(result, find.toString())
     }
 
+    private fun getTestFile(): Path {
+        // 获取当前 class 文件的位置
+        val classLocation = this::class.java.protectionDomain.codeSource.location
+        val decodedPath = URLDecoder.decode(classLocation.path, Charsets.UTF_8.name()).removePrefix("/")
+
+        val buildDirIndex = decodedPath.indexOf("/build/")
+
+        val moduleDir = decodedPath.substring(0, buildDirIndex)
+
+        return Path(moduleDir, "src/test/kotlin", "TestSource.kt")
+    }
+
 
     @OptIn(ExperimentalCompilerApi::class)
     @Test
     fun testCompile(){
-        val kotlinSource = SourceFile.kotlin(
-            "KClass.kt", """
-package com.labijie.orm.testing
 
-import com.labijie.infra.orm.SimpleLongIdTable
-import org.jetbrains.exposed.sql.Column
-import org.jetbrains.exposed.sql.*
-import org.jetbrains.exposed.sql.Table
-import com.labijie.infra.orm.compile.*
-import org.jetbrains.exposed.sql.javatime.datetime
+        val testFile = getTestFile()
+        val fileContent = testFile.readText(Charsets.UTF_8)
 
-enum class Status {
-    OK,
-    Failed
-}
-
-interface NestedInterface {
-    enum class NestedEnum {
-        Default,
-        Failed
-    }
-}
-
-interface TestInterface {}
-
-
-@KspTablePojoSuper(type=TestInterface::class)
-object TestTable : SimpleLongIdTable("my") {
-    var nullableString = varchar("null_str", 32).nullable()
-    var array = array<String>("array")
-    var name: Column<String> = varchar("name", 50)
-    var count = integer("count")
-    val status = enumeration("status", Status::class)
-    val status2 = enumeration("status2", NestedInterface.NestedEnum::class)
-    val dt = datetime("dt")
-}
-    """
-        )
+        val kotlinSource = SourceFile.kotlin("TestSourceCode.kt", fileContent)
 
         //https://github.com/ZacSweers/kotlin-compile-testing
         val compilation = KotlinCompilation().apply {

@@ -3,6 +3,7 @@ package com.labijie.orm.generator
 import com.google.devtools.ksp.symbol.KSClassDeclaration
 import com.google.devtools.ksp.symbol.KSDeclaration
 import com.google.devtools.ksp.symbol.KSType
+import com.google.devtools.ksp.symbol.Nullability
 import com.labijie.infra.orm.ExposedConverter
 import com.squareup.kotlinpoet.ClassName
 import com.squareup.kotlinpoet.MemberName
@@ -11,6 +12,7 @@ import java.math.BigDecimal
 import java.time.*
 import java.util.*
 import kotlin.reflect.KFunction
+import kotlin.text.toBooleanStrictOrNull
 
 object DefaultValues {
     //exposed types: https://jetbrains.github.io/Exposed/data-types.html
@@ -37,28 +39,33 @@ object DefaultValues {
 
     private fun getConvertMethod(func: KFunction<*>) : MemberName {
         val className = ClassName(ExposedConverter::class.java.packageName, ExposedConverter::class.java.simpleName)
+
         return MemberName(enclosingClassName = className, simpleName = func.name)
     }
 
-    private val parseMethods = mutableMapOf(
-        String::class.qualifiedName to null,
-        Int::class.qualifiedName to kotlinTextExtensionMethod("toInt"),
-        Short::class.qualifiedName to kotlinTextExtensionMethod("toShort"),
-        Long::class.qualifiedName to kotlinTextExtensionMethod("toLong"),
-        Float::class.qualifiedName to kotlinTextExtensionMethod("toFloat"),
-        Double::class.qualifiedName to kotlinTextExtensionMethod("toDouble"),
-        BigDecimal::class.qualifiedName to kotlinTextExtensionMethod("toDouble"),
-        Char::class.qualifiedName to kotlinTextExtensionMethod("first"),
-        ByteArray::class.qualifiedName to  getConvertMethod(ExposedConverter::stringToByteArray),
-        UUID::class.qualifiedName to getConvertMethod(ExposedConverter::stringToUUID),
-        Boolean::class.qualifiedName to kotlinTextExtensionMethod("toBoolean"),
-        Byte::class.qualifiedName to getConvertMethod(ExposedConverter::stringToByteArray),
-        Instant::class.qualifiedName to getConvertMethod(ExposedConverter::stringToInstant),
-        LocalDate::class.qualifiedName to getConvertMethod(ExposedConverter::stringToLocalDate),
-        LocalTime::class.qualifiedName to getConvertMethod(ExposedConverter::stringToLocalTime),
-        LocalDateTime::class.qualifiedName to getConvertMethod(ExposedConverter::stringToLocalDateTime),
-        Duration::class.qualifiedName to getConvertMethod(ExposedConverter::stringToDuration),
-    )
+    private fun getParseMethod(typeQualifiedName: String, isNullable: Boolean): MemberName? {
+        return when (typeQualifiedName) {
+            String::class.qualifiedName -> null
+            Int::class.qualifiedName -> kotlinTextExtensionMethod(if(isNullable) "toIntOrNull" else "toInt")
+            Short::class.qualifiedName -> kotlinTextExtensionMethod(if(isNullable) "toShortOrNull" else "toShort")
+            Long::class.qualifiedName -> kotlinTextExtensionMethod(if(isNullable) "toLongOrNull" else "toLong")
+            Float::class.qualifiedName -> kotlinTextExtensionMethod(if(isNullable) "toFloatOrNull" else "toFloat")
+            Double::class.qualifiedName -> kotlinTextExtensionMethod(if(isNullable) "toDoubleOrNull" else "toDouble")
+            BigDecimal::class.qualifiedName -> kotlinTextExtensionMethod(if(isNullable) "toDoubleOrNull" else "toDouble")
+            Char::class.qualifiedName -> kotlinTextExtensionMethod(if(isNullable) "firstOrNull" else "first")
+            ByteArray::class.qualifiedName -> if(isNullable) getConvertMethod(ExposedConverter::stringToByteArrayOrNull) else getConvertMethod(ExposedConverter::stringToByteArray)
+            UUID::class.qualifiedName -> if(isNullable) getConvertMethod(ExposedConverter::stringToUUIDOrNull) else getConvertMethod(ExposedConverter::stringToUUID)
+            Boolean::class.qualifiedName -> if(isNullable) kotlinTextExtensionMethod("toBooleanStrictOrNull") else kotlinTextExtensionMethod("toBoolean")
+            Byte::class.qualifiedName -> kotlinTextExtensionMethod(if(isNullable) "toByte" else "toByteOrNull")
+            Instant::class.qualifiedName ->  if(isNullable) getConvertMethod(ExposedConverter::stringToInstantOrNull) else getConvertMethod(ExposedConverter::stringToInstant)
+            LocalDate::class.qualifiedName ->  if(isNullable) getConvertMethod(ExposedConverter::stringToLocalDateOrNull) else getConvertMethod(ExposedConverter::stringToLocalDate)
+            LocalTime::class.qualifiedName ->  if(isNullable) getConvertMethod(ExposedConverter::stringToLocalTimeOrNull) else getConvertMethod(ExposedConverter::stringToLocalTime)
+            LocalDateTime::class.qualifiedName -> if(isNullable) getConvertMethod(ExposedConverter::stringToLocalDateTimeOrNull) else getConvertMethod(ExposedConverter::stringToLocalDateTime)
+            Duration::class.qualifiedName -> if(isNullable) getConvertMethod(ExposedConverter::stringToDurationOrNull) else getConvertMethod(ExposedConverter::stringToDuration)
+            else -> null
+        }
+    }
+
 
     fun MemberName.isConverterMethod(): Boolean {
         val validPackage = this.enclosingClassName?.packageName?.equals(ExposedConverter::class.java.packageName, true) ?: false
@@ -96,7 +103,7 @@ object DefaultValues {
 
     fun getParseMethod(type: KSType): MemberName? {
         val typeName = type.declaration.qualifiedName!!.asString()
-        val name = parseMethods[typeName]
+        val name = getParseMethod(typeName, type.nullability == Nullability.NULLABLE)
         return name
     }
 

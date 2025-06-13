@@ -6,13 +6,11 @@ import com.labijie.infra.orm.SimpleLongIdTable
 import com.labijie.infra.orm.SimpleStringIdTable
 import com.labijie.infra.orm.compile.KspPrimaryKey
 import com.labijie.infra.orm.compile.KspTableIgnore
-import com.labijie.infra.orm.compile.KspTablePojoSuper
+import com.labijie.infra.orm.compile.KspTablePojo
 import com.labijie.orm.dummy.otherpackage.NestedInterface
 import org.jetbrains.exposed.sql.Column
 import org.jetbrains.exposed.sql.Table
 import org.jetbrains.exposed.sql.javatime.*
-import java.time.Instant
-import kotlin.time.Duration
 
 
 enum class TestEnum {
@@ -40,8 +38,7 @@ object ShopTable : SimpleLongIdTable("shops", "id") {
 }
 
 
-@KspTablePojoSuper(type = SimpleInterface::class)
-@KspTablePojoSuper(type = SimpleBaseClass::class)
+@KspTablePojo(superClasses = [SimpleBaseClass::class, SimpleInterface::class])
 object IntIdTable : SimpleIntIdTable("exposed_test_entities") {
     var name: Column<String> = varchar("name", 50)
     var memo = varchar("memo", 50).nullable()
@@ -66,18 +63,7 @@ object DurationIdEntityTable : Table("duration_id_entities") {
 }
 
 
-object TestSimpleTable : SimpleStringIdTable("exposed_test_entities") {
-    var name: Column<String> = varchar("name", 50)
-    var memo = varchar("memo", 50).nullable()
-    var charCol = char("char")
-    var textCol = text("text")
-    var enumCol = enumeration("enum", TestEnum::class)
-    var binaryCol = binary("data")
-    var uidCol = uuid("uid")
-    val shortCol = short("short")
-    val booleanCol = bool("boolean")
-    val byteCol = byte("byte")
-}
+
 
 @KspTableIgnore
 object IgnoreTable : SimpleStringIdTable("ignore") {

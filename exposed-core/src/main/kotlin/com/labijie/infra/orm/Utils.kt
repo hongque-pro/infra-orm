@@ -22,6 +22,11 @@ object ExposedConverter {
     }
 
     @JvmStatic
+    fun stringToUUIDOrNull(value: String): UUID? {
+        return if(value.isNotBlank()) UUID.fromString(value) else null
+    }
+
+    @JvmStatic
     fun instantToString(value: Instant): String {
         return value.toEpochMilli().toString()
     }
@@ -32,13 +37,26 @@ object ExposedConverter {
     }
 
     @JvmStatic
-    fun byteArrayToString(array: ByteArray): String {
-        return array.toString(Charsets.UTF_8)
+    fun stringToInstantOrNull(value: String): Instant? {
+        return value.toLongOrNull()?.let {
+            Instant.ofEpochMilli(it)
+        }
+    }
+
+
+    @JvmStatic
+    fun byteArrayToString(array: ByteArray?): String {
+        return array?.toString(Charsets.UTF_8) ?: ""
     }
 
     @JvmStatic
     fun stringToByteArray(value: String): ByteArray {
         return value.toByteArray(Charsets.UTF_8)
+    }
+
+    @JvmStatic
+    fun stringToByteArrayOrNull(value: String): ByteArray? {
+        return if(value.isNotBlank()) value.toByteArray(Charsets.UTF_8) else null
     }
 
     @JvmStatic
@@ -52,8 +70,20 @@ object ExposedConverter {
     }
 
     @JvmStatic
+    fun stringToDurationOrNull(value: String): Duration? {
+        return value.toLongOrNull()?.let {
+            Duration.ofMillis(value.toLong())
+        }
+    }
+
+    @JvmStatic
     fun stringToLocalDate(date: String): LocalDate {
         return LocalDate.parse(date)
+    }
+
+    @JvmStatic
+    fun stringToLocalDateOrNull(date: String): LocalDate? {
+        return if(date.isNotBlank()) LocalDate.parse(date) else null
     }
 
     @JvmStatic
@@ -62,10 +92,18 @@ object ExposedConverter {
     }
 
     @JvmStatic
+    fun stringToLocalTimeOrNull(time: String): LocalTime? {
+        return if(time.isNotBlank()) LocalTime.parse(time) else null
+    }
+
+    @JvmStatic
     fun stringToLocalDateTime(dateTime: String): LocalDateTime {
         return LocalDateTime.parse(dateTime)
     }
-
+    @JvmStatic
+    fun stringToLocalDateTimeOrNull(dateTime: String): LocalDateTime? {
+        return if(dateTime.isNotBlank()) LocalDateTime.parse(dateTime) else null
+    }
 
 }
 

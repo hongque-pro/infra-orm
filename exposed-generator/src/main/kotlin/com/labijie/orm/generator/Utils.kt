@@ -166,7 +166,7 @@ fun KSType.isKotlinType(kclass: KClass<*>): Boolean {
     return kType.compareTo(cls) == 0
 }
 
-fun generateParsedValueCodeBlock(valueVarName: String, parseMethod: MemberName?): CodeBlock {
+fun generateParsedValueCodeBlock(valueVarName: String, parseMethod: MemberName?, isNullable: Boolean): CodeBlock {
     return CodeBlock.builder()
         .apply {
             parseMethod?.let {
@@ -180,7 +180,7 @@ fun generateParsedValueCodeBlock(valueVarName: String, parseMethod: MemberName?)
         .build()
 }
 
-fun generateToStringCodeBlock(valueVarName: String, toStringMethod: MemberName?): CodeBlock {
+fun generateToStringCodeBlock(valueVarName: String, toStringMethod: MemberName?, isNullable: Boolean): CodeBlock {
     return CodeBlock.builder()
         .apply {
             toStringMethod?.let {
@@ -191,7 +191,8 @@ fun generateToStringCodeBlock(valueVarName: String, toStringMethod: MemberName?)
                         toStringMethod.simpleName
                     )
                 } else {
-                    addStatement("${valueVarName}.%N()", toStringMethod.simpleName)
+                    val toStringBlock = if(isNullable) "(${valueVarName}?.%N()).orEmpty()" else "${valueVarName}.%N()"
+                    addStatement(toStringBlock, toStringMethod.simpleName)
                 }
             } ?: addStatement(valueVarName)
         }
