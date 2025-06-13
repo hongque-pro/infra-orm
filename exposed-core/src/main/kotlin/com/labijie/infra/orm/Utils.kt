@@ -162,17 +162,17 @@ fun Query.orHavingIf(condition:Boolean, orPart: SqlExpressionBuilder.() -> Op<Bo
     }
 }
 
-fun Op<Boolean>.andIf(condition: Boolean, expression: SqlExpressionBuilder.() -> Op<Boolean>): Op<Boolean> {
+fun Op<Boolean>.andIf(condition: Boolean, andPart: SqlExpressionBuilder.() -> Op<Boolean>): Op<Boolean> {
     return if(condition) {
-        this.and(expression)
+        this.and(andPart)
     }else {
         this
     }
 }
 
-fun Op<Boolean>.orIf(condition: Boolean, expression: SqlExpressionBuilder.() -> Op<Boolean>): Op<Boolean> {
+fun Op<Boolean>.orIf(condition: Boolean, orPart: SqlExpressionBuilder.() -> Op<Boolean>): Op<Boolean> {
     return if(condition) {
-        this.or(expression)
+        this.or(orPart)
     }else {
         this
     }
