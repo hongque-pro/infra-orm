@@ -7,7 +7,7 @@ class GenerationContext(val table: TableMetadata, val options: WriterOptions) {
     val dslPackageName = "${pojoPackageName}.dsl"
     val aotPackageName = "${table.packageName}.aot"
 
-    val runtimeHintsRegistrarClass  = ClassName(aotPackageName, "OrmRuntimeHintsRegistrar")
+    val runtimeHintsRegistrarClass  = ClassName(aotPackageName, "OrmPojoRuntimeHintsRegistrar")
 
     val pojoClass = ClassName(pojoPackageName, table.normalizeClassName())
     val dslClass = ClassName(dslPackageName, "${table.normalizeClassName()}DSL")

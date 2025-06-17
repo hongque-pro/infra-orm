@@ -7,6 +7,7 @@ import com.labijie.orm.generator.DefaultValues.isConverterMethod
 import com.squareup.kotlinpoet.*
 import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
 import com.squareup.kotlinpoet.ksp.toClassName
+import com.squareup.kotlinpoet.ksp.toTypeName
 import org.jetbrains.exposed.dao.id.EntityID
 import org.jetbrains.exposed.sql.Column
 import java.io.File
@@ -126,12 +127,14 @@ private fun KSType.getIDTypeFromEntityID(): KSType? {
 
 
 fun KSPropertyDeclaration.getColumnType(): ColumnType? {
-    val argCount = this.type.element?.typeArguments?.count()
 
-    if ((argCount == 1 || argCount == null)) {
-        val propertyType = this.type.resolve()
+    val propertyType = this.type.resolve()
+    val argCount = propertyType.arguments.count()
 
-        val columnType = propertyType.arguments.firstOrNull()?.type?.resolve()
+    if ((argCount == 1)) {
+
+        val col = propertyType.arguments.firstOrNull()
+        val columnType = col?.type?.resolve()
         if (columnType != null) {
             val idType = columnType.getIDTypeFromEntityID()
             if (idType != null) {
@@ -286,7 +289,7 @@ fun findProjectResourceDir(sourceFile: String): Path {
         val folder = sourceFile.substring(0, index)
         Path("${folder}${resourcesPath}".trimEnd(File.separatorChar))
     } else {
-        throw ExposedGenerationException("Unable to get resources folder from file '${sourceFile}'")
+        Path(Path(sourceFile).parent.absolutePathString(), "resources")
     }
 }
 
@@ -296,7 +299,7 @@ fun findProjectSourceDir(sourceFile: String): Path {
         val folder = sourceFile.substring(0, index)
         Path("${folder}${srcPath}".trimEnd(File.separatorChar))
     } else {
-        throw ExposedGenerationException("Unable to get src folder from file '${sourceFile}'")
+        Path(sourceFile).parent
     }
 }
 

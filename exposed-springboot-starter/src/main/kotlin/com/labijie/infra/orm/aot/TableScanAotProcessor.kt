@@ -85,7 +85,7 @@ class TableScanAotProcessor : BeanFactoryInitializationAotProcessor {
             val classes = discoveredTableClasses.distinct()
             if(classes.isNotEmpty()) {
                 for (clazz in classes) {
-                    // 注册 AOT Hint
+                    // 注册 Table 类的 AOT Hint
                     hints.reflection().registerType(clazz) {
                         it.withMembers(
                             MemberCategory.INVOKE_DECLARED_METHODS,

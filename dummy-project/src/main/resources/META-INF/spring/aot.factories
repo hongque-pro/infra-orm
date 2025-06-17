@@ -1,3 +1,3 @@
 org.springframework.aot.hint.RuntimeHintsRegistrar=\
-com.labijie.orm.dummy.aot.OrmRuntimeHintsRegistrar
+com.labijie.orm.dummy.aot.OrmPojoRuntimeHintsRegistrar
 

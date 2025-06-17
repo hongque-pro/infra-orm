@@ -11,19 +11,19 @@ import com.labijie.infra.orm.compile.KspTableIgnore
 import com.labijie.orm.generator.*
 import com.labijie.orm.generator.writer.DSLWriter
 import com.labijie.orm.generator.writer.PojoWriter
+import com.labijie.orm.generator.writer.SpringRuntimeHintWriter
+import com.squareup.kotlinpoet.ClassName
 import org.jetbrains.exposed.sql.Table
 
 
 class ExposedSymbolProcessor(
     private val logger: KSPLogger,
-    options: Map<String, String> = mapOf()
+    private val options: Map<String, String> = mapOf()
 ) : SymbolProcessor {
-
-    private val writerOptions = buildWriterOptions(options)
-
 
     override fun process(resolver: Resolver): List<KSAnnotated> {
 
+        val writerOptions = buildWriterOptions(options)
 
         val visitContext = VisitContext()
 
@@ -42,8 +42,7 @@ class ExposedSymbolProcessor(
             context
         }
 
-        //SpringRuntimeHintWriter.write(tables, writerOptions, logger)
-        //NativeReflectConfigWriter.write(tables, writerOptions, logger)
+        SpringRuntimeHintWriter.write(tables, writerOptions, logger)
 
         return emptyList()
     }

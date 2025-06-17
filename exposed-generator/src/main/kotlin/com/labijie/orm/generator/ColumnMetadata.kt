@@ -17,6 +17,9 @@ data class ColumnMetadata(
     val isGeneric: Boolean
         get() = this.type.declaration.typeParameters.isNotEmpty()
 
+    val isCollection: Boolean
+        get() = this.type.declaration.qualifiedName!!.asString() == "kotlin.Array" || this.type.declaration.qualifiedName!!.asString().startsWith("kotlin.collections")
+
     override fun toString(): String {
         return "ColumnMetadata(name='$name', type=${type.declaration.qualifiedName.toString()}, rawType=${rawType.declaration.qualifiedName.toString()}, isNull=$isNullableColumn, isPrimary=$isPrimary, isEntityId=$isEntityId, isEnum=$isEnum)"
     }
