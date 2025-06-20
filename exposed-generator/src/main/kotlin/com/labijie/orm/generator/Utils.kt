@@ -230,8 +230,6 @@ fun buildWriterOptions(env: Map<String, String>): WriterOptions {
     return WriterOptions().apply {
         this.pojoPackageName = env.getOrDefault(EnvVariables.POJO_PACKAGE_NAME, null)
         this.pojoProjectRootDir = env.getOrDefault(EnvVariables.POJO_DIR, null)
-        this.tableGroupId = env.getOrDefault(EnvVariables.TABLE_GROUP_ID, "com.example")
-        this.tableArtifactId = env.getOrDefault(EnvVariables.TABLE_ARTIFACT_ID, "")
         this.springbootAot = env.getOrDefault(EnvVariables.SPRINGBOOT_AOT, "false").toBooleanStrictOrNull() ?: false
     }
 }
