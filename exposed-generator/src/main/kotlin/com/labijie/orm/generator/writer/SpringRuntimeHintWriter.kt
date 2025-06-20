@@ -158,22 +158,25 @@ object SpringRuntimeHintWriter {
                     addColumnHintTypes(it, writerOptions = options)
                 }
 
-                addComment("""
+                if(options.hintTypesCache.values.isNotEmpty()) {
+                    addComment(
+                        """
                     Begin Column types hint register
-                """.trimIndent())
-
-
-                options.hintTypesCache.values.forEach {
-                        col->
-                    beginControlFlow("hints.reflection().registerType(%T::class.java)", col)
-                    addStatement("it.withMembers(")
-                    addMemoryCategory(
-                        MemberCategory.INVOKE_DECLARED_CONSTRUCTORS, // 调用构造器（某些情况下有用）
-                        MemberCategory.INVOKE_PUBLIC_METHODS,        // 调用 .name(), .ordinal(), .values() 等方法
-                        MemberCategory.DECLARED_FIELDS
+                """.trimIndent()
                     )
-                    addStatement(")")
-                    endControlFlow()
+
+
+                    options.hintTypesCache.values.forEach { col ->
+                        beginControlFlow("hints.reflection().registerType(%T::class.java)", col)
+                        addStatement("it.withMembers(")
+                        addMemoryCategory(
+                            MemberCategory.INVOKE_DECLARED_CONSTRUCTORS, // 调用构造器（某些情况下有用）
+                            MemberCategory.INVOKE_PUBLIC_METHODS,        // 调用 .name(), .ordinal(), .values() 等方法
+                            MemberCategory.DECLARED_FIELDS
+                        )
+                        addStatement(")")
+                        endControlFlow()
+                    }
                 }
             }
             .build()
