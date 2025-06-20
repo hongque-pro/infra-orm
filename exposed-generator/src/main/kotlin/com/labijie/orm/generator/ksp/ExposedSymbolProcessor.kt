@@ -12,7 +12,6 @@ import com.labijie.orm.generator.*
 import com.labijie.orm.generator.writer.DSLWriter
 import com.labijie.orm.generator.writer.PojoWriter
 import com.labijie.orm.generator.writer.SpringRuntimeHintWriter
-import com.squareup.kotlinpoet.ClassName
 import org.jetbrains.exposed.sql.Table
 
 

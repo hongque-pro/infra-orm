@@ -4,10 +4,7 @@
  */
 package com.labijie.orm.generator.writer
 
-import com.google.devtools.ksp.closestClassDeclaration
 import com.google.devtools.ksp.processing.KSPLogger
-import com.google.devtools.ksp.symbol.KSName
-import com.google.devtools.ksp.symbol.KSType
 import com.labijie.orm.generator.*
 import com.squareup.kotlinpoet.*
 import com.squareup.kotlinpoet.ksp.toTypeName
@@ -111,7 +108,7 @@ object SpringRuntimeHintWriter {
                 col.type.declaration.typeParameters.forEach {
                     p->
                     val typeName = p.toTypeVariableName()
-                    val key = typeName.toString();
+                    val key = typeName.toString()
                     writerOptions.hintTypesCache.putIfAbsent(key, typeName)
                 }
             }
