@@ -12,6 +12,7 @@ import com.labijie.orm.generator.*
 import com.labijie.orm.generator.writer.DSLWriter
 import com.labijie.orm.generator.writer.PojoWriter
 import com.labijie.orm.generator.writer.SpringRuntimeHintWriter
+import org.jetbrains.exposed.sql.Column
 import org.jetbrains.exposed.sql.Table
 
 
@@ -66,7 +67,9 @@ class ExposedSymbolProcessor(
             val table = data.currentTable
             if (table != null) {
                 //it.origin == Origin.KOTLIN 用来判断是否是来自直接声明
-                //logger.println("property receiver: ${property.parentDeclaration?.qualifiedName?.getShortName()}")
+                val qualifier = property.type.resolve().declaration.qualifiedName?.asString()
+                val isColumn = qualifier?.equals(Column::class.qualifiedName) ?: false
+                if(!isColumn) return
 
                 val columnType = property.getColumnType()
                 if (columnType != null) {

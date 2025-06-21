@@ -28,3 +28,6 @@ object TestTable : SimpleLongIdTable("my") {
     val status2 = enumeration("status2", NestedInterface.NestedEnum::class)
     val dt = datetime("dt")
 }
+
+val TestTable.extProperty: String
+    get() = "TestExtensions"

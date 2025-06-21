@@ -160,7 +160,7 @@ object DefaultValues {
         val typeName = type.declaration.qualifiedName!!.asString()
 
 
-        return values[typeName] ?: throw IllegalArgumentException("'${typeName}' (class: ${type.toClassName()}) has not a default value currently at property '${propertyName}'")
+        return values[typeName] ?: throw IllegalArgumentException("'${typeName}' (type: ${type}) has not a default value currently at property '${propertyName}'")
     }
 
     fun getEnumValue(type: KSType): String {

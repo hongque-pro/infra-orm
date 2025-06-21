@@ -18,7 +18,7 @@ open class SimpleTableScanner(excludeClassNames: Set<String>? = null) : ClassPat
         addIncludeFilter(AssignableTypeFilter(Table::class.java))
         addExcludeFilter { metadataReader: MetadataReader, _: MetadataReaderFactory? ->
             val className = metadataReader.classMetadata.className
-            className.endsWith("package-info") || (excludeClassNames?.contains(className) ?: false)
+            className.endsWith("package-info") || (excludeClassNames?.contains(className) ?: false) || metadataReader.classMetadata.isAbstract
         }
     }
 

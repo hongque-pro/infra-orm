@@ -56,8 +56,6 @@ class TableScanner(
                     beanFactory.registerSingleton(beanName, instance)
                     mutableSet.add(kClass.java.name)
                 }
-
-                scannerLogger.info("Table registered: $beanName, class: ${kClass.simpleName}")
             }
         }
         return mutableSet

@@ -7,6 +7,7 @@ package com.labijie.infra.orm.aot
 
 import com.labijie.infra.orm.SimpleTableScanner
 import com.labijie.infra.orm.configuration.TableDefinitionPostProcessor
+import org.slf4j.LoggerFactory
 import org.springframework.aot.generate.DefaultMethodReference
 import org.springframework.aot.hint.MemberCategory
 import org.springframework.beans.factory.aot.BeanFactoryInitializationAotContribution
@@ -25,9 +26,13 @@ import javax.lang.model.element.Modifier
 
 class TableScanAotProcessor : BeanFactoryInitializationAotProcessor {
 
-    override fun processAheadOfTime(beanFactory: ConfigurableListableBeanFactory): BeanFactoryInitializationAotContribution? {
+    companion object {
+        private val logger by lazy {
+            LoggerFactory.getLogger(TableScanAotProcessor::class.java)
+        }
+    }
 
-        println("Start Infra-Orm aot process ...")
+    override fun processAheadOfTime(beanFactory: ConfigurableListableBeanFactory): BeanFactoryInitializationAotContribution? {
 
         // 1. 收集所有 @TableScan 注解
         val tableScans = collectTableScanAnnotations(beanFactory)
@@ -44,15 +49,6 @@ class TableScanAotProcessor : BeanFactoryInitializationAotProcessor {
             (beanFactory as? BeanDefinitionRegistry)?.removeBeanDefinition(define.key)
         }
 
-//        val msg = StringBuilder().apply {
-//            appendLine("Table scans:")
-//            appendLine("  Packages:")
-//            appendLine(allPackages.joinToString("\n") { it.padStart(4, ' ') })
-//            appendLine("  Excludes:")
-//            appendLine(allExcludes.joinToString("\n") { it.padStart(4, ' ') })
-//        }
-//        println(msg)
-
 
         if (allPackages.isEmpty()) return null
 
@@ -63,7 +59,7 @@ class TableScanAotProcessor : BeanFactoryInitializationAotProcessor {
         val candidates = scanner.scan(*allPackages.toTypedArray())
 
         for (candidate in candidates) {
-            println("Detected orm table: ${candidate.beanClassName}")
+            logger.debug("AOT Process Orm Table : ${candidate.beanClassName}")
             if(candidate.beanClassName.isNullOrBlank()) {
                 continue
             }
