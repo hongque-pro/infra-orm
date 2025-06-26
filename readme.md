@@ -30,6 +30,8 @@
 - JDK **21** is used by default .
 - Upgrade to Spring Boot **3.5** .
 
+> We working in the process for migrating GraalVM in our project, we are validating Infra-ORM in the GraalVM native environment
+
 ## 基于表结构的 Code First 开发模式
 
 ### 1. 引入插件
