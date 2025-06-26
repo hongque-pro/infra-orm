@@ -3,7 +3,7 @@
 </div>
 <br>
 
-[简体中文](./readme_zh.md)
+[English](./readme.md)
 
 <br>
 
@@ -24,28 +24,27 @@
 <br>
 <br>
 
-Welcome to **Infra-ORM**, an ORM framework based on [Exposed](https://github.com/JetBrains/Exposed),
-designed to integrate well with Spring Boot.  
-If you're a Kotlin developer, we recommend trying Exposed —  
-combined with Infra-ORM, it brings you the best development experience.
+欢迎使用 **Infra-ORM**, 这是一个基于 [Exposed](https://github.com/JetBrains/Exposed)
+的 ORM 框架，可以和 Spring Boot 集成良好，如果你是 Kotlin 开发者，推荐你试试 Exposed, 
+配合 Infra-ORM 可以给你带来最佳的开发体验。
 
-## What’s New in 2.1.x
+## What news in 2.1.x
 
-- Spring Boot AOT support, providing a consistent experience in GraalVM native environment.
-- JDK **21** is used by default.
-- Upgraded to Spring Boot **3.5**.
+- Spring Boot AOT support, got a consistent experience in GraalVM native enviroment.
+- JDK **21** is used by default .
+- Upgrade to Spring Boot **3.5** .
 
-> We are currently in the process of migrating to GraalVM in our project.  
-> GraalVM support is still experimental.  
-> We will continuously validate the GraalVM compatibility of Infra-ORM within our project.
+> We are currently in the process of migrating to GraalVM in our project.    
+> GraalVM supported still experimental.   
+> We will continuously validate the GraalVM compatibility of Infra-ORM within our project.   
 
-## Code-First Development Based on Table Structure
+## 基于表结构的 Code First 开发模式
 
-### 1. Apply the Plugin
+### 1. 引入插件
+示例中使用 `com.labijie.infra` gradle 插件简化配置
 
-This example uses the `com.labijie.infra` Gradle plugin to simplify configuration:
+```ktolin
 
-```kotlin
 plugins {
     id("com.google.devtools.ksp") version <ksp plugin version>
 }
@@ -59,36 +58,48 @@ ksp {
     arg("orm.springboot_aot ", "true")
     ...
 }
+
 ```
 
-KSP Parameters
+Ksp 参数
 
-| Name                  | Default | Description                                                                 |
-|-----------------------|---------|-----------------------------------------------------------------------------|
-| orm.pojo_package      |         | Package name for generated code. If not configured, a `pojo` subpackage will be created under the Table class package. |
-| orm.pojo_project_dir  |         | Directory to generate code to, must be an **absolute path**. If not set, it defaults to the root directory of the project containing the Table class. |
-| orm.springboot_aot    | false   | **GraalVM** support: enable Spring AOT integration, register RuntimeHints for entity classes and native support for TableScale. |
+| 参数名                   | 默认值   | 说明                                                                        |
+|-----------------------|-------|---------------------------------------------------------------------------| 
+| orm.pojo_package      |       | 生成代码的包名，如果不配置，默认会在你的 Table 类的包下创建 pojo 子包，代码文件将放入其中                       |
+| orm.pojo_project_dir  |       | 生成代码的目录，必须是**绝对路径**，如果不配置，默认生成到你的 Table 类所在的项目根目录                         |
+| orm.springboot_aot    | false | **GraalVM** 支持： 启用 spring  AOT 集成，注册实体反射 RuntimeHint 和表的 TableScale 的 native 支持。 |    
 
-### 2. Define Table Classes
+
+### 2. 编写表结构类
 
 ```kotlin
+
 object PostTable : SimpleLongIdTable("posts", "id") {
     val title: Column<String> = varchar("name", 50)
     val status = enumeration("status", TestEnum::class)
     val description = varchar("desc", 255)
 }
+
 ```
 
+或
+
 ```kotlin
+
+//通过注解可以自定义主键属性名称（postId 代替 SimpleLongIdTable 的 id）
+
 object PostTable: Table("posts") {
 
   @KspPrimaryKey
   val postId = long("post_id") 
-
+    
   override val primaryKey: PrimaryKey
         get() = PrimaryKey(postId)
 }
+
 ```
+
+多主键表支持
 
 ```kotlin
 import com.labijie.infra.orm.compile.KspPrimaryKey
@@ -101,21 +112,24 @@ object MultiKeyTable: Table("multi_key_table") {
 
   @KspPrimaryKey
   val key2 = varchar("key2", 32)
-
+    
   override val primaryKey: PrimaryKey
         get() = PrimaryKey(key1, key2)
 }
 ```
 
-> **Note**: The table must be declared as an `object`, not a `class`.
+> **注意**: Table 是一个 `object` , 请勿使用 `class` .
 
-### 3. Generate POJO and DSL Code
-
+### 3. 生成 POJO 和 DSL 代码
+执行 gradle 命令
 ```shell
 gradle kspKotlin
 ```
 
+该命令将自动为你生成 `Post` 类 (POJO) 和 `PostDSL` (Table 扩展方法类)。
+
 ```kotlin
+
 public class Post {
   public var title: String = ""
 
@@ -125,71 +139,102 @@ public class Post {
 
   public var id: Long = 0L
 }
+
 ```
 
-### 4. Use DSL in Your Code
+4. 在代码中使用 DSL 生成代码
 
+**Select**
 ```kotlin
+//select by primary key
 val selectedPost: Post? = PostTable.selectByPrimaryKey(123)
 
+//select one by a column
 val postItem: Post? = PostTable.selectOne {
     andWhere { PostTable.title eq  "Test" }
 }
 
+//select multiple by a column
 val postList: List<Post> = PostTable.selectMany {
     andWhere { PostTable.title eq  "Test" }
 }
 
+//select multiple by a column, only select title, description columns
 val postListSelective: List<Post> = PostTable.selectMany(PostTable.title, PostTable.description) {
     andWhere { PostTable.title like  "T%" }
 }
 ```
 
+**Insert**
 ```kotlin
+
 val post = Post().apply {
     this.id = 123
     this.title = "Test"
     this.description = "Just a test."
 }
 
+//insert
 PostTable.insert(post)
+
 ```
 
+**Update**
+
 ```kotlin
+//update all columns by primary key
 PostTable.updateByPrimaryKey(post)
 
+//update by primary key, and only update title column.
 PostTable.updateByPrimaryKey(post, PostTable.title)
 
+//update by a column, and only update description column.
 PostTable.update(post, selective =  arrayOf(PostTable.description), limit = 1) {
     PostTable.title.eq("Test")
 }
 
+
+//Update or insert
 PostTable.upsert(post)
 
+//Replace
 PostTable.replace(post)
 ```
 
+**Delete** 
 ```kotlin
+//delete by primary key
 PostTable.deleteByPrimaryKey(123)
 
+//delete many
 PostTable.deleteWhere {
     PostTable.title inList listOf("Test", "Test1")
 }
+
 ```
+
+更多 DSL 方法，请参考 [Exposed](https://github.com/JetBrains/Exposed) 文档：
 
 [https://jetbrains.github.io/Exposed/deep-dive-into-dsl.html](https://jetbrains.github.io/Exposed/deep-dive-into-dsl.html)
 
+
+**Infra-Orm** 详细使用方法请阅读文档：
 - [Quick Start](docs/quick_start.md)
 - [Work with SpringBoot](docs/use_spring.md)
 
 ---
 
-## Supported Databases
+
+## 数据库支持
+
+得益于 Exposed 良好的跨数据数据库特性，Infra-ORM 支持以下数据库：
 
 * H2
 * MySQL
 * MariaDB
 * Oracle
 * PostgreSQL
+* PostgreSQL
 * SQL Server
 * SQLite
+
