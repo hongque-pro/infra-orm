@@ -46,6 +46,21 @@ class OffsetList<T>(var list: List<T> = emptyList(), var forwardToken: String? =
             val list =decodedBase64.split("&")
             return list.map { URLDecoder.decode(it, Charsets.UTF_8.name()) }
         }
+
+        fun < T: Any> Iterable<T>.toOffsetList(forwardToken: String? = null): OffsetList<T> {
+            if(this is List<*>) {
+                return OffsetList(this as List<T>)
+            }
+            return OffsetList(this.toList(), forwardToken)
+        }
+
+        fun <T: Any, TOut: Any> Iterable<T>.toOffsetList(convert: (item: T)->TOut): OffsetList<TOut> {
+            return OffsetList(this.map { convert(it) })
+        }
+
+        fun <T: Any, TOut: Any> Iterable<T>.toOffsetList(forwardToken: String, convert: (item: T)->TOut): OffsetList<TOut> {
+            return OffsetList(this.map { convert(it) }, forwardToken)
+        }
     }
 
 

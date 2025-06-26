@@ -92,13 +92,15 @@ object UserTable : Table("my") {
     |   |                       |
     |   |                       \---dsl
     |   |                               UserDSL.kt
+    |   |                   \---aot  //如果你开启了 aot 支持
+    |   |                       |   OrmPojoRuntimeHintsRegistrar.kt
     |   |
     |   \---resources
     \---test
         +---kotlin
 ```
 
-可以看到生成了 *pojo* 目录, 同时生成了 *User.kt* 文件和 *UserDSL.kt* 文件:
+可以看到生成了 *pojo* 目录, 同时生成了 *User.kt* 文件和 *UserDSL.kt* 文件, 还有一个 OrmPojoRuntimeHintsRegistrar 类:
 
 User.kt
 ```kotlin
@@ -113,64 +115,16 @@ public open class User {
 }
 
 ```
-UserDSL.kt
-```kotlin
-public object UserDSL {
-   public fun parseUserRow(raw: ResultRow): User {
-      val plain = User()
-      plain.id = raw[id]
-      plain.name = raw[name]
-      plain.status = raw[status]
-      plain.count = raw[count]
-      return plain
-   }
-
-   public fun applyUser(statement: UpdateBuilder<*>, raw: User): Unit {
-      statement[id] = raw.id
-      statement[name] = raw.name
-      statement[status] = raw.status
-      statement[count] = raw.count
-   }
-
-   public fun applyUser(statement: UpdateStatement, raw: User): Unit {
-      statement[id] = raw.id
-      statement[name] = raw.name
-      statement[status] = raw.status
-      statement[count] = raw.count
-   }
-
-   public fun ResultRow.toUser(): User = parseUserRow(this)
-
-   public fun Iterable<ResultRow>.toUserList(): List<User> = this.map(UserDSL::parseUserRow)
-
-   public fun UpdateBuilder<*>.apply(raw: User) = applyUser(this, raw)
-
-   public fun UpdateStatement.apply(raw: User) = applyUser(this, raw)
-
-   public fun UserTable.insert(raw: User): InsertStatement<Number> = UserTable.insert {
-      applyUser(it, raw)
-   }
-
-   public fun UserTable.batchInsert(list: Iterable<User>): List<ResultRow> {
-      val rows = UserTable.batchInsert(list) {
-            entry -> applyUser(this, entry)
-      }
-      return rows
-   }
-
-   public fun UserTable.update(
-      raw: User,
-      limit: Int? = null,
-      `where`: SqlExpressionBuilder.() -> Op<Boolean>
-   ): Int = UserTable.update(where, limit) {
-      applyUser(it, raw)
-   }
-}
-
+`OrmPojoRuntimeHintsRegistrar` 类无需你手动注册，生成器自动为你放置了 spring 的配置文件:   
+```
+resources/META-INF/spring/aot.factories
 ```
 
-- *User.kt* 是实体类, 帮助你用简单对象映射到 Exposed 的 ResultRow
-- *UserDSL* 是数据操作的扩展方法，帮助你自动完成数据映射，简化 CRUD 操作
+> 如果你的项目中已经存在 `aot.factories`，生成器会智能的为你合并内容，无需担心它会破坏你的文件结构。
+
+- `User.kt`: 是实体类, 帮助你用简单对象映射到 Exposed 的 ResultRow
+- `UserDSL`: 是数据操作的扩展方法，帮助你自动完成数据映射，简化 CRUD 操作
+- `OrmPojoRuntimeHintsRegistrar`: Spring 的 AOT 配置文件（仅当开启了 `orm.springboot_aot` 才生成）
 
 > 生成代码包含了 User 对象作为参数的 update, insert, batchInsert， 和一些完成数据映射的帮助器方法, 但似乎还缺少一些东西,
 比如 selectByPrimaryKey, deleteByPrimaryKey, updateByPrimaryKey.
@@ -254,15 +208,18 @@ public object UserDSL {
 
 ```kotlin
 import com.labijie.infra.orm.compile.KspPrimaryKey
+import org.jetbrains.exposed.sql.Table
 
-public open class MultiKey {
-
-  @KspPrimaryKey
-  public var key1: String = ""
+object MultiKeyTable: Table("multi_key_table") {
 
   @KspPrimaryKey
-  public var key2: Int = 0
+  val key1 = varchar("key1", 32)
 
+  @KspPrimaryKey
+  val key2 = varchar("key2", 32)
+    
+  override val primaryKey: PrimaryKey
+        get() = PrimaryKey(key1, key2)
 }
 ```
 
@@ -288,7 +245,6 @@ public open class MultiKey {
 :lips: 注意：
 - `orm.pojo_project_dir` 要配置到项目**根目录**，即 `gradle.build` 文件所在目录.   
 - 如果配置了`orm.pojo_project_dir`生成器会拼接子目录:    `<pojo_project_dir>/src/main/kotlin/<pojo_package>`
-- 拖过没有配置 `table_artifact_id` 即使启用了 native build, 也无法生成反射配置
 
 配置使用示例，在 gradle.build.kts 中添加如下代码:
 
@@ -298,8 +254,6 @@ ksp {
     arg("orm.out_package", "com.github.my.orm")
     arg("orm.pojo_dir", project.rootProject.childProjects["other"]!!.projectDir.absolutePath)
     arg("orm.native_build", "true")
-    arg("orm.table_group_id", project.group.toString())
-    arg("orm.table_artifact_id", project.name)
 }
 
 ```

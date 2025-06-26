@@ -67,12 +67,49 @@ Ksp 参数
 ```kotlin
 
 object PostTable : SimpleLongIdTable("posts", "id") {
-    var title: Column<String> = varchar("name", 50)
-    var status = enumeration("status", TestEnum::class)
-    var description = varchar("desc", 255)
+    val title: Column<String> = varchar("name", 50)
+    val status = enumeration("status", TestEnum::class)
+    val description = varchar("desc", 255)
 }
 
 ```
+
+或
+
+```kotlin
+
+//通过注解可以自定义主键属性名称（postId 代替 SimpleLongIdTable 的 id）
+
+object PostTable: Table("posts") {
+
+  @KspPrimaryKey
+  val postId = long("post_id") 
+    
+  override val primaryKey: PrimaryKey
+        get() = PrimaryKey(postId)
+}
+
+```
+
+多主键表支持
+
+```kotlin
+import com.labijie.infra.orm.compile.KspPrimaryKey
+import org.jetbrains.exposed.sql.Table
+
+object MultiKeyTable: Table("multi_key_table") {
+
+  @KspPrimaryKey
+  val key1 = varchar("key1", 32)
+
+  @KspPrimaryKey
+  val key2 = varchar("key2", 32)
+    
+  override val primaryKey: PrimaryKey
+        get() = PrimaryKey(key1, key2)
+}
+```
+
 > **注意**: Table 是一个 `object` , 请勿使用 `class` .
 
 ### 3. 生成 POJO 和 DSL 代码
