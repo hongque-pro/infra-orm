@@ -5,6 +5,7 @@ package com.labijie.orm.dummy.pojo
 import com.labijie.orm.dummy.Status
 import kotlin.Int
 import kotlin.String
+import kotlinx.serialization.Serializable
 
 /**
  * POJO for DescribeEnumTable
@@ -19,6 +20,7 @@ import kotlin.String
  * Origin Exposed Table:
  * @see com.labijie.orm.dummy.DescribeEnumTable
  */
+@Serializable
 public open class DescribeEnum {
   public var key1: String = ""
 

@@ -2,6 +2,7 @@
 
 package com.labijie.orm.dummy.aot
 
+import com.labijie.infra.orm.aot.registerOrmPojoType
 import com.labijie.orm.dummy.Status
 import com.labijie.orm.dummy.TestEnum
 import com.labijie.orm.dummy.otherpackage.NestedInterface
@@ -9,7 +10,6 @@ import java.lang.ClassLoader
 import org.springframework.aot.hint.MemberCategory
 import org.springframework.aot.hint.RuntimeHints
 import org.springframework.aot.hint.RuntimeHintsRegistrar
-import org.springframework.aot.hint.TypeReference
 
 /**
  * SpringBoot runtime hint for orm tables
@@ -22,60 +22,18 @@ import org.springframework.aot.hint.TypeReference
  * Don't modify these codes !!
  *
  * Origin Exposed Table:
- * @see com.labijie.orm.dummy.PostTable
+ * @see com.labijie.orm.dummy.TestTable
  */
 internal class OrmPojoRuntimeHintsRegistrar : RuntimeHintsRegistrar {
   override fun registerHints(hints: RuntimeHints, classLoader: ClassLoader?) {
     // Begin Table Pojo types hint register
-    hints.reflection().registerType(TypeReference.of("com.labijie.orm.dummy.pojo.Post")) {
-      it.withMembers(
-      MemberCategory.PUBLIC_FIELDS,
-      MemberCategory.INVOKE_DECLARED_CONSTRUCTORS,
-      MemberCategory.INVOKE_PUBLIC_METHODS,
-      )
-    }
-    hints.reflection().registerType(TypeReference.of("com.labijie.orm.dummy.pojo.Shop")) {
-      it.withMembers(
-      MemberCategory.PUBLIC_FIELDS,
-      MemberCategory.INVOKE_DECLARED_CONSTRUCTORS,
-      MemberCategory.INVOKE_PUBLIC_METHODS,
-      )
-    }
-    hints.reflection().registerType(TypeReference.of("com.labijie.orm.dummy.pojo.IntId")) {
-      it.withMembers(
-      MemberCategory.PUBLIC_FIELDS,
-      MemberCategory.INVOKE_DECLARED_CONSTRUCTORS,
-      MemberCategory.INVOKE_PUBLIC_METHODS,
-      )
-    }
-    hints.reflection().registerType(TypeReference.of("com.labijie.orm.dummy.pojo.DurationIdEntity")) {
-      it.withMembers(
-      MemberCategory.PUBLIC_FIELDS,
-      MemberCategory.INVOKE_DECLARED_CONSTRUCTORS,
-      MemberCategory.INVOKE_PUBLIC_METHODS,
-      )
-    }
-    hints.reflection().registerType(TypeReference.of("com.labijie.orm.dummy.pojo.MultiKey")) {
-      it.withMembers(
-      MemberCategory.PUBLIC_FIELDS,
-      MemberCategory.INVOKE_DECLARED_CONSTRUCTORS,
-      MemberCategory.INVOKE_PUBLIC_METHODS,
-      )
-    }
-    hints.reflection().registerType(TypeReference.of("com.labijie.orm.dummy.pojo.DescribeEnum")) {
-      it.withMembers(
-      MemberCategory.PUBLIC_FIELDS,
-      MemberCategory.INVOKE_DECLARED_CONSTRUCTORS,
-      MemberCategory.INVOKE_PUBLIC_METHODS,
-      )
-    }
-    hints.reflection().registerType(TypeReference.of("com.labijie.orm.dummy.pojo.TestSimple")) {
-      it.withMembers(
-      MemberCategory.PUBLIC_FIELDS,
-      MemberCategory.INVOKE_DECLARED_CONSTRUCTORS,
-      MemberCategory.INVOKE_PUBLIC_METHODS,
-      )
-    }
+    hints.registerOrmPojoType("com.labijie.orm.dummy.pojo.Test")
+    hints.registerOrmPojoType("com.labijie.orm.dummy.pojo.Shop")
+    hints.registerOrmPojoType("com.labijie.orm.dummy.pojo.IntId")
+    hints.registerOrmPojoType("com.labijie.orm.dummy.pojo.DurationIdEntity")
+    hints.registerOrmPojoType("com.labijie.orm.dummy.pojo.MultiKey")
+    hints.registerOrmPojoType("com.labijie.orm.dummy.pojo.DescribeEnum")
+    hints.registerOrmPojoType("com.labijie.orm.dummy.pojo.TestSimple")
     // Begin Column types hint register
     hints.reflection().registerType(TestEnum::class.java) {
       it.withMembers(

@@ -6,7 +6,7 @@ package com.labijie.orm.testing
 
 import com.labijie.infra.orm.annotation.TableScan
 import com.labijie.infra.orm.test.ExposedTest
-import com.labijie.orm.dummy.PostTable
+import com.labijie.orm.dummy.TestTable
 import com.labijie.orm.dummy.ShopTable
 import com.labijie.orm.dummy.pojo.Shop
 import com.labijie.orm.dummy.pojo.dsl.ShopDSL.insert
@@ -26,7 +26,7 @@ import kotlin.test.assertTrue
 
 //使用 Spring test 环境
 @ExposedTest //自动配置 Exposed 依赖 //指定测试上下文
-@TableScan(basePackageClasses = [PostTable::class])
+@TableScan(basePackageClasses = [TestTable::class])
 @ContextConfiguration(classes = [TestingAutoConfiguration::class])
 class SelectForwardTester {
 

@@ -231,6 +231,7 @@ fun buildWriterOptions(env: Map<String, String>): WriterOptions {
         this.pojoPackageName = env.getOrDefault(EnvVariables.POJO_PACKAGE_NAME, null)
         this.pojoProjectRootDir = env.getOrDefault(EnvVariables.POJO_DIR, null)
         this.springbootAot = env.getOrDefault(EnvVariables.SPRINGBOOT_AOT, "false").toBooleanStrictOrNull() ?: false
+        this.kotlinSerializable = env.getOrDefault(EnvVariables.KOTLIN_SERIALIZATION, "false").toBooleanStrictOrNull() ?: false
     }
 }
 

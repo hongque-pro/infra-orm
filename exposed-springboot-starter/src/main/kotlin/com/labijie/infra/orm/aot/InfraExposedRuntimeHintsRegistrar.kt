@@ -9,6 +9,7 @@ import com.labijie.infra.orm.configuration.InfraExposedAutoConfiguration
 import com.labijie.infra.orm.configuration.TableScanner
 import org.springframework.aot.hint.RuntimeHints
 import org.springframework.aot.hint.RuntimeHintsRegistrar
+import org.springframework.aot.hint.TypeReference
 
 class InfraExposedRuntimeHintsRegistrar : RuntimeHintsRegistrar {
 

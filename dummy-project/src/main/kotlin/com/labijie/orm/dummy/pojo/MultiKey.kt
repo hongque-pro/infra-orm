@@ -4,6 +4,7 @@ package com.labijie.orm.dummy.pojo
 
 import kotlin.Int
 import kotlin.String
+import kotlinx.serialization.Serializable
 
 /**
  * POJO for MultiKeyTable
@@ -18,6 +19,7 @@ import kotlin.String
  * Origin Exposed Table:
  * @see com.labijie.orm.dummy.MultiKeyTable
  */
+@Serializable
 public open class MultiKey {
   public var key1: String = ""
 

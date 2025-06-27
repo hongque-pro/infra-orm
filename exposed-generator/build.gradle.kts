@@ -20,6 +20,7 @@ dependencies {
     implementation("org.jetbrains.exposed:exposed-java-time")
     implementation("org.jetbrains.exposed:exposed-json")
     implementation("org.springframework:spring-core")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-core")
     implementation("com.squareup:kotlinpoet-ksp:${Versions.kotlinPoetVersion}")
     // https://mvnrepository.com/artifact/org.jetbrains.kotlinx/kotlinx-serialization-json
 

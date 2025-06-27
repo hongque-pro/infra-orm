@@ -2,17 +2,18 @@ package com.labijie.orm.dummy
 
 import org.springframework.boot.SpringApplication
 import org.springframework.boot.autoconfigure.SpringBootApplication
+import org.springframework.context.annotation.Import
 
 /**
  * @author Anders Xiao
  * @date 2025/6/12
  */
 @SpringBootApplication
-class AotTestApplication {
+@Import(value = [CommandLineTestRunner::class])
+class AotTestApplication
 
-    fun main(args: Array<String>) {
-        SpringApplication.run(AotTestApplication::class.java, *args)
-    }
+fun main(args: Array<String>) {
+    SpringApplication.run(AotTestApplication::class.java, *args)
 }
 
 //fun main(args: Array<String>) {

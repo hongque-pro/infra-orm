@@ -24,7 +24,7 @@ import kotlin.collections.List
  * Don't modify these codes !!
  *
  * Origin Exposed Table:
- * @see com.labijie.orm.dummy.PostTable
+ * @see com.labijie.orm.dummy.TestTable
  */
 public open class Post {
   public var title: String? = null

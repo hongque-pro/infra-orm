@@ -1,5 +1,6 @@
 package com.labijie.orm.generator
 
+import com.labijie.infra.orm.compile.KspToggles
 import com.squareup.kotlinpoet.ClassName
 
 class GenerationContext(val table: TableMetadata, val options: WriterOptions) {
@@ -13,4 +14,8 @@ class GenerationContext(val table: TableMetadata, val options: WriterOptions) {
     val dslClass = ClassName(dslPackageName, "${table.normalizeClassName()}DSL")
 
     val tableClass = ClassName(table.packageName, table.className)
+
+    val tableSerializable by lazy {
+        table.serializable == KspToggles.ON || (table.serializable == KspToggles.AUTO && options.kotlinSerializable)
+    }
 }

@@ -2,6 +2,9 @@
 
 package com.labijie.orm.dummy.pojo
 
+import com.labijie.infra.orm.serialization.OrmDuration
+import com.labijie.infra.orm.serialization.OrmLocalDateTime
+import com.labijie.infra.orm.serialization.OrmUUID
 import com.labijie.orm.dummy.TestEnum
 import java.time.Duration
 import java.time.LocalDateTime
@@ -12,6 +15,7 @@ import kotlin.ByteArray
 import kotlin.Char
 import kotlin.Short
 import kotlin.String
+import kotlinx.serialization.Serializable
 
 /**
  * POJO for TestSimpleTable
@@ -26,6 +30,7 @@ import kotlin.String
  * Origin Exposed Table:
  * @see com.labijie.orm.dummy.TestSimpleTable
  */
+@Serializable
 public open class TestSimple {
   public var name: String = ""
 
@@ -39,7 +44,7 @@ public open class TestSimple {
 
   public var binary: ByteArray = ByteArray(0)
 
-  public var uid: UUID = UUID.randomUUID()
+  public var uid: OrmUUID = UUID(0L, 0L)
 
   public var short: Short = 0
 
@@ -47,9 +52,9 @@ public open class TestSimple {
 
   public var byte: Byte = 0
 
-  public var dateTime: LocalDateTime = LocalDateTime.of(0, 1, 1, 0, 0,0, 0)
+  public var dateTime: OrmLocalDateTime = LocalDateTime.of(0, 1, 1, 0, 0,0, 0)
 
-  public var duration: Duration = Duration.ZERO
+  public var duration: OrmDuration = Duration.ZERO
 
   public var nameNullable: String? = null
 
@@ -63,7 +68,7 @@ public open class TestSimple {
 
   public var binaryNullable: ByteArray? = null
 
-  public var uidNullable: UUID? = null
+  public var uidNullable: OrmUUID? = null
 
   public var shortNullable: Short? = null
 
@@ -71,9 +76,9 @@ public open class TestSimple {
 
   public var byteNullable: Byte? = null
 
-  public var dateTimeNullable: LocalDateTime? = null
+  public var dateTimeNullable: OrmLocalDateTime? = null
 
-  public var durationNullable: Duration = Duration.ZERO
+  public var durationNullable: OrmDuration = Duration.ZERO
 
   public var id: String = ""
 }

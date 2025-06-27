@@ -63,11 +63,13 @@ ksp {
 
 KSP Parameters
 
-| Name                  | Default | Description                                                                 |
-|-----------------------|---------|-----------------------------------------------------------------------------|
-| orm.pojo_package      |         | Package name for generated code. If not configured, a `pojo` subpackage will be created under the Table class package. |
-| orm.pojo_project_dir  |         | Directory to generate code to, must be an **absolute path**. If not set, it defaults to the root directory of the project containing the Table class. |
-| orm.springboot_aot    | false   | **GraalVM** support: enable Spring AOT integration, register RuntimeHints for entity classes and native support for TableScale. |
+| Name                           | Default | Description                                                                                                                                           |
+|--------------------------------|---------|-------------------------------------------------------------------------------------------------------------------------------------------------------|
+| orm.pojo_package               |         | Package name for generated code. If not configured, a `pojo` subpackage will be created under the Table class package.                                |
+| orm.pojo_project_dir           |         | Directory to generate code to, must be an **absolute path**. If not set, it defaults to the root directory of the project containing the Table class. |
+| orm.pojo_kotlin_serializable   | false   | Whether to add **@Serializable** to the POJO class to support [kotlin-serialization](https://github.com/Kotlin/kotlinx.serialization)                 |
+| orm.springboot_aot             | false   | **GraalVM** support: enable Spring AOT integration, register RuntimeHints for entity classes and native support for TableScale.                       |
+
 
 ### 2. Define Table Classes
 

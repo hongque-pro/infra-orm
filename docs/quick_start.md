@@ -234,13 +234,14 @@ object MultiKeyTable: Table("multi_key_table") {
 > 为了降低学习成本，**Infra-ORM** 提供的配置不多，约定大于配置是不变的真理.
 
 
-| 参数名                   | 默认值         | 说明                                                                           |
-|-----------------------|-------------|------------------------------------------------------------------------------|
-| orm.pojo_package      |             | 生成代码的包名，如果不配置，默认会在你的 Table 类的包下创建 pojo 子包，代码文件将放入其中                          |
-| orm.pojo_project_dir  |             | 生成代码的目录，必须是**绝对路径**，如果不配置，默认生成到你的 Table 类所在的项目根目录                            |
-| orm.springboot_aot     | false       | 是否生成 springboot hint 类 (RuntimeHintsRegistrar)                                                    |    
+| 参数名                          | 默认值   | 说明                                                                                                     |
+|------------------------------|-------|--------------------------------------------------------------------------------------------------------|
+| orm.pojo_package             |       | 生成代码的包名，如果不配置，默认会在你的 Table 类的包下创建 pojo 子包，代码文件将放入其中                                                    |
+| orm.pojo_project_dir         |       | 生成代码的目录，必须是**绝对路径**，如果不配置，默认生成到你的 Table 类所在的项目根目录                                                      |
+| orm.pojo_kotlin_serializable | false | 是否添加 **@Serializable** 注解到实体类 [kotlin-serialization](https://github.com/Kotlin/kotlinx.serialization)  |
+| orm.springboot_aot           | false | 是否生成 springboot hint 类 (RuntimeHintsRegistrar)                                                         |    
 
-> `orm.pojo_dir` 虽然要求**绝对路径**，但是你可以通过 gradle.build 中提供的变量得到项目目录,以达到相对路径的效果
+> `orm.pojo_dir`: 虽然要求**绝对路径**，但是你可以通过 gradle.build 中提供的变量得到项目目录,以达到相对路径的效果。   
 
 :lips: 注意：
 - `orm.pojo_project_dir` 要配置到项目**根目录**，即 `gradle.build` 文件所在目录.   

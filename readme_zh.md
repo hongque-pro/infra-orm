@@ -63,12 +63,14 @@ ksp {
 
 Ksp 参数
 
-| 参数名                   | 默认值   | 说明                                                                        |
-|-----------------------|-------|---------------------------------------------------------------------------| 
-| orm.pojo_package      |       | 生成代码的包名，如果不配置，默认会在你的 Table 类的包下创建 pojo 子包，代码文件将放入其中                       |
-| orm.pojo_project_dir  |       | 生成代码的目录，必须是**绝对路径**，如果不配置，默认生成到你的 Table 类所在的项目根目录                         |
-| orm.springboot_aot    | false | **GraalVM** 支持： 启用 spring  AOT 集成，注册实体反射 RuntimeHint 和表的 TableScale 的 native 支持。 |    
+| 参数名                             | 默认值   | 说明                                                                                                    |
+|---------------------------------|-------|-------------------------------------------------------------------------------------------------------| 
+| orm.pojo_package                |       | 生成代码的包名，如果不配置，默认会在你的 Table 类的包下创建 pojo 子包，代码文件将放入其中                                                   |
+| orm.pojo_project_dir            |       | 生成代码的目录，必须是**绝对路径**，如果不配置，默认生成到你的 Table 类所在的项目根目录                                                     |
+| orm.pojo_kotlin_serializable    | false | 是否添加 **@Serializable** 注解到实体类 [kotlin-serialization](https://github.com/Kotlin/kotlinx.serialization) | 
+| orm.springboot_aot              | false | **GraalVM** 支持： 启用 spring  AOT 集成，注册实体反射 RuntimeHint 和表的 TableScale 的 native 支持。                      |    
 
+> 注意，开启 `orm.pojo_kotlin_serializable` 为 **turue** 时，需要项目引用 `kotlinx-serialization` 相关包，否则会产生编译错误.
 
 ### 2. 编写表结构类
 

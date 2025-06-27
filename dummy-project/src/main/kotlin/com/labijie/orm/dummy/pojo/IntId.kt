@@ -2,6 +2,7 @@
 
 package com.labijie.orm.dummy.pojo
 
+import com.labijie.infra.orm.serialization.OrmUUID
 import com.labijie.orm.dummy.SimpleBaseClass
 import com.labijie.orm.dummy.SimpleInterface
 import com.labijie.orm.dummy.TestEnum
@@ -13,6 +14,7 @@ import kotlin.Char
 import kotlin.Int
 import kotlin.Short
 import kotlin.String
+import kotlinx.serialization.Serializable
 
 /**
  * POJO for IntIdTable
@@ -27,6 +29,7 @@ import kotlin.String
  * Origin Exposed Table:
  * @see com.labijie.orm.dummy.IntIdTable
  */
+@Serializable
 public open class IntId : SimpleBaseClass(), SimpleInterface {
   public override var name: String = ""
 
@@ -38,7 +41,7 @@ public open class IntId : SimpleBaseClass(), SimpleInterface {
 
   public var binaryCol: ByteArray = ByteArray(0)
 
-  public var uidCol: UUID = UUID.randomUUID()
+  public var uidCol: OrmUUID = UUID(0L, 0L)
 
   public var shortCol: Short = 0
 

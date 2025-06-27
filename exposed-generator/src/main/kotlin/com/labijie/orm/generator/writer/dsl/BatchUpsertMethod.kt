@@ -85,7 +85,6 @@ object BatchUpsertMethod : AbstractDSLMethodBuilder() {
 
         val resultType = List::class.asTypeName().parameterizedBy(ResultRow::class.asTypeName())
 
-        kotlinLetMethod
 
         val keysBlock = CodeBlock.builder()
             .add("%N(%L)", kotlinArrayOfMethod, context.base.table.primaryKeys.joinToString(", ") { it.name })

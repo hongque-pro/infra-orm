@@ -10,7 +10,7 @@ import kotlin.reflect.KClass
 @Retention(AnnotationRetention.SOURCE)
 @Target(AnnotationTarget.CLASS)
 annotation class KspTablePojo(
-    val kotlinSerializable: Boolean = false,
+    val kotlinSerializable: KspToggles = KspToggles.AUTO,
     val isOpen: Boolean = true,
     val superClasses: Array<KClass<*>> = [],
 )

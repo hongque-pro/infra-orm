@@ -6,6 +6,7 @@ import com.labijie.orm.dummy.TestEnum
 import kotlin.Int
 import kotlin.Long
 import kotlin.String
+import kotlinx.serialization.Serializable
 
 /**
  * POJO for ShopTable
@@ -20,6 +21,7 @@ import kotlin.String
  * Origin Exposed Table:
  * @see com.labijie.orm.dummy.ShopTable
  */
+@Serializable
 public open class Shop {
   public var name: String = ""
 

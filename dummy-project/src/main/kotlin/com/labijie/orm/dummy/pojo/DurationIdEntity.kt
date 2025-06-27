@@ -2,8 +2,10 @@
 
 package com.labijie.orm.dummy.pojo
 
+import com.labijie.infra.orm.serialization.OrmDuration
 import java.time.Duration
 import kotlin.String
+import kotlinx.serialization.Serializable
 
 /**
  * POJO for DurationIdEntityTable
@@ -18,8 +20,9 @@ import kotlin.String
  * Origin Exposed Table:
  * @see com.labijie.orm.dummy.DurationIdEntityTable
  */
+@Serializable
 public open class DurationIdEntity {
   public var name: String = ""
 
-  public var id: Duration = Duration.ZERO
+  public var id: OrmDuration = Duration.ZERO
 }

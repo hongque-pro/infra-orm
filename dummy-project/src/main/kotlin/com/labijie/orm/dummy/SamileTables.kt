@@ -17,7 +17,7 @@ enum class TestEnum {
     OK, Error
 }
 
-object PostTable : SimpleLongIdTable("posts", "id") {
+object TestTable : SimpleLongIdTable("posts", "id") {
     var title = varchar("name", 50).nullable()
     var status = enumeration("status", TestEnum::class)
     var description = varchar("desc", 255)
@@ -28,6 +28,12 @@ object PostTable : SimpleLongIdTable("posts", "id") {
     var time = time("time")
     var date = date("date")
     var timestamp = timestamp("timestamp")
+    var decimal = decimal("decimal",10, 10)
+    var decimalNullable = decimal("decimal_nullable",10, 10).nullable()
+    var uuid = uuid("uuid")
+    var uuidNullable = uuid("uuidNullable").nullable()
+    var datetime = datetime("dt")
+    var datetimeNullable = datetime("datetimeNullable").nullable()
 }
 
 object ShopTable : SimpleLongIdTable("shops", "id") {

@@ -27,7 +27,7 @@ object DefaultValues {
         BigDecimal::class.qualifiedName to "BigDecimal.ZERO",
         Char::class.qualifiedName to "'\\u0000'",
         ByteArray::class.qualifiedName to "ByteArray(0)",
-        UUID::class.qualifiedName to "UUID.randomUUID()",
+        UUID::class.qualifiedName to "UUID(0L, 0L)",
         Boolean::class.qualifiedName to "false",
         Byte::class.qualifiedName to "0",
         Array::class.qualifiedName to "arrayOf<{type}>()"
@@ -39,7 +39,6 @@ object DefaultValues {
 
     private fun getConvertMethod(func: KFunction<*>) : MemberName {
         val className = ClassName(ExposedConverter::class.java.packageName, ExposedConverter::class.java.simpleName)
-
         return MemberName(enclosingClassName = className, simpleName = func.name)
     }
 

@@ -12,7 +12,6 @@ import com.squareup.kotlinpoet.ksp.toTypeVariableName
 import org.springframework.aot.hint.MemberCategory
 import org.springframework.aot.hint.RuntimeHints
 import org.springframework.aot.hint.RuntimeHintsRegistrar
-import org.springframework.aot.hint.TypeReference
 import kotlin.io.path.*
 
 object SpringRuntimeHintWriter {
@@ -47,8 +46,10 @@ object SpringRuntimeHintWriter {
 
                 registrarClassNames.add(context.runtimeHintsRegistrarClass.reflectionName())
 
-                val file =
+                val fileBuilder =
                     FileSpec.builder(context.aotPackageName, fileName = context.runtimeHintsRegistrarClass.simpleName)
+                val file =
+                    fileBuilder
                         .suppressRedundantVisibilityModifierWarning()
                         .addType(
                             TypeSpec.classBuilder(context.runtimeHintsRegistrarClass)
@@ -88,8 +89,7 @@ object SpringRuntimeHintWriter {
                 .build()
         }
 
-        blocks.forEachIndexed {
-                i, b->
+        blocks.forEachIndexed { i, b ->
             addCode(b)
         }
         return this
@@ -97,16 +97,14 @@ object SpringRuntimeHintWriter {
 
     private fun addColumnHintTypes(table: TableMetadata, writerOptions: WriterOptions): Array<TypeName> {
 
-        table.columns.forEach {
-            col->
+        table.columns.forEach { col ->
             val type = col.type.makeNotNullable()
-            if(col.isEnum) {
+            if (col.isEnum) {
                 val key = type.toTypeName().toString()
                 writerOptions.hintTypesCache.putIfAbsent(key, type.toTypeName())
             }
-            if(col.isGeneric && !col.isCollection) {
-                col.type.declaration.typeParameters.forEach {
-                    p->
+            if (col.isGeneric && !col.isCollection) {
+                col.type.declaration.typeParameters.forEach { p ->
                     val typeName = p.toTypeVariableName()
                     val key = typeName.toString()
                     writerOptions.hintTypesCache.putIfAbsent(key, typeName)
@@ -116,7 +114,16 @@ object SpringRuntimeHintWriter {
         return writerOptions.hintTypesCache.values.toTypedArray()
     }
 
-    private fun overrideRegisterHintsFunc(tables: List<TableMetadata>, options: WriterOptions): FunSpec {
+
+    val aotRegisterMethod by lazy {
+        MemberName("com.labijie.infra.orm.aot", "registerOrmPojoType", true)
+    }
+
+
+    private fun overrideRegisterHintsFunc(
+        tables: List<TableMetadata>,
+        options: WriterOptions
+    ): FunSpec {
 
         val hintsParam = ParameterSpec.builder("hints", RuntimeHints::class).build()
         val nullableClassLoader = ClassLoader::class.asClassName().copy(nullable = true)
@@ -131,34 +138,26 @@ object SpringRuntimeHintWriter {
             .addParameter(classLoaderParam)
             .apply {
 
-                addComment("""
+                addComment(
+                    """
                     Begin Table Pojo types hint register
-                """.trimIndent())
+                """.trimIndent()
+                )
 
                 tables.forEach {
 
                     val ctx = GenerationContext(it, options)
 
-                    beginControlFlow(
-                        "hints.reflection().registerType(%T.of(%S))",
-                        TypeReference::class,
+                    addStatement(
+                        "hints.%M(%S)",
+                        aotRegisterMethod,
                         ctx.pojoClass.reflectionName()
                     )
-                    addStatement("it.withMembers(")
-
-                    addMemoryCategory(
-                        MemberCategory.PUBLIC_FIELDS,
-                        MemberCategory.INVOKE_DECLARED_CONSTRUCTORS,
-                        MemberCategory.INVOKE_PUBLIC_METHODS
-                    )
-
-                    addStatement(")")
-                    .endControlFlow()
 
                     addColumnHintTypes(it, writerOptions = options)
                 }
 
-                if(options.hintTypesCache.values.isNotEmpty()) {
+                if (options.hintTypesCache.values.isNotEmpty()) {
                     addComment(
                         """
                     Begin Column types hint register

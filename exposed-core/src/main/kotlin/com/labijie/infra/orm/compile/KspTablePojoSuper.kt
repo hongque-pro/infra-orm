@@ -6,10 +6,16 @@ package com.labijie.infra.orm.compile
 
 import kotlin.reflect.KClass
 
-@Deprecated("Use KspTablePojo.superClasses property instead.", level = DeprecationLevel.ERROR)
+/**
+ * Use [KspTablePojo.superClasses] property instead
+ */
+@Deprecated(
+    "Use KspTablePojo.superClasses instead.",
+    replaceWith = ReplaceWith("KspTablePojo.superClass")
+)
 @Repeatable
 @Retention(AnnotationRetention.SOURCE)
 @Target(AnnotationTarget.CLASS)
-annotation class KspTablePojoSuper (
+annotation class KspTablePojoSuper(
     val type: KClass<*>
 )

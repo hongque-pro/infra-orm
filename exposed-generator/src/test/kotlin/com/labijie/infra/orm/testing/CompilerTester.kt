@@ -1,5 +1,6 @@
 package com.labijie.infra.orm.testing
 
+import com.labijie.orm.generator.EnvVariables
 import com.labijie.orm.generator.findProjectSourceDir
 import com.labijie.orm.generator.ksp.ExposedSymbolProcessorProvider
 import com.tschuchort.compiletesting.*
@@ -8,7 +9,6 @@ import java.io.File
 import java.net.URLDecoder
 import java.nio.file.Path
 import kotlin.io.path.Path
-import kotlin.io.path.absolutePathString
 import kotlin.io.path.readText
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -60,7 +60,8 @@ class CompilerTester {
             inheritClassPath = true
             messageOutputStream = System.out
             kspProcessorOptions = mutableMapOf(
-                "orm.springboot_aot" to "true"
+                EnvVariables.SPRINGBOOT_AOT to "true",
+                EnvVariables.KOTLIN_SERIALIZATION to "true",
             )
         }
         val result = compilation.compile()

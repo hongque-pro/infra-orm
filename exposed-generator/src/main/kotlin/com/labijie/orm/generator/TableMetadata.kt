@@ -12,6 +12,7 @@ import com.google.devtools.ksp.symbol.KSType
 import com.google.devtools.ksp.symbol.Origin
 import com.labijie.infra.orm.SimpleIdTable
 import com.labijie.infra.orm.compile.KspTablePojo
+import com.labijie.infra.orm.compile.KspToggles
 import com.squareup.kotlinpoet.ClassName
 import com.squareup.kotlinpoet.ksp.toTypeName
 import org.jetbrains.exposed.dao.id.IdTable
@@ -56,7 +57,7 @@ class TableMetadata(declaration: KSClassDeclaration, val sourceFile: String, pri
     var kind: TableKind = TableKind.Normal
         private set
 
-    val isSerializable: Boolean
+    var serializable: KspToggles = KspToggles.AUTO
     val isOpen: Boolean
     val superTypes: MutableList<PojoSuper> = mutableListOf()
 
@@ -87,8 +88,7 @@ class TableMetadata(declaration: KSClassDeclaration, val sourceFile: String, pri
 
         val pojoAnnoValues = pojoAnnotation?.getProperties()
 
-
-        isSerializable = pojoAnnoValues?.getOrDefault(KspTablePojo::kotlinSerializable.name, false) as? Boolean ?: false
+        serializable = pojoAnnoValues?.getOrDefault(KspTablePojo::kotlinSerializable.name, KspToggles.AUTO) as? KspToggles ?: KspToggles.AUTO
         isOpen = pojoAnnoValues?.getOrDefault(KspTablePojo::isOpen.name, true) as? Boolean ?: true
 
         val types = pojoAnnoValues?.getOrDefault(KspTablePojo::superClasses.name, listOf<KSType>())

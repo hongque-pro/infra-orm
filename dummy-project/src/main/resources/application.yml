@@ -1,0 +1,9 @@
+server:
+  port: 9898
+spring:
+  application:
+    name: framework-dummy
+  datasource:
+    url: jdbc:h2:mem:testdb;mode=mysql
+    username: sa
+    driver-class-name: org.h2.Driver
