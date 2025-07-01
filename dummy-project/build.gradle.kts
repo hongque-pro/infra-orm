@@ -7,8 +7,6 @@ graalvmNative {
     binaries.named("main") {
         sharedLibrary = false
         mainClass = "com.labijie.orm.dummy.AotTestApplicationKt"
-
-        buildArgs.add("--trace-class-initialization=kotlin.DeprecationLevel")
     }
 
 }

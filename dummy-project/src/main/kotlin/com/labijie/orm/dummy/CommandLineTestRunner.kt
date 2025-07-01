@@ -1,3 +1,5 @@
+
+
 package com.labijie.orm.dummy
 
 import com.labijie.orm.dummy.otherpackage.NestedInterface
@@ -41,27 +43,28 @@ class CommandLineTestRunner : CommandLineRunner {
         }
     }
 
+    @Suppress("ReplaceCallWithBinaryOperator")
     fun assertTestEquals(expected: Test, actual: Test) {
         assert(expected.title == actual.title) { "title mismatch: ${expected.title} != ${actual.title}" }
         assert(expected.status == actual.status) { "status mismatch: ${expected.status} != ${actual.status}" }
         assert(expected.description == actual.description) { "description mismatch: ${expected.description} != ${actual.description}" }
         assert(expected.status2 == actual.status2) { "status2 mismatch: ${expected.status2} != ${actual.status2}" }
-        assert(expected.array == actual.array) { "array mismatch: ${expected.array} != ${actual.array}" }
+        assert(expected.array.toTypedArray().contentEquals(actual.array.toTypedArray())) { "array mismatch: ${expected.array} != ${actual.array}" }
 
-        assert(expected.dateTime == actual.dateTime) { "dateTime mismatch: ${expected.dateTime} != ${actual.dateTime}" }
-        assert(expected.duration == actual.duration) { "duration mismatch: ${expected.duration} != ${actual.duration}" }
-        assert(expected.time == actual.time) { "time mismatch: ${expected.time} != ${actual.time}" }
-        assert(expected.date == actual.date) { "date mismatch: ${expected.date} != ${actual.date}" }
-        assert(expected.timestamp == actual.timestamp) { "timestamp mismatch: ${expected.timestamp} != ${actual.timestamp}" }
+        assert(expected.dateTime.equals(actual.dateTime)) { "dateTime mismatch: ${expected.dateTime} != ${actual.dateTime}" }
+        assert(expected.duration.equals(actual.duration)) { "duration mismatch: ${expected.duration} != ${actual.duration}" }
+        assert(expected.time.equals(actual.time)) { "time mismatch: ${expected.time} != ${actual.time}" }
+        assert(expected.date.equals(actual.date)) { "date mismatch: ${expected.date} != ${actual.date}" }
+        assert(expected.timestamp.equals(actual.timestamp)) { "timestamp mismatch: ${expected.timestamp} != ${actual.timestamp}" }
 
-        assert(expected.decimal == actual.decimal) { "decimal mismatch: ${expected.decimal} != ${actual.decimal}" }
+        assert(expected.decimal.equals(actual.decimal)) { "decimal mismatch: ${expected.decimal} != ${actual.decimal}" }
         assert(expected.decimalNullable == actual.decimalNullable) { "decimalNullable mismatch: ${expected.decimalNullable} != ${actual.decimalNullable}" }
 
-        assert(expected.uuid == actual.uuid) { "uuid mismatch: ${expected.uuid} != ${actual.uuid}" }
+        assert(expected.uuid.equals(actual.uuid)) { "uuid mismatch: ${expected.uuid} != ${actual.uuid}" }
         assert(expected.uuidNullable == actual.uuidNullable) { "uuidNullable mismatch: ${expected.uuidNullable} != ${actual.uuidNullable}" }
 
-        assert(expected.datetime == actual.datetime) { "datetime mismatch: ${expected.datetime} != ${actual.datetime}" }
-        assert(expected.datetimeNullable == actual.datetimeNullable) { "datetimeNullable mismatch: ${expected.datetimeNullable} != ${actual.datetimeNullable}" }
+        assert(expected.datetime.equals(actual.datetime)) { "datetime mismatch: ${expected.datetime} != ${actual.datetime}" }
+        assert(expected.datetimeNullable?.equals(actual.datetimeNullable) ?: (actual.datetimeNullable == null)) { "datetimeNullable mismatch: ${expected.datetimeNullable} != ${actual.datetimeNullable}" }
 
         assert(expected.id == actual.id) { "id mismatch: ${expected.id} != ${actual.id}" }
     }

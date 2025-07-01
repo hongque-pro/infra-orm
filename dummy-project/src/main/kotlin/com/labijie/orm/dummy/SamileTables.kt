@@ -11,6 +11,7 @@ import com.labijie.orm.dummy.otherpackage.NestedInterface
 import org.jetbrains.exposed.sql.Column
 import org.jetbrains.exposed.sql.Table
 import org.jetbrains.exposed.sql.javatime.*
+import org.jetbrains.exposed.sql.json.jsonb
 
 
 enum class TestEnum {

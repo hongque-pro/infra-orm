@@ -1,8 +1,7 @@
 import InfraConstants.DEFAULT_KSP_API_VERSION
 
 infra {
-    useKspApi()
-    useKspApi("testImplementation")
+    useKspApi(setOf("implementation", "testImplementation"))
 }
 
 kotlin {
@@ -14,7 +13,7 @@ kotlin {
     }
 }
 
-forceDependencyVersion(DEFAULT_KSP_API_VERSION, "com.google.devtools.ksp")
+//forceDependencyVersion(DEFAULT_KSP_API_VERSION, "com.google.devtools.ksp")
 
 dependencies {
     implementation(project(":exposed-core"))
