@@ -5,7 +5,9 @@ infra {
 }
 
 dependencies {
-    api("org.jetbrains.exposed:exposed-core")
+    api("org.jetbrains.exposed:exposed-core") {
+        exclude(group = "org.jetbrains.kotlin")
+    }
     compileOnly("org.graalvm.nativeimage:svm:${Versions.graalvmSvm}")
     compileOnly("org.jetbrains.kotlinx:kotlinx-serialization-json")
 

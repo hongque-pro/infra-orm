@@ -1,33 +1,49 @@
 package com.labijie.infra.orm.aot
 
+
+/**
+ * @author Anders Xiao
+ * @date 2025/6/27
+ */
+
 import com.labijie.infra.orm.serialization.*
 import org.graalvm.nativeimage.hosted.Feature
 import org.graalvm.nativeimage.hosted.RuntimeClassInitialization
 import org.graalvm.nativeimage.hosted.RuntimeReflection
 
 
-/**
- * @author Anders Xiao
- * @date 2025/6/27
- */
 @Suppress("unused")
-internal class InfraOrmFeature : Feature {
+class InfraOrmFeature : Feature {
+
+    companion object {
+        const val SERIALIZATION_NAME_SPACE = "com.labijie.infra.orm.serialization"
+
+        fun serializerClassName(simpleName: String): String {
+            return "$SERIALIZATION_NAME_SPACE.$simpleName"
+        }
+    }
 
     override fun beforeAnalysis(access: Feature.BeforeAnalysisAccess?) {
 
-        RuntimeClassInitialization.initializeAtRunTime("com.labijie.infra.orm.compile")
-        RuntimeClassInitialization.initializeAtBuildTime(DeprecationLevel::class.java)
+        RuntimeClassInitialization.initializeAtBuildTime("com.labijie.infra.orm.compile")
 
-        access?.registerSerializer(BigDecimalSerializer::class.java)
-        access?.registerSerializer(DurationSerializer::class.java)
-        access?.registerSerializer(InstantSerializer::class.java)
-        access?.registerSerializer(LocalDateSerializer::class.java)
-        access?.registerSerializer(LocalDateTimeSerializer::class.java)
-        access?.registerSerializer(LocalTimeSerializer::class.java)
-        access?.registerSerializer(UUIDSerializer::class.java)
+        access?.initAtBuildTime("kotlin.DeprecationLevel")
+
+        access?.findClass("kotlinx.serialization.KSerializer")?.let {
+
+            RuntimeReflection.register(it)
+
+            registerSerializer(BigDecimalSerializer::class.java)
+            registerSerializer(DurationSerializer::class.java)
+            registerSerializer(InstantSerializer::class.java)
+            registerSerializer(LocalDateSerializer::class.java)
+            registerSerializer(LocalDateTimeSerializer::class.java)
+            registerSerializer(LocalTimeSerializer::class.java)
+            registerSerializer(UUIDSerializer::class.java)
+        }
 
 
-        access?.registerClassByName(DeprecationLevel::class.java.name)
+
 
         access?.registerClassByName("kotlinx.serialization.protobuf.internal.ProtobufDecoder")
         access?.registerClassByName("kotlinx.serialization.protobuf.internal.ProtobufEncoder")
@@ -35,21 +51,55 @@ internal class InfraOrmFeature : Feature {
         access?.registerClassByName("kotlinx.serialization.json.JsonDecoder")
     }
 
-    private fun Feature.BeforeAnalysisAccess.registerSerializer(clazz: Class<*>) {
-        this.findClassByName(clazz.name)?.let {
-            RuntimeReflection.register(it)
-            RuntimeReflection.registerFieldLookup(it, "INSTANCE")
-
-            for (constructor in it.getDeclaredConstructors()) {
-                RuntimeReflection.register(constructor)
+    private fun Feature.BeforeAnalysisAccess.initAtBuildTime(className: String): Class<*>? {
+        return try {
+            val clazz: Class<*>? = findClass(className)
+            if (clazz != null) {
+                RuntimeClassInitialization.initializeAtBuildTime(clazz)
+                println("Registered class for build-time init: " + clazz.getName())
+            } else {
+                println("Class not found: $className")
             }
+            clazz
+        } catch (e: Exception) {
+            System.err.println("Error during class check: " + e.printStackTrace())
+            null
+        }
+    }
+
+    private fun Feature.BeforeAnalysisAccess.findClass(clazzName: String): Class<*>? {
+        return try {
+            this.findClassByName(clazzName)
+        }catch (e: ClassNotFoundException) {
+            null
+        }
+    }
+
+    private fun registerSerializer(clazz: Class<*>) {
+        RuntimeReflection.register(clazz)
+
+        try {
+            val instanceField = clazz.getDeclaredField("INSTANCE")
+            RuntimeReflection.register(instanceField)
+        } catch (ex: NoSuchFieldException) {
+            // 不是 object 就忽略
+        }
+
+        for (constructor in clazz.declaredConstructors) {
+            RuntimeReflection.register(constructor)
+        }
+    }
+
+    private fun Feature.BeforeAnalysisAccess.registerSerializer(className: String) {
+        findClass(className)?.let {
+            registerSerializer(it)
         }
     }
 
     private fun Feature.BeforeAnalysisAccess.registerClassByName(className: String) {
 
-        val clazz = this.findClassByName(className)
-        if (clazz != null) {
+        findClass(className)?.let {
+            clazz->
             RuntimeReflection.register(clazz)
 
             for (constructor in clazz.getDeclaredConstructors()) {
@@ -63,7 +113,7 @@ internal class InfraOrmFeature : Feature {
             for (field in clazz.getDeclaredFields()) {
                 RuntimeReflection.register(field)
             }
-
         }
     }
+
 }

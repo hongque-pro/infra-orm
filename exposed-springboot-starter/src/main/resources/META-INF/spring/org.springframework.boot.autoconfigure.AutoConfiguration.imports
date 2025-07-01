@@ -1,1 +1,2 @@
 com.labijie.infra.orm.configuration.InfraExposedAutoConfiguration
+com.labijie.infra.orm.configuration.InfraExposedExcludeJpaAutoConfiguration

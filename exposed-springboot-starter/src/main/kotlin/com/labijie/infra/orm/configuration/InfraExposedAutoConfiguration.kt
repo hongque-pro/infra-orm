@@ -25,7 +25,6 @@ import javax.sql.DataSource
 
 @Configuration(proxyBeanMethods = false)
 @AutoConfigureAfter(DataSourceAutoConfiguration::class)
-@EnableConfigurationProperties(InfraExposedProperties::class)
 @EnableTransactionManagement
 class InfraExposedAutoConfiguration : ApplicationContextAware {
 

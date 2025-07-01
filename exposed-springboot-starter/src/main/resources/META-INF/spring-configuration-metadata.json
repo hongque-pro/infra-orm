@@ -11,6 +11,13 @@
   ],
   "properties":[
     {
+      "name":"infra.exposed.disable-jpa",
+      "type": "java.lang.Boolean",
+      "sourceType": "com.labijie.infra.orm.configuration.InfraExposedProperties",
+      "description": "Exclude JPA auto configuration.",
+      "defaultValue": true
+    },
+    {
       "name":"infra.exposed.generate-schema.enabled",
       "type": "java.lang.Boolean",
       "sourceType": "com.labijie.infra.orm.configuration.SchemaGenerationSettings",

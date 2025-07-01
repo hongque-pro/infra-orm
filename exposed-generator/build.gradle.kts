@@ -1,3 +1,4 @@
+import InfraConstants.DEFAULT_KSP_API_VERSION
 
 infra {
     useKspApi()
@@ -13,6 +14,8 @@ kotlin {
     }
 }
 
+forceDependencyVersion(DEFAULT_KSP_API_VERSION, "com.google.devtools.ksp")
+
 dependencies {
     implementation(project(":exposed-core"))
     implementation("com.fasterxml.jackson.core:jackson-databind")
@@ -22,6 +25,7 @@ dependencies {
     implementation("org.springframework:spring-core")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-core")
     implementation("com.squareup:kotlinpoet-ksp:${Versions.kotlinPoetVersion}")
+    //runtimeOnly("org.jetbrains.kotlin:kotlin-annotation-processing-compiler:2.1.21")
     // https://mvnrepository.com/artifact/org.jetbrains.kotlinx/kotlinx-serialization-json
 
 

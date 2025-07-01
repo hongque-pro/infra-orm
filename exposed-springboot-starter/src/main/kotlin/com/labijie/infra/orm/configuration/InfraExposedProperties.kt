@@ -7,6 +7,8 @@ import org.springframework.boot.context.properties.NestedConfigurationProperty
 class InfraExposedProperties {
     var showSql: Boolean = false
 
+    var disableJpa: Boolean = false
+
     var translateSqlException: Boolean = true
 
     @NestedConfigurationProperty
