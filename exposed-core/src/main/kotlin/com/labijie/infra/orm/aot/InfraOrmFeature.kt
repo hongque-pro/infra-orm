@@ -40,6 +40,8 @@ class InfraOrmFeature : Feature {
             registerSerializer(LocalDateTimeSerializer::class.java)
             registerSerializer(LocalTimeSerializer::class.java)
             registerSerializer(UUIDSerializer::class.java)
+
+            println("Infra-ORM kotlin serializers registered.")
         }
 
 
