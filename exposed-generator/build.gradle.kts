@@ -1,4 +1,3 @@
-import InfraConstants.DEFAULT_KSP_API_VERSION
 
 infra {
     useKspApi(setOf("implementation", "testImplementation"))
