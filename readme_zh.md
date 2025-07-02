@@ -12,6 +12,7 @@
 ![maven central version](https://img.shields.io/maven-central/v/com.labijie.orm/exposed-core?logo=java)
 ![workflow status](https://img.shields.io/github/actions/workflow/status/hongque-pro/infra-orm/build.yml)
 ![license](https://img.shields.io/github/license/hongque-pro/infra-orm?style=flat-square)
+![Static Badge](https://img.shields.io/badge/GraalVM-supported-green?style=flat&logoColor=blue&labelColor=orange)
 
 </div>
 
