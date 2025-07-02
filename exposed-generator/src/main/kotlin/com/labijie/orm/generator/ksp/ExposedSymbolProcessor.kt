@@ -17,13 +17,14 @@ import org.jetbrains.exposed.sql.Table
 
 
 class ExposedSymbolProcessor(
+    private val generatorVersion: String,
     private val logger: KSPLogger,
     private val options: Map<String, String> = mapOf()
 ) : SymbolProcessor {
 
     override fun process(resolver: Resolver): List<KSAnnotated> {
 
-        val writerOptions = buildWriterOptions(options)
+        val writerOptions = buildWriterOptions(generatorVersion,options)
 
         val visitContext = VisitContext()
 
