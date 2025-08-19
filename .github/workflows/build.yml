@@ -46,6 +46,12 @@ jobs:
         with:
           distribution: 'microsoft'
           java-version: 21
+
+      - name: Setup Gradle 8
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: "8.14"
+
       - name: PGP Prepare
         run: |
           echo "Create .gpg key"
@@ -56,7 +62,7 @@ jobs:
           sed -i -e "s,signing.secretKeyRingFile=,signing.secretKeyRingFile=$GITHUB_WORKSPACE/release.gpg,g" gradle.properties
           cat gradle.properties
       - name: Build with Gradle
-        run: gradle build -x test -x kspKotlin -x compileJava
+        run: gradle fastBuild
       - name: Publish To GitHub Packages
         if: ${{ env.PUB_GITHUB == 'Yes' }}
         run: gradle publishToGitHubPackages
