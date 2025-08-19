@@ -35,7 +35,7 @@ class ExposedSymbolProcessorProvider: SymbolProcessorProvider {
             }
 
         } catch (e: IOException) {
-            System.err.println("Load git properties failed. ${e.printStackTrace()}")
+            println("Load git properties failed. ${e.printStackTrace()}")
             null
         }
     }
@@ -47,9 +47,14 @@ class ExposedSymbolProcessorProvider: SymbolProcessorProvider {
         val systemResources: Enumeration<URL> =
             (classLoader ?: ClassLoader.getSystemClassLoader()).getResources(name)
         while (systemResources.hasMoreElements()) {
-            systemResources.nextElement().openStream().use { stream ->
-                val content: T? = filter?.invoke(stream)
-                return content
+            val url = systemResources.nextElement()
+            try {
+                url.openStream().use { stream ->
+                    val content: T? = filter?.invoke(stream)
+                    if (content != null) return content
+                }
+            } catch (e: Exception) {
+                println("Skip invalid resource: $url -> ${e.message}")
             }
         }
         return null

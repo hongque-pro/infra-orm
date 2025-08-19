@@ -146,12 +146,12 @@ object SelectMethod : AbstractDSLMethodBuilder() {
                 SortOrder::class
             )
             .addStatement(
-                "query.%M { %N lessEq it }",
+                "query.%M { %N less it }",
                 andWhereMethod,
                 sortColumn
             )
             .addStatement(
-                "else-> query.%M { %N greaterEq it }",
+                "else-> query.%M { %N greater it }",
                 andWhereMethod,
                 sortColumn
             )
@@ -159,7 +159,7 @@ object SelectMethod : AbstractDSLMethodBuilder() {
             //end when
             .endControlFlow()
 
-            .beginControlFlow("lastId?.let")
+            .beginControlFlow("if(lastId != null && offsetKey != null)")
 
             //when
             .beginControlFlow("when(order)")
@@ -170,13 +170,17 @@ object SelectMethod : AbstractDSLMethodBuilder() {
                 SortOrder::class
             )
             .addStatement(
-                "query.%M { %M less it }",
-                andWhereMethod,
+                "query.%M { %N.eq(offsetKey) %M %M.less(lastId) }",
+                orWhereMethod,
+                sortColumn,
+                andMethod,
                 primaryKey
             )
             .addStatement(
-                "else-> query.%M { %M greater it }",
-                andWhereMethod,
+                "else-> query.%M { %N.eq(offsetKey) %M %M.greater(lastId) }",
+                orWhereMethod,
+                sortColumn,
+                andMethod,
                 primaryKey
             )
             .endControlFlow()

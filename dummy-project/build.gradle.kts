@@ -3,13 +3,13 @@ plugins {
     id("org.springframework.boot") version "3.5.0"
 }
 
-graalvmNative {
-    binaries.named("main") {
-        sharedLibrary = false
-        mainClass = "com.labijie.orm.dummy.AotTestApplicationKt"
-    }
-
-}
+//graalvmNative {
+//    binaries.named("main") {
+//        sharedLibrary = false
+//        mainClass = "com.labijie.orm.dummy.AotTestApplicationKt"
+//    }
+//
+//}
 
 dependencies {
     implementation(project(":exposed-springboot-starter"))
@@ -29,5 +29,4 @@ infra {
         arg("orm.pojo_kotlin_serializable", "true")
     }
 }
-
 

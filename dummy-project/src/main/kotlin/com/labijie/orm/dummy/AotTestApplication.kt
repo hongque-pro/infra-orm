@@ -1,5 +1,7 @@
 package com.labijie.orm.dummy
 
+import org.jetbrains.exposed.sql.orWhere
+import org.jetbrains.exposed.sql.selectAll
 import org.springframework.boot.SpringApplication
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.context.annotation.Import

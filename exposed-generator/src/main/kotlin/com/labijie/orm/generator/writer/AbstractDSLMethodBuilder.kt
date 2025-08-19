@@ -96,6 +96,7 @@ abstract class AbstractDSLMethodBuilder : IDSLMethodBuilder {
         val eqMethod = getExposedSqlExpressionBuilderMember("eq")
         val andMethod = getSqlExtendMethod("and")
         val andWhereMethod = getSqlExtendMethod("andWhere")
+        val orWhereMethod = getSqlExtendMethod("orWhere")
 
         val encodeTokenMethod by lazy {
             val offsetListType = OffsetList::class.asTypeName()
