@@ -30,6 +30,11 @@ designed to integrate well with Spring Boot.
 If you're a Kotlin developer, we recommend trying Exposed —  
 combined with Infra-ORM, it brings you the best development experience.
 
+<br>
+<br>
+
+Try Exposed For AWS DynamoDB: [Exposed-DynamoDB](https://github.com/endink/Exposed-DynamoDB)
+
 ## What’s New in 2.1.x
 
 - Spring Boot AOT support, providing a consistent experience in GraalVM native environment.

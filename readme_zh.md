@@ -29,6 +29,11 @@
 的 ORM 框架，可以和 Spring Boot 集成良好，如果你是 Kotlin 开发者，推荐你试试 Exposed, 
 配合 Infra-ORM 可以给你带来最佳的开发体验。
 
+<br>
+<br>
+
+如果你正在使用 AWS DynamoDB， 你还可以尝试: [Exposed-DynamoDB](https://github.com/endink/Exposed-DynamoDB)
+
 ## What news in 2.1.x
 
 - Spring Boot AOT support, got a consistent experience in GraalVM native enviroment.
