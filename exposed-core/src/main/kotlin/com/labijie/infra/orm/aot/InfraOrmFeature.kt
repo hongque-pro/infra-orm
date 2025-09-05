@@ -7,7 +7,6 @@ package com.labijie.infra.orm.aot
  */
 
 import com.labijie.infra.orm.serialization.*
-import com.oracle.svm.core.jdk.Resources
 import org.graalvm.nativeimage.hosted.Feature
 import org.graalvm.nativeimage.hosted.RuntimeClassInitialization
 import org.graalvm.nativeimage.hosted.RuntimeReflection
