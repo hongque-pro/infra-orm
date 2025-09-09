@@ -1,17 +1,12 @@
 package com.labijie.orm.generator.writer.dsl
 
 import com.labijie.infra.orm.OffsetList
-import com.labijie.orm.generator.DefaultValues
-import com.labijie.orm.generator.DefaultValues.isConverterMethod
-import com.labijie.orm.generator.generateParsedValueCodeBlock
-import com.labijie.orm.generator.generateToStringCodeBlock
 import com.labijie.orm.generator.writer.AbstractDSLMethodBuilder
 import com.labijie.orm.generator.writer.DSLCodeContext
 import com.squareup.kotlinpoet.*
 import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
-import org.jetbrains.exposed.sql.*
-import java.util.*
-import kotlin.reflect.full.companionObject
+import org.jetbrains.exposed.sql.Column
+import org.jetbrains.exposed.sql.SortOrder
 
 /**
  *

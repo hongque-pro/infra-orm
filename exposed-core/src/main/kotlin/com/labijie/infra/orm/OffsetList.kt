@@ -11,9 +11,9 @@ import kotlin.collections.map
  * @Date: 2021/12/27
  * @Description:
  */
-class OffsetList<T> {
+class OffsetList<out T> {
 
-    var list: List<T> = emptyList<T>()
+    var list: List<@UnsafeVariance T> = emptyList<T>()
     var forwardToken: String? = null
 
     constructor(list: List<T>, forwardToken: String? = null) {
@@ -80,6 +80,6 @@ class OffsetList<T> {
 
 private val EMPTY_LIST = OffsetList<Nothing>()
 
-fun <T> emptyOfOffsetList(): OffsetList<out T> {
+fun <T> emptyOfOffsetList(): OffsetList<T> {
     return EMPTY_LIST
 }
