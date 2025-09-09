@@ -6,10 +6,12 @@ package com.labijie.infra.orm.aot
  * @date 2025/6/27
  */
 
+import com.labijie.infra.orm.OffsetList
 import com.labijie.infra.orm.serialization.*
 import org.graalvm.nativeimage.hosted.Feature
 import org.graalvm.nativeimage.hosted.RuntimeClassInitialization
 import org.graalvm.nativeimage.hosted.RuntimeReflection
+import org.jetbrains.exposed.sql.Table
 
 
 @Suppress("unused")
@@ -44,7 +46,7 @@ class InfraOrmFeature : Feature {
             println("Infra-ORM kotlin serializers registered.")
         }
 
-
+        access?.registerClass(OffsetList::class.java)
 
 
         access?.registerClassByName("kotlinx.serialization.protobuf.internal.ProtobufDecoder")
@@ -98,23 +100,27 @@ class InfraOrmFeature : Feature {
         }
     }
 
+    private fun Feature.BeforeAnalysisAccess.registerClass(clazz: Class<*>) {
+        RuntimeReflection.register(clazz)
+
+        for (constructor in clazz.getDeclaredConstructors()) {
+            RuntimeReflection.register(constructor)
+        }
+
+        for (method in clazz.getDeclaredMethods()) {
+            RuntimeReflection.register(method)
+        }
+
+        for (field in clazz.getDeclaredFields()) {
+            RuntimeReflection.register(field)
+        }
+    }
+
     private fun Feature.BeforeAnalysisAccess.registerClassByName(className: String) {
 
         findClass(className)?.let {
             clazz->
-            RuntimeReflection.register(clazz)
-
-            for (constructor in clazz.getDeclaredConstructors()) {
-                RuntimeReflection.register(constructor)
-            }
-
-            for (method in clazz.getDeclaredMethods()) {
-                RuntimeReflection.register(method)
-            }
-
-            for (field in clazz.getDeclaredFields()) {
-                RuntimeReflection.register(field)
-            }
+            registerClass(clazz)
         }
     }
 

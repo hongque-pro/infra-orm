@@ -11,14 +11,21 @@ import kotlin.collections.map
  * @Date: 2021/12/27
  * @Description:
  */
-class OffsetList<T>(var list: List<T> = emptyList(), var forwardToken: String? = null) {
+class OffsetList<T> {
+
+    var list: List<T> = emptyList<T>()
+    var forwardToken: String? = null
+
+    constructor(list: List<T>, forwardToken: String? = null) {
+        this.list = list
+        this.forwardToken = forwardToken
+    }
+
+    constructor() {
+
+    }
 
     companion object {
-
-        @JvmStatic
-        fun <T> empty(): OffsetList<T> {
-            return OffsetList(emptyList(), null)
-        }
 
         fun encodeToken(key: String): String {
             if(key.isEmpty()) return ""
@@ -69,5 +76,10 @@ class OffsetList<T>(var list: List<T> = emptyList(), var forwardToken: String? =
         val rr = ll.map(transform)
         return OffsetList(rr, this.forwardToken)
     }
+}
 
+private val EMPTY_LIST = OffsetList<Nothing>()
+
+fun <T> emptyOfOffsetList(): OffsetList<out T> {
+    return EMPTY_LIST
 }
