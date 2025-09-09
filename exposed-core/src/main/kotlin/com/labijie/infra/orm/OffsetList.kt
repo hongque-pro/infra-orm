@@ -13,7 +13,7 @@ import kotlin.collections.map
  */
 class OffsetList<out T> {
 
-    var list: List<@UnsafeVariance T> = emptyList<T>()
+    var list: List<@UnsafeVariance T> = emptyList()
     var forwardToken: String? = null
 
     constructor(list: List<T>, forwardToken: String? = null) {
