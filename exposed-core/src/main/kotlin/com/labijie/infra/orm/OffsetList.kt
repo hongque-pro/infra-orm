@@ -27,6 +27,12 @@ class OffsetList<out T> {
 
     companion object {
 
+        private val EMPTY_LIST = OffsetList<Nothing>()
+
+        fun <T> empty(): OffsetList<T> {
+            return EMPTY_LIST
+        }
+
         fun encodeToken(key: String): String {
             if(key.isEmpty()) return ""
             return encodeToken(arrayOf(key))
@@ -76,10 +82,4 @@ class OffsetList<out T> {
         val rr = ll.map(transform)
         return OffsetList(rr, this.forwardToken)
     }
-}
-
-private val EMPTY_LIST = OffsetList<Nothing>()
-
-fun <T> emptyOfOffsetList(): OffsetList<T> {
-    return EMPTY_LIST
 }
